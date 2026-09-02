@@ -419,10 +419,16 @@ function vulKlapAan(nu) {
 //  De tel in beeld
 // ============================================================
 
-// Hoe ver de ring opzwelt op de tel. De eerste tel van de maat krijgt meer,
-// zodat je niet alleen hoort maar ook ziet waar een maat begint.
-const KLAP_TEL_PULS = 1.14;
-const KLAP_TEL_PULS_EEN = 1.32;
+// Op elke tel ademt de hele baan even mee. De eerste tel van de maat krijgt
+// meer, zodat je niet alleen hoort maar ook ziet waar een maat begint.
+//
+// De baan is bijna een meter breed op een digibord, dus daar is twee procent al
+// een flinke beweging. Een stipje van twintig pixels heeft veel meer nodig om
+// hetzelfde te doen. Vandaar twee maten in plaats van een.
+const KLAP_BAAN_PULS = 1.02;
+const KLAP_BAAN_PULS_EEN = 1.04;
+const KLAP_STIP_PULS = 1.14;
+const KLAP_STIP_PULS_EEN = 1.32;
 const KLAP_TEL_DUUR = 220;
 
 const klapStippen = [];
@@ -451,14 +457,23 @@ function pulseerKlap(el, groei) {
   ], { duration: KLAP_TEL_DUUR });
 }
 
-// De ring klopt door op elke tel, ook als er geen klapje op valt. Juist dan:
-// op een rust is er verder niets te zien, en dat is precies waar een klas de
-// tel kwijtraakt.
+// De baan klopt door op elke tel, ook als er geen klapje op valt. Juist dan: op
+// een rust is er verder niets te zien en niets te doen, en dat is precies waar
+// een klas de tel kwijtraakt.
+//
+// De puls zit op de baan zelf, dus op de zwarte lijnen rondom het speelvak. Die
+// zie je vanaf de achterste tafel nog; een ring van zestig pixels is van vijf
+// meter afstand niets meer.
+//
+// De ring erin klopt gewoon mee. Hij zit in de baan, dus hij krijgt die twee
+// procent er sowieso bij, en zijn eigen puls komt daar bovenop -- daar waar je
+// moet klappen mag het het hardst aankomen.
 function toonKlapTel(inMaat) {
   klapStippen.forEach((stip, i) => stip.classList.toggle('aan', i === inMaat));
-  const groei = inMaat === 0 ? KLAP_TEL_PULS_EEN : KLAP_TEL_PULS;
-  pulseerKlap(klapStippen[inMaat], groei);
-  pulseerKlap(klapDoelEl, groei);
+  const eerste = inMaat === 0;
+  pulseerKlap(klapBaanEl, eerste ? KLAP_BAAN_PULS_EEN : KLAP_BAAN_PULS);
+  pulseerKlap(klapDoelEl, eerste ? KLAP_STIP_PULS_EEN : KLAP_STIP_PULS);
+  pulseerKlap(klapStippen[inMaat], eerste ? KLAP_STIP_PULS_EEN : KLAP_STIP_PULS);
 }
 
 function wisKlapTellen() {

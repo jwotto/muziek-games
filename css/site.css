@@ -1169,6 +1169,8 @@ input[type="range"]::-moz-range-thumb {
 
 /* De baan waarover de klapjes van rechts naar links komen. */
 .klap-baan {
+  /* Vooraf een eigen laag, want dit hele vak ademt mee op elke tel. */
+  will-change: transform;
   --klap: 60px;
   /* Waar de ring staat. Javascript leest deze waarde uit, dus hij hoeft maar op
      één plek te kloppen -- ook als hij op een telefoon dichter naar links gaat. */
