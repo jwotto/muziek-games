@@ -4,6 +4,9 @@
 
 DirectoryIndex index.html
 
+# Kapotte link? Toon onze eigen 404 in plaats van de kale Apache-melding.
+ErrorDocument 404 /404.html
+
 # ============================================================
 # Eén adres, en beveiligd
 # ============================================================

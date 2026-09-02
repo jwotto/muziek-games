@@ -38,6 +38,8 @@ h1, h2, h3, .ui {
 
 /* Bouncy knop */
 .knop {
+  /* Ook als de knop een link is, zoals op de 404: dan geen onderstreping. */
+  text-decoration: none;
   font-family: var(--font-kop);
   font-weight: 600;
   font-size: 1.1rem;
