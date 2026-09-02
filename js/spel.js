@@ -95,6 +95,7 @@ const kaartEl = spelEl && spelEl.querySelector('[data-kaart]');
 const aftelEl = spelEl && spelEl.querySelector('[data-aftellen]');
 const recordEl = spelEl && spelEl.querySelector('[data-record]');
 const knoppenEl = spelEl && spelEl.querySelector('[data-knoppen]');
+const tellenEl = spelEl && spelEl.querySelector('[data-tellen]');
 const veldEl = spelEl && spelEl.querySelector('.spel-veld');
 const vrijEl = spelEl && spelEl.querySelector('[data-vrij]');
 const meldingEl = document.querySelector('[data-melding]');
@@ -110,7 +111,53 @@ const niveauUitlegEl = spelEl && spelEl.querySelector('[data-niveau-uitleg]');
 // Deze staat bovenaan in de balk, buiten het spel: het is de knop die alles wist.
 const wisAllesEl = document.querySelector('[data-wis-alles]');
 
+// Hoe ver de doelvorm opzwelt op de tel. De eerste tel van de maat krijgt meer,
+// zodat je niet alleen hoort maar ook ziet waar een maat begint.
+const TEL_PULS = 1.14;
+const TEL_PULS_EEN = 1.32;
+const TEL_PULS_DUUR = 220;
+
 const banen = {};
+const telStippen = [];
+
+// Vier stipjes boven de banen, een per tel. Ze lopen de maat rond, dus je ziet
+// niet alleen dát er een tel is maar ook wélke -- daar zit het verschil tussen
+// meetellen en meedoen.
+function bouwTellen() {
+  if (!tellenEl) return;
+  for (let i = 0; i < 4; i++) {
+    const stip = document.createElement('span');
+    stip.className = 'spel-tel' + (i === 0 ? ' eerste' : '');
+    tellenEl.appendChild(stip);
+    telStippen.push(stip);
+  }
+}
+
+// Een korte puls op de animatie-API en niet op een class: dan begint hij opnieuw
+// ook als hij midden in een vorige valt. Alleen transform, want dat draait op de
+// grafische kaart -- op een traag digibord is dat het verschil tussen een puls en
+// een hik. De veer zit alleen op het eerste stuk: over het geheel schiet hij bij
+// het eerste beeldje al door zijn eindstand heen en zie je er niets van.
+function pulseer(el, groei) {
+  if (!el || !el.animate || minderBeweging.matches) return;
+  el.animate([
+    { transform: 'scale(1)', easing: 'cubic-bezier(0.34, 1.56, 0.64, 1)' },
+    { transform: 'scale(' + groei + ')', offset: 0.35, easing: 'ease-out' },
+    { transform: 'scale(1)' }
+  ], { duration: TEL_PULS_DUUR });
+}
+
+function toonTel(inMaat) {
+  telStippen.forEach((stip, i) => stip.classList.toggle('aan', i === inMaat));
+
+  const groei = inMaat === 0 ? TEL_PULS_EEN : TEL_PULS;
+  pulseer(telStippen[inMaat], groei);
+  Object.keys(banen).forEach((id) => pulseer(banen[id].doel, groei));
+}
+
+function wisTellen() {
+  telStippen.forEach((stip) => stip.classList.remove('aan'));
+}
 
 function bouwBanen() {
   KIT.forEach((inst) => {
@@ -126,7 +173,12 @@ function bouwBanen() {
       '<span class="baan-doel"><svg viewBox="0 0 100 100" aria-hidden="true">' + VORMEN[inst.vorm] + '</svg></span>' +
       '<div class="baan-noten"></div>';
     baanEl.appendChild(baan);
-    banen[inst.id] = { el: baan, noten: baan.querySelector('.baan-noten'), vorm: inst.vorm };
+    banen[inst.id] = {
+      el: baan,
+      noten: baan.querySelector('.baan-noten'),
+      doel: baan.querySelector('.baan-doel'),
+      vorm: inst.vorm
+    };
 
     // De knop onder de baan, zodat je tijdens het spelen niet omhoog hoeft te
     // kijken naar de pads. Hij krijgt gewoon de pad-rol, dus toetsenbord, muis
@@ -341,6 +393,8 @@ function start() {
     gemist: 0,
     laatste: [],      // om niet drie keer hetzelfde geluid achter elkaar te geven
     aanloop: [],      // de tijden van het aftellen
+    tellen: [],       // de tijden van de tellen, voor de stipjes en de puls
+    telAan: -1,
     aftelGetal: 0,
     aftelKlaar: false,
     eersteNoot: 0,
@@ -349,6 +403,7 @@ function start() {
   };
 
   kaartEl.hidden = true;
+  wisTellen();
   toonAftellen(0);
   toonOordeel('');
   werkBalkBij();
@@ -362,6 +417,7 @@ function stop() {
   if (vrijEl) { clearTimeout(vrijTimer); vrijEl.textContent = ''; }
   spel.noten.forEach((noot) => noot.el.remove());
   spel.noten = [];
+  wisTellen();
   toonAftellen(0);
   // De begeleiding staat al een paar tellen vooruit gepland; die zou anders
   // doorspelen terwijl je game over in beeld staat.
@@ -470,6 +526,8 @@ function vulAan(nu) {
       spel.noten.push(maakNoot(geluidVoor(tel - AANLOOP_TELLEN), spel.telTijd));
     }
 
+    spel.tellen.push({ nr: tel, tijd: spel.telTijd });
+
     spel.bpm = bpmVoor(tel);
     spel.telTijd += tellengte;
     spel.telNr += 1;
@@ -504,12 +562,33 @@ function toonAftellen(getal) {
   );
 }
 
+// Welke tel er nu klinkt. Hij kijkt naar de audioklok en niet naar hoeveel
+// beeldjes er voorbij zijn: op een traag digibord vallen er beeldjes weg en dan
+// zou de puls langzaam achter de muziek aan gaan lopen. Hij pakt de nieuwste tel
+// die al geweest is, dus als er een beeldje overgeslagen wordt springt hij naar
+// de goede in plaats van er een achter te blijven.
+function werkTelBij(nu) {
+  let nieuw = null;
+  for (let i = 0; i < spel.tellen.length; i++) {
+    const t = spel.tellen[i];
+    if (nu >= t.tijd && (!nieuw || t.nr > nieuw.nr)) nieuw = t;
+  }
+  if (!nieuw || nieuw.nr === spel.telAan) return;
+
+  spel.telAan = nieuw.nr;
+  toonTel(nieuw.nr % 4);
+
+  // Wat geweest is hoeft niet elk beeldje opnieuw langsgelopen te worden.
+  spel.tellen = spel.tellen.filter((t) => t.tijd > nu - 0.5);
+}
+
 function stap() {
   if (!spel || !spel.loopt) return;
   const nu = Tone.now();
 
   vulAan(nu);
   werkAftellenBij(nu);
+  werkTelBij(nu);
 
   // De noten vallen van boven naar beneden. Op het moment dat een noot aan de
   // beurt is staat hij op de doelvorm; VOORUIT seconden daarvoor staat hij
@@ -871,6 +950,7 @@ if (spelEl) {
   bijBeat = meldBeat;
   werkSlotBij();
   bouwBanen();
+  bouwTellen();
   bouwNiveaus();
   werkNiveausBij();
   werkBalkBij();
