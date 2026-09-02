@@ -31,29 +31,6 @@ body {
   margin-bottom: 2.5rem;
 }
 
-.merk {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.6rem;
-  font-family: var(--font-kop);
-  font-weight: 600;
-  font-size: 1.05rem;
-  color: var(--ink);
-  text-decoration: none;
-}
-
-.merk .bol {
-  display: grid;
-  place-items: center;
-  width: 2.25rem;
-  height: 2.25rem;
-  border-radius: 50%;
-  background: var(--blauw);
-  border: 3px solid var(--ink);
-  color: var(--wit);
-  font-size: 1.1rem;
-}
-
 .terug {
   display: inline-flex;
   align-items: center;
@@ -115,6 +92,18 @@ body {
   padding: 0 0.15em;
   box-decoration-break: clone;
   -webkit-box-decoration-break: clone;
+}
+
+/* Het woordmerk staat als plaatje in de kop. De h1 blijft een h1, met de naam
+   in de alt-tekst, dus voor een schermlezer verandert er niets. */
+.merkbeeld {
+  margin: 0 0 0.9rem;
+}
+
+.merkbeeld img {
+  display: block;
+  width: 100%;
+  height: auto;
 }
 
 .lead {
