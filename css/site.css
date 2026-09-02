@@ -193,10 +193,6 @@ body {
   cursor: zoom-out;
 }
 
-.grootbeeld .knop {
-  display: block;
-  margin: 0.9rem auto 0;
-}
 
 @media (prefers-reduced-motion: reduce) {
   .vergroot img { transition: none; }
@@ -546,11 +542,11 @@ input[type="range"]::-moz-range-thumb {
 
 /* ---------- Het spelletje ---------- */
 
-.spel { margin-top: 2rem; }
+/* De kop en de uitleg staan boven het vak en niet erin: dan zie je meteen waar
+   de game begint, ook als het vak zelf nog dicht is. */
+.kop-spel { margin-top: 2.5rem; }
 
-.spel h2 { margin: 0; font-size: 1.6rem; }
-
-.spel-uitleg { margin: 0; line-height: 1.5; }
+.spel-uitleg { margin: 0 0 1.1rem; line-height: 1.5; }
 
 /* De vier moeilijkheidsgraden staan als een rij boven het veld. De graad waar je
    op speelt is ingevuld, wat nog dicht zit staat gestippeld -- net als de lessen

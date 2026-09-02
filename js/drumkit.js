@@ -590,8 +590,9 @@ document.addEventListener('click', (e) => {
   }
 
   // Staat hij open, dan doet de volgende klik hem weer dicht: op de grote foto
-  // zelf, op de sluitknop, of ernaast. Dat laatste komt bij de dialog binnen,
-  // want de foto en de knop liggen erbovenop.
+  // zelf of ernaast. Er staat geen sluitknop in beeld, want die zou over de foto
+  // heen liggen; met het toetsenbord doet Escape hetzelfde, en dat kan de dialog
+  // uit zichzelf al.
   if (grootbeeld.open) grootbeeld.close();
 });
 
