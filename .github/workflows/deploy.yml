@@ -1,0 +1,49 @@
+name: Deploy naar Vimexx
+
+# Bij elke push naar main gaan de sitebestanden via FTP naar Vimexx. Pushen is
+# dus publiceren; je hoeft nooit met de hand te FTP-en.
+#
+# EENMALIG INSTELLEN -- zet je Vimexx-FTP-gegevens als secrets in GitHub
+# (Settings -> Secrets and variables -> Actions -> New repository secret):
+#
+#   FTP_SERVER    de FTP-hostnaam van Vimexx, bijvoorbeeld ftp.muziekfles.nl
+#   FTP_USERNAME  je FTP-gebruikersnaam
+#   FTP_PASSWORD  je FTP-wachtwoord
+#
+# server-dir hieronder is de map op Vimexx waar de site in moet. Een FTP-account
+# dat op domains/muziekfles.nl/ uitkomt heeft daaronder public_html/ als webmap.
+# Klopt dat na de eerste deploy niet, kijk dan met een FTP-programma waar je
+# landt en pas server-dir aan.
+#
+# Deze actie houdt een bestandje .ftp-deploy-sync-state.json op de server bij en
+# uploadt daarna alleen wat er veranderd is. De eerste keer duurt dus het langst
+# (de map img is bij elkaar zo'n 5 MB), daarna gaat het snel.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:          # met de hand starten kan ook, via de Actions-tab
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Code ophalen
+        uses: actions/checkout@v4
+
+      - name: Naar Vimexx via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          server-dir: public_html/
+          # Wat niet mee naar de live site gaat: git zelf en de werkbestanden.
+          # De rest is de site, inclusief js/vendor/Tone.js -- die staat er met
+          # opzet bij, zodat de les ook werkt als het internet in de klas hapert.
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/.github/**
+            README.md
+            huisstijl.md

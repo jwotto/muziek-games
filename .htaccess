@@ -1,0 +1,82 @@
+# ============================================================
+# muziekfles.nl - Apache-instellingen (Vimexx)
+# ============================================================
+
+DirectoryIndex index.html
+
+# ============================================================
+# Eén adres, en beveiligd
+# ============================================================
+# Alles komt uit op https://muziekfles.nl (zonder www). www en http sturen door
+# naar dat ene adres, zodat Google de site niet als meerdere versies ziet.
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  # www weg: www.muziekfles.nl -> muziekfles.nl
+  RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
+  RewriteRule ^ https://%1%{REQUEST_URI} [L,R=301]
+
+  # http -> https. De tweede voorwaarde is cruciaal: op Vimexx handelt een laag
+  # vóór de server de SSL af, waardoor Apache %{HTTPS} altijd als "off" ziet, ook
+  # bij een echt https-verzoek. Zonder de X-Forwarded-Proto-check stuurt hij dan
+  # https naar https door, eindeloos. Nu alleen doorsturen als het verzoek echt
+  # via http binnenkwam.
+  RewriteCond %{HTTPS} off
+  RewriteCond %{HTTP:X-Forwarded-Proto} !=https
+  RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+</IfModule>
+
+# ============================================================
+# Cache: wat mag de browser bewaren, en hoe lang?
+# ============================================================
+# Zonder deze regels verzint de browser het zelf, en die vuistregel is grofweg
+# "hoe ouder het bestand, hoe langer ik het bewaar". Daardoor zie je na een
+# aanpassing uren later nog de oude les, en op een telefoon kun je dat niet even
+# met Ctrl+F5 forceren.
+#
+# HTML, CSS en de eigen JS: no-cache. Dat is niet "niet bewaren", maar "bewaren
+# en elke keer even navragen of er iets nieuws is". Meestal antwoordt de server
+# met een kaal "niks veranderd" van een paar honderd bytes, dus je ziet altijd
+# de laatste versie en het kost bijna niets.
+#
+# De foto's in img/ en Tone.js in js/vendor/ veranderen bijna nooit en zijn wel
+# groot. Die mogen lang blijven staan. Vervang je er toch een, hernoem hem dan
+# (bijvoorbeeld kick-2.png), anders houdt een bezoeker die de oude al heeft die
+# nog maanden.
+
+<IfModule mod_headers.c>
+  <FilesMatch "\.(html|css|js)$">
+    Header set Cache-Control "no-cache"
+  </FilesMatch>
+
+  <FilesMatch "\.(png|jpg|jpeg|gif|svg|webp|ico|woff2)$">
+    Header set Cache-Control "public, max-age=15552000, immutable"
+  </FilesMatch>
+</IfModule>
+
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType image/png              "access plus 6 months"
+  ExpiresByType image/svg+xml          "access plus 6 months"
+  ExpiresByType image/x-icon           "access plus 6 months"
+  ExpiresByType font/woff2             "access plus 6 months"
+</IfModule>
+
+# Tone.js is 347 kB en hoort bij deze versie van de les. Hij mag wel lang
+# bewaard blijven; komt er ooit een nieuwe, dan zet je die naast de oude.
+<IfModule mod_headers.c>
+  <Files "Tone.js">
+    Header set Cache-Control "public, max-age=15552000"
+  </Files>
+</IfModule>
+
+# ============================================================
+# Kleiner over de lijn
+# ============================================================
+
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/css text/plain text/xml
+  AddOutputFilterByType DEFLATE application/javascript application/json
+  AddOutputFilterByType DEFLATE image/svg+xml
+</IfModule>

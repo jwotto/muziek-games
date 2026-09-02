@@ -1,0 +1,12 @@
+# ============================================================
+# muziekfles.nl - robots.txt
+# ============================================================
+# Dit bestand vertelt zoekmachines wat ze mogen ophalen. Het werkt alleen vanaf
+# de wortel van een domein, dus het telt pas mee op muziekfles.nl zelf.
+#
+# Er staat bewust geen Disallow in: alles op deze site mag gevonden worden.
+
+User-agent: *
+Allow: /
+
+Sitemap: https://muziekfles.nl/sitemap.xml
