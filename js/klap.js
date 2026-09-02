@@ -422,11 +422,13 @@ function vulKlapAan(nu) {
 // Op elke tel ademt de hele baan even mee. De eerste tel van de maat krijgt
 // meer, zodat je niet alleen hoort maar ook ziet waar een maat begint.
 //
-// De baan is bijna een meter breed op een digibord, dus daar is twee procent al
-// een flinke beweging. Een stipje van twintig pixels heeft veel meer nodig om
-// hetzelfde te doen. Vandaar twee maten in plaats van een.
-const KLAP_BAAN_PULS = 1.02;
-const KLAP_BAAN_PULS_EEN = 1.04;
+// De baan is bijna een meter breed op een digibord. Twee procent daarvan is al
+// twee centimeter aan elke kant en dat werd te druk; ruim een procent is genoeg
+// om te zien dat het vak ademt zonder dat het gaat wiebelen. Een stipje van
+// twintig pixels heeft veel meer nodig om hetzelfde te doen, vandaar twee maten
+// in plaats van een.
+const KLAP_BAAN_PULS = 1.012;
+const KLAP_BAAN_PULS_EEN = 1.022;
 const KLAP_STIP_PULS = 1.14;
 const KLAP_STIP_PULS_EEN = 1.32;
 const KLAP_TEL_DUUR = 220;
