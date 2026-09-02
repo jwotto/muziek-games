@@ -10,10 +10,19 @@ name: Deploy naar Vimexx
 #   FTP_USERNAME  je FTP-gebruikersnaam
 #   FTP_PASSWORD  je FTP-wachtwoord
 #
-# server-dir hieronder is de map op Vimexx waar de site in moet. Een FTP-account
-# dat op domains/muziekfles.nl/ uitkomt heeft daaronder public_html/ als webmap.
-# Klopt dat na de eerste deploy niet, kijk dan met een FTP-programma waar je
-# landt en pas server-dir aan.
+# server-dir hieronder is de map op Vimexx waar de site in moet, gerekend vanaf
+# de plek waar je FTP-account binnenkomt. En dat verschilt per soort account:
+#
+#   het hoofdaccount (u158514p148271) komt binnen in je home-map, met daarin
+#   domains/ voor al je domeinen samen -> domains/muziekfles.nl/public_html/
+#
+#   een FTP-account dat je speciaal voor dit domein aanmaakt komt al binnen in
+#   domains/muziekfles.nl/ -> dan is public_html/ genoeg
+#
+# Het staat hieronder op het hoofdaccount. Controleer het pad even met FileZilla
+# of de bestandsbeheerder van Vimexx voordat je de eerste keer draait: met het
+# hoofdaccount kun je bij al je domeinen, dus een verkeerd pad zet deze site in
+# de map van een andere site.
 #
 # Deze actie houdt een bestandje .ftp-deploy-sync-state.json op de server bij en
 # uploadt daarna alleen wat er veranderd is. De eerste keer duurt dus het langst
@@ -37,7 +46,7 @@ jobs:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          server-dir: public_html/
+          server-dir: domains/muziekfles.nl/public_html/
           # Wat niet mee naar de live site gaat: git zelf en de werkbestanden.
           # De rest is de site, inclusief js/vendor/Tone.js -- die staat er met
           # opzet bij, zodat de les ook werkt als het internet in de klas hapert.
