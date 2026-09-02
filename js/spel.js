@@ -83,12 +83,13 @@ const oordeelEl = spelEl && spelEl.querySelector('[data-oordeel]');
 const kaartEl = spelEl && spelEl.querySelector('[data-kaart]');
 const aftelEl = spelEl && spelEl.querySelector('[data-aftellen]');
 const recordEl = spelEl && spelEl.querySelector('[data-record]');
-const wisEl = spelEl && spelEl.querySelector('[data-wis]');
 const knoppenEl = spelEl && spelEl.querySelector('[data-knoppen]');
 const veldEl = spelEl && spelEl.querySelector('.spel-veld');
 const vrijEl = spelEl && spelEl.querySelector('[data-vrij]');
 const niveausEl = spelEl && spelEl.querySelector('[data-niveaus]');
 const niveauUitlegEl = spelEl && spelEl.querySelector('[data-niveau-uitleg]');
+// Deze staat bovenaan in de balk, buiten het spel: het is de knop die alles wist.
+const wisAllesEl = document.querySelector('[data-wis-alles]');
 
 const banen = {};
 
@@ -286,25 +287,32 @@ function bewaarRecord() {
 
 let record = laadRecord();
 
-// Wissen vraagt eerst even door. Per ongeluk je topscore kwijtraken is zuur, en
+// Wissen vraagt eerst even door. Per ongeluk je topscores kwijtraken is zuur, en
 // een gewoon vensterknopje van de browser wil ik hier niet: dat legt de audio
 // stil en is voor een kind een schrikreactie. Twee keer tikken doet hetzelfde
 // werk en blijft in de bladzijde.
 let wisTimer = 0;
 
-// Wist alleen de topscore van de graad waar je op staat; de andere drie en wat
-// je hebt vrijgespeeld blijven staan.
-function wisRecord() {
+// Alles terug naar het begin: alle topscores op nul en alleen Easy nog open.
+// Handig als de volgende klas achter dezelfde computer gaat zitten.
+function wisVoortgang() {
+  // Loopt er nog een beurt, dan die eerst netjes afsluiten: anders schrijft stop()
+  // zijn score er even later alsnog in.
+  if (spel && spel.loopt) stop();
+
+  voortgang = legeStand();
+  niveauNr = 0;
   record = 0;
-  bewaarRecord();
-  werkBalkBij();
+  bewaarVoortgang();
   werkNiveausBij();
+  werkBalkBij();
+  toonStartkaart();
 }
 
 function ontwapenWissen() {
   clearTimeout(wisTimer);
   wisTimer = 0;
-  if (wisEl) wisEl.textContent = 'Wis';
+  if (wisAllesEl) wisAllesEl.textContent = 'Wis voortgang';
 }
 
 // Ook opslaan als je wegklikt zonder game over, anders ben je een net gehaald
@@ -756,8 +764,10 @@ function werkNiveausBij() {
     // Tijdens het spelen staat de rij vast, anders speel je met een misklik je
     // eigen beurt weg.
     knop.disabled = !open || bezig;
-    knop.querySelector('.niveau-beste').textContent =
-      open ? 'beste ' + voortgang.records[NIVEAUS[i].id] : 'op slot';
+    knop.querySelector('.niveau-beste').innerHTML =
+      // De spatie zit in de span en niet ertussen: zo leest een schermlezer
+      // 'beste 120' terwijl de flex-gap de ruimte op het scherm regelt.
+      open ? '<span>beste </span><b>' + voortgang.records[NIVEAUS[i].id] + '</b>' : 'op slot';
   });
 
   if (!niveauUitlegEl) return;
@@ -808,13 +818,15 @@ if (spelEl) {
   toonStartkaart();
   kaartEl.querySelector('button').addEventListener('click', start);
 
-  wisEl.addEventListener('click', () => {
-    if (wisTimer) {
-      ontwapenWissen();
-      wisRecord();
-      return;
-    }
-    wisEl.textContent = 'Zeker?';
-    wisTimer = setTimeout(ontwapenWissen, 3000);
-  });
+  if (wisAllesEl) {
+    wisAllesEl.addEventListener('click', () => {
+      if (wisTimer) {
+        ontwapenWissen();
+        wisVoortgang();
+        return;
+      }
+      wisAllesEl.textContent = 'Zeker?';
+      wisTimer = setTimeout(ontwapenWissen, 3000);
+    });
+  }
 }
