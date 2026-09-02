@@ -1348,36 +1348,30 @@ input[type="range"]::-moz-range-thumb {
    van de ruimte. */
 .vierkant-vak.dubbel img { max-width: 48%; }
 
-/* Een plaatje links van een kop met tekst. Het plaatje wordt even hoog als de
-   tekst ernaast in plaats van een vaste maat te krijgen: zo blijft het blok een
-   blok, ook als de tekst later langer of korter wordt. De breedte volgt uit de
-   hoogte, want een plaatje houdt zijn verhouding.
+/* Een plaatje links van een kop met tekst. Het zweeft, dus de regels lopen er
+   omheen en daaronder gewoon door over de volle breedte. Een eigen kolom zou de
+   tekst voor de hele alinea smaller maken, en dan leest de bladzijde ongelijk.
 
-   Wel een plafond erop. Bij een lang stuk tekst zou hij anders het halve scherm
-   vullen en dan gaat de illustratie de tekst overschreeuwen. */
-.met-plaatje {
-  display: flex;
-  gap: var(--space-5);
-  align-items: stretch;
+   Klein houden dus: net zo hoog als het stukje tekst ernaast, niet meer. De
+   illustratie hoort erbij te staan, niet het blok over te nemen. */
+.met-plaatje::after {
+  content: '';
+  display: block;
+  clear: both;
 }
 
 .met-plaatje-beeld {
-  display: block;
-  flex: 0 0 auto;
-  align-self: stretch;
-  width: auto;
+  float: left;
+  width: 150px;
   height: auto;
-  max-width: 260px;
-  object-fit: contain;
+  margin: 0 var(--space-4) var(--space-2) 0;
+  shape-margin: var(--space-2);
 }
-
-.met-plaatje-tekst { flex: 1 1 0; min-width: 0; }
 
 .kop-knieen .kop { margin-top: 0; }
 
 @media (max-width: 720px) {
-  .met-plaatje { flex-direction: column; align-items: flex-start; }
-  .met-plaatje-beeld { align-self: flex-start; max-width: 160px; }
+  .met-plaatje-beeld { width: 110px; }
 }
 
 /* Alles in een regel: de afspeelknop vooraan, het tempo op de halve breedte, en
