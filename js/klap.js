@@ -72,6 +72,8 @@ const klapEl = document.getElementById('klapspel');
 const klapBaanEl = klapEl && klapEl.querySelector('[data-klap-baan]');
 const klapNotenEl = klapEl && klapEl.querySelector('[data-klap-noten]');
 const klapAftelEl = klapEl && klapEl.querySelector('[data-klap-aftellen]');
+const klapTellenEl = klapEl && klapEl.querySelector('[data-klap-tellen]');
+const klapDoelEl = klapEl && klapEl.querySelector('.klap-doel');
 const klapKnopEl = klapEl && klapEl.querySelector('[data-klap-start]');
 const klapBpmEl = klapEl && klapEl.querySelector('[data-klap-bpm]');
 const klapMaatEl = klapEl && klapEl.querySelector('[data-klap-maat]');
@@ -301,6 +303,8 @@ function startKlap() {
     klappen: klappenVoor(0),
     noten: [],
     aanloop: [],
+    tellen: [],       // de tijden van de tellen, voor de stipjes en de ring
+    telAan: -1,
     aftelGetal: 0,
     aftelKlaar: false,
     eersteKlap: 0,
@@ -309,6 +313,7 @@ function startKlap() {
 
   klapKnopEl.textContent = 'Stop';
   klapZetKnoppen(true);
+  wisKlapTellen();
   toonKlapAftellen(0);
   werkKlapBalkBij();
 
@@ -334,6 +339,7 @@ function stopKlap() {
   akkEnv.cancel(Tone.now());
   tikEnv.cancel(Tone.now());
 
+  wisKlapTellen();
   toonKlapAftellen(0);
   klapKnopEl.textContent = 'Start';
   klapZetKnoppen(false);
@@ -369,6 +375,8 @@ function vulKlapAan(nu) {
     // Hij loopt vanaf de eerste tel, dus ook onder het aftellen. Zo heb je de
     // muziek al in je voordat het eerste klapje valt.
     const tellengte = 60 / bpm;
+    if (stap % 4 === 0) klap.tellen.push({ nr: tel, tijd: klap.stapTijd });
+
     if (stap % 4 === 0 && (inAanloop || maat < klapStand.maten)) {
       const akkoord = akkoordVoor(tel);
       basNoot(klap.stapTijd, akkoord, tellengte, tel % 4);
@@ -405,6 +413,76 @@ function vulKlapAan(nu) {
       klap.einde = klap.stapTijd + 0.4;
     }
   }
+}
+
+// ============================================================
+//  De tel in beeld
+// ============================================================
+
+// Hoe ver de ring opzwelt op de tel. De eerste tel van de maat krijgt meer,
+// zodat je niet alleen hoort maar ook ziet waar een maat begint.
+const KLAP_TEL_PULS = 1.14;
+const KLAP_TEL_PULS_EEN = 1.32;
+const KLAP_TEL_DUUR = 220;
+
+const klapStippen = [];
+
+function bouwKlapTellen() {
+  if (!klapTellenEl) return;
+  for (let i = 0; i < 4; i++) {
+    const stip = document.createElement('span');
+    stip.className = 'klap-tel' + (i === 0 ? ' eerste' : '');
+    klapTellenEl.appendChild(stip);
+    klapStippen.push(stip);
+  }
+}
+
+// Een korte puls via de animatie-API en niet via een class: dan begint hij
+// opnieuw ook als hij midden in een vorige valt. Alleen transform, want dat
+// draait op de grafische kaart -- op een traag digibord is dat het verschil
+// tussen een puls en een hik. De veer zit alleen op het eerste stuk: over het
+// geheel schiet hij bij het eerste beeldje al door zijn eindstand heen.
+function pulseerKlap(el, groei) {
+  if (!el || !el.animate || minderBeweging.matches) return;
+  el.animate([
+    { transform: 'scale(1)', easing: 'cubic-bezier(0.34, 1.56, 0.64, 1)' },
+    { transform: 'scale(' + groei + ')', offset: 0.35, easing: 'ease-out' },
+    { transform: 'scale(1)' }
+  ], { duration: KLAP_TEL_DUUR });
+}
+
+// De ring klopt door op elke tel, ook als er geen klapje op valt. Juist dan:
+// op een rust is er verder niets te zien, en dat is precies waar een klas de
+// tel kwijtraakt.
+function toonKlapTel(inMaat) {
+  klapStippen.forEach((stip, i) => stip.classList.toggle('aan', i === inMaat));
+  const groei = inMaat === 0 ? KLAP_TEL_PULS_EEN : KLAP_TEL_PULS;
+  pulseerKlap(klapStippen[inMaat], groei);
+  pulseerKlap(klapDoelEl, groei);
+}
+
+function wisKlapTellen() {
+  klapStippen.forEach((stip) => stip.classList.remove('aan'));
+}
+
+// Welke tel er nu klinkt. Hij kijkt naar de audioklok en niet naar hoeveel
+// beeldjes er voorbij zijn: op een traag digibord vallen er beeldjes weg en dan
+// zou de puls langzaam achter de muziek aan gaan lopen. Hij pakt de nieuwste tel
+// die al geweest is, dus als er een beeldje overgeslagen wordt springt hij naar
+// de goede in plaats van er een achter te blijven.
+function werkKlapTelBij(nu) {
+  let nieuw = null;
+  for (let i = 0; i < klap.tellen.length; i++) {
+    const t = klap.tellen[i];
+    if (nu >= t.tijd && (!nieuw || t.nr > nieuw.nr)) nieuw = t;
+  }
+  if (!nieuw || nieuw.nr === klap.telAan) return;
+
+  klap.telAan = nieuw.nr;
+  toonKlapTel(nieuw.nr % 4);
+
+  // Wat geweest is hoeft niet elk beeldje opnieuw langsgelopen te worden.
+  klap.tellen = klap.tellen.filter((t) => t.tijd > nu - 0.5);
 }
 
 function klapDoelX() {
@@ -481,6 +559,7 @@ function klapStap() {
 
   vulKlapAan(nu);
   werkKlapAftellenBij(nu);
+  werkKlapTelBij(nu);
 
   // Van rechts naar links. Op zijn moment staat een klapje op het doelvak;
   // KLAP_VOORUIT seconden daarvoor staat hij tegen de rechterrand.
@@ -600,6 +679,7 @@ function klapZetKnoppen(bezig) {
 if (klapEl) {
   laadKlapStand();
   bouwKlapKnoppen();
+  bouwKlapTellen();
   werkKlapBalkBij();
 
   klapKnopEl.addEventListener('click', () => {

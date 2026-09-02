@@ -1181,6 +1181,31 @@ input[type="range"]::-moz-range-thumb {
   border-radius: var(--radius);
 }
 
+/* Vier stipjes in de balk onder de baan, een per tel, die de maat rondlopen. De
+   eerste is een andere kleur: dan zie je waar de maat begint zonder te hoeven
+   tellen. Ze staan vooraan, naast het tempo en de maat -- daar staat toch al
+   alles wat over de tijd gaat. */
+.klap-tellen {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  height: 20px;
+}
+
+.klap-tel {
+  width: 20px;
+  height: 20px;
+  border: 3px solid var(--ink);
+  border-radius: 50%;
+  background: var(--wit);
+  /* Vooraf een eigen laag, zodat de puls op een traag digibord niet elke tel
+     opnieuw een laag hoeft te maken. */
+  will-change: transform;
+}
+
+.klap-tel.aan { background: var(--zon); }
+.klap-tel.eerste.aan { background: var(--koraal); }
+
 /* De ring waar je op klapt. */
 .klap-doel {
   position: absolute;
@@ -1191,6 +1216,7 @@ input[type="range"]::-moz-range-thumb {
   margin: calc(var(--klap) / -2) 0 0 calc(var(--klap) / -2);
   border: 4px dashed var(--ink);
   border-radius: 50%;
+  will-change: transform;
 }
 
 .klap-noten { position: absolute; inset: 0; }
@@ -1271,6 +1297,8 @@ input[type="range"]::-moz-range-thumb {
 
 @media (max-width: 720px) {
   .klap-baan { --klap: 46px; --doel-x: 64px; }
+  .klap-tellen { gap: var(--space-2); height: 15px; }
+  .klap-tel { width: 15px; height: 15px; border-width: 2px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
