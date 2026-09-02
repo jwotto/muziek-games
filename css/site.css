@@ -821,8 +821,6 @@ input[type="range"]::-moz-range-thumb {
     gap: var(--space-3);
     --noot: 42px;
   }
-  .spel-tellen { gap: var(--space-2); height: 15px; }
-  .spel-tel { width: 15px; height: 15px; border-width: 2px; }
   .spel-zij,
   .spel-hartjes { flex-direction: row; align-items: center; }
   .spel-zij { gap: var(--space-3); }
@@ -831,29 +829,6 @@ input[type="range"]::-moz-range-thumb {
 }
 
 /* De plek waar je hem moet raken: dezelfde vorm, maar leeg. */
-/* Vier stipjes boven de banen, een per tel, die de maat rondlopen. De eerste is
-   een andere kleur: dan zie je waar de maat begint zonder te hoeven tellen. */
-.spel-tellen {
-  display: flex;
-  justify-content: center;
-  gap: var(--space-3);
-  height: 20px;
-}
-
-.spel-tel {
-  width: 20px;
-  height: 20px;
-  border: 3px solid var(--ink);
-  border-radius: 50%;
-  background: var(--wit);
-  /* Vooraf een eigen laag, zodat de puls op een traag digibord niet elke tel
-     opnieuw een laag hoeft te maken. */
-  will-change: transform;
-}
-
-.spel-tel.aan { background: var(--zon); }
-.spel-tel.eerste.aan { background: var(--koraal); }
-
 .baan-doel {
   position: absolute;
   left: 50%;
@@ -862,7 +837,6 @@ input[type="range"]::-moz-range-thumb {
   height: var(--noot);
   margin-left: calc(var(--noot) / -2);
   z-index: 1;
-  will-change: transform;
 }
 
 .baan-doel svg {
