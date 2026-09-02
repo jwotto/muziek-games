@@ -268,25 +268,55 @@ body {
   background: var(--wit);
 }
 
-/* De uitleg staat onder het vak, maar wel in dezelfde drie kolommen, zodat elke
-   tekst recht onder zijn eigen foto uitkomt. */
+/* De drie stukjes uitleg staan boven het vak, onder elkaar. Eerst lezen wat het
+   is, dan de foto's erbij zien. */
 .onderdelen-uitleg {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1rem 1.25rem;
-  margin-top: 1rem;
-  /* Dezelfde inspringing als de binnenkant van het kader hierboven: 4px rand
-     plus de padding. Anders staat elke tekst net naast zijn eigen foto. */
-  padding: 0 calc(1.25rem + 4px);
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  margin: 1.2rem 0 0;
 }
 
-/* Even hoog, zodat de drie kolommen naast elkaar gelijk eindigen. De teksten in
-   KIT zijn ongeveer even lang gehouden; dit is het vangnet daaronder. */
 .deel-uitleg {
   margin: 0;
-  line-height: 1.5;
-  min-height: calc(3 * 1.5em);
+  line-height: 1.7;
   text-wrap: pretty;
+}
+
+/* De naam als pilletje in de kleur van het onderdeel. Niet als gekleurde letters:
+   het geel van de snare is op wit niet te lezen, en de huisstijl werkt met volle
+   vlakken in plaats van gekleurde tekst.
+
+   Alle drie even breed, zodat de tekst erachter op dezelfde plek begint. Het is
+   een knop: erop tikken speelt het geluid, net als de foto eronder. */
+.deel-titel {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 6em;
+  margin-right: 0.5em;
+  padding: 0.1em 0.75em;
+  vertical-align: -0.2em;
+  font-family: var(--font-kop);
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--op-kleur, var(--ink));
+  background: var(--kleur);
+  border: 3px solid var(--ink);
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  transition: transform 0.15s var(--bounce);
+}
+
+.deel-titel:hover { transform: scale(1.05); }
+.deel-titel:focus-visible { outline: 4px solid var(--blauw); outline-offset: 3px; }
+
+/* Licht mee op zodra dat geluid klinkt, ook als je de foto of het pad aantikt. */
+.deel-titel.aan { transform: scale(1.08); }
+
+@media (prefers-reduced-motion: reduce) {
+  .deel-titel { transition: none; }
+  .deel-titel:hover { transform: none; }
 }
 
 .deel {

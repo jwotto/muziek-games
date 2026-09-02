@@ -102,40 +102,34 @@
       elk nummer: de <b>kick</b>, de <b>snare</b> en de <b>hihat</b>. Met alleen
       die drie speel je al een echte beat.
     </p>
-    <p class="lead">
-      Hieronder staan ze alle drie. Lees wat ze zijn, draai aan de schuifjes tot
-      het klinkt zoals jij wilt, en speel ze met <b>A</b>, <b>S</b> en <b>D</b>
-      of tik op de vormen.
-    </p>
+    <!-- Eerst lezen wat het is, dan pas de foto's. Naam, vorm, kleur en tekst
+         komen uit KIT in drumkit.js, zodat ze maar op een plek staan. -->
+    <div class="onderdelen-uitleg">
+      <p class="deel-uitleg" data-uitleg="kick"></p>
+      <p class="deel-uitleg" data-uitleg="snare"></p>
+      <p class="deel-uitleg" data-uitleg="hihat"></p>
+    </div>
 
     <figure class="drumstel">
       <div class="onderdelen">
         <button class="deel" type="button" data-id="kick" style="--kleur: var(--koraal)">
-          <img class="puls" src="img/kick.png" width="1434" height="1097"
+          <img class="puls" data-puls="1.12" src="img/kick.png" width="1434" height="1097"
                alt="De kick: een grote rode trommel die op de grond staat.">
           <span class="deel-naam">Kick</span>
         </button>
 
         <button class="deel" type="button" data-id="snare" style="--kleur: var(--zon)">
-          <img class="puls" src="img/snare.png" width="1442" height="1091"
+          <img class="puls" data-puls="1.12" src="img/snare.png" width="1442" height="1091"
                alt="De snare: een gele trommel op een standaard.">
           <span class="deel-naam">Snare</span>
         </button>
 
         <button class="deel" type="button" data-id="hihat"
                 style="--kleur: var(--blauw); --op-kleur: var(--wit)">
-          <img class="puls" src="img/hihat.png" width="1024" height="1536"
+          <img class="puls" data-puls="1.12" src="img/hihat.png" width="1024" height="1536"
                alt="De hihat: twee blauwe bekkens boven elkaar op een standaard met een pedaal.">
           <span class="deel-naam">Hihat</span>
         </button>
-      </div>
-
-      <!-- De uitleg staat onder het vak, in dezelfde drie kolommen. De tekst
-           komt uit KIT in drumkit.js, zodat hij maar op een plek staat. -->
-      <div class="onderdelen-uitleg">
-        <p class="deel-uitleg" data-uitleg="kick"></p>
-        <p class="deel-uitleg" data-uitleg="snare"></p>
-        <p class="deel-uitleg" data-uitleg="hihat"></p>
       </div>
 
       <figcaption>

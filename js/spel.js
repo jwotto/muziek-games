@@ -193,7 +193,7 @@ function akkoordVoor(tel) {
 }
 
 // De oom: een ronde lage noot, kort afgekapt.
-const basVol = new Tone.Volume(-9).connect(master);
+const basVol = new Tone.Volume(-4).connect(master);
 const basFilter = new Tone.Filter({ type: 'lowpass', frequency: 480, Q: 1 }).connect(basVol);
 const basEnv = new Tone.AmplitudeEnvelope({ attack: 0.004, decay: 0.14, sustain: 0, release: 0.03 }).connect(basFilter);
 const basOsc = new Tone.Oscillator({ type: 'triangle', frequency: 110 }).start();
@@ -201,7 +201,7 @@ basOsc.connect(basEnv);
 
 // De pah: drie blokgolven samen, dus een echt akkoord. Ze gaan eerst door een
 // gain, want drie golven bij elkaar opgeteld zou boven vol bereik uitkomen.
-const akkVol = new Tone.Volume(-15).connect(master);
+const akkVol = new Tone.Volume(-10).connect(master);
 const akkFilter = new Tone.Filter({ type: 'lowpass', frequency: 2600, Q: 1 }).connect(akkVol);
 const akkEnv = new Tone.AmplitudeEnvelope({ attack: 0.003, decay: 0.1, sustain: 0, release: 0.03 }).connect(akkFilter);
 const akkMix = new Tone.Gain(0.33).connect(akkEnv);
@@ -224,7 +224,7 @@ function basNoot(tijd, akkoord, tellengte, inMaat) {
 // spel begint houdt hij op: dan is de polka zelf je maat.
 const tikOsc = new Tone.Oscillator({ type: 'sine', frequency: 1000 }).start();
 const tikEnv = new Tone.AmplitudeEnvelope({ attack: 0.001, decay: 0.04, sustain: 0, release: 0.01 });
-const tikVol = new Tone.Volume(-14);
+const tikVol = new Tone.Volume(-9);
 tikOsc.chain(tikEnv, tikVol, master);
 
 function tik(tijd, laatste) {

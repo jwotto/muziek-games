@@ -39,9 +39,9 @@ const KIT = [
     vorm: 'vierkant',
     uitleg: 'Een trommel met metalen snaartjes onder het vel. Die ratelen mee als je slaat en maken die scherpe tsjak.',
     schuifjes: [
-      // Stand 11 is periode 508: rond de 3,5 kHz. Dat zit lager en dichter bij een
-      // echte snare dan de scherpere standen eronder.
-      { id: 'ruistoon', label: 'Ruistoon', min: 0, max: 15, step: 1, waarde: 11 },
+      // Stand 12 is periode 762: rond de 2,3 kHz. Daar zit de ruis van een echte
+      // snare ook ongeveer; de standen eronder klinken al gauw als sissen.
+      { id: 'ruistoon', label: 'Ruistoon', min: 0, max: 15, step: 1, waarde: 12 },
       { id: 'lengte', label: 'Lengte', min: 0.03, max: 0.5, step: 0.01, waarde: 0.19 },
       { id: 'galm', label: 'Galm', min: 0, max: 1, step: 0.02, waarde: 0 }
     ]
@@ -438,11 +438,23 @@ KIT.forEach((inst) => {
 // je hem hoort. De tekst komt uit KIT hierboven, zodat hij maar op een plek staat.
 document.querySelectorAll('.deel[data-id]').forEach((deel) => meldPad(deel.dataset.id, deel));
 
-// De uitleg staat onder het vak met de foto's, in dezelfde kolommen. De tekst
-// komt uit KIT hierboven, zodat hij maar op een plek staat.
+// De uitleg staat boven het vak met de foto's. Voor de tekst staat een pilletje
+// met de vorm en de naam van het onderdeel, in zijn eigen kleur -- dezelfde vorm
+// die straks op het pad staat en in het spel naar beneden valt, zodat je hem
+// overal herkent. Alles komt uit KIT hierboven.
 KIT.forEach((inst) => {
   const vak = document.querySelector('[data-uitleg="' + inst.id + '"]');
-  if (vak) vak.textContent = inst.uitleg;
+  if (!vak) return;
+
+  vak.style.setProperty('--kleur', 'var(--' + inst.kleur + ')');
+  vak.style.setProperty('--op-kleur', inst.kleur === 'blauw' ? 'var(--wit)' : 'var(--ink)');
+  vak.innerHTML =
+    '<button class="deel-titel" type="button" data-id="' + inst.id +
+    '" aria-label="Speel ' + inst.naam + '">' + inst.naam + '</button> ' + inst.uitleg;
+
+  // Het naampilletje doet mee als pad: erop tikken speelt het geluid, en het
+  // licht mee op als de foto of het pad geraakt wordt.
+  meldPad(inst.id, vak.querySelector('.deel-titel'));
 });
 
 // ============================================================
@@ -499,12 +511,19 @@ function flits(id) {
   // ook als je hem midden in een vorige aanslag weer raakt.
   vormen[id].forEach((vorm) => {
     if (!vorm || !vorm.animate) return;
+    // Hoe ver hij uitzet mag per element verschillen. Een vorm op een pad is
+    // klein en heeft ruimte om zich heen; een foto van driehonderd pixels breed
+    // staat tegen de rand van de bladzijde aan en zou er met 32% overheen
+    // steken. Dan groeit de bladzijde mee, verschijnt er een schuifbalk en
+    // verspringt de hele opmaak.
+    const groei = vorm.dataset.puls || '1.32';
+
     // De bounce hoort op het uitzetten, niet over de hele animatie. Stond hij op
     // het geheel, dan schoot de overshoot al voorbij de laatste keyframe en was
     // de puls na een goede honderd milliseconden alweer voorbij.
     vorm.animate([
       { transform: 'scale(1)', easing: 'cubic-bezier(0.34, 1.56, 0.64, 1)' },
-      { transform: 'scale(1.32)', offset: 0.35, easing: 'ease-out' },
+      { transform: 'scale(' + groei + ')', offset: 0.35, easing: 'ease-out' },
       { transform: 'scale(1)' }
     ], { duration: 280 });
   });
@@ -552,7 +571,7 @@ document.addEventListener('pointerdown', (e) => {
   // bewust niet op isPrimary, want een tweede vinger moet ook gewoon spelen.
   if (e.button !== 0) return;
 
-  const pad = e.target.closest('.pad, .deel');
+  const pad = e.target.closest('.pad, .deel, .deel-titel');
   if (!pad) return;
 
   // preventDefault houdt het slepen en selecteren tegen, maar neemt ook de focus
@@ -578,7 +597,7 @@ document.addEventListener('click', (e) => {
 // het geluid een tweede keer starten en zichzelf afkappen.
 document.addEventListener('keydown', (e) => {
   if (e.key !== 'Enter' && e.key !== ' ') return;
-  const pad = e.target.closest && e.target.closest('.pad, .deel');
+  const pad = e.target.closest && e.target.closest('.pad, .deel, .deel-titel');
   if (!pad) return;
   e.preventDefault();
   raak(pad.dataset.id);
