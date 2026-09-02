@@ -1,4 +1,4 @@
-/* Les 1 — Maak je eigen drum muziek
+/* Les 1 — Maak je eigen drumstel
    Kick, snare en hihat, opgebouwd uit losse onderdelen.
 
    Eén regel loopt door het hele bestand heen: geen enkele stem wordt per

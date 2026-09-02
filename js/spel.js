@@ -37,24 +37,24 @@ const MIS_KOSTEN = 25;       // punten kwijt als je slaat waar geen noot is
 // ============================================================
 
 // Elke graad bepaalt zelf wat er op een tel valt. De teller loopt vanaf de
-// eerste noot, dus 0 is de eerste tel van de maat na het aftellen. Geeft een
-// graad null terug, dan valt er niets: dat is een rust, en juist die rusten
-// maken de makkelijke graden rustig.
+// eerste noot, dus 0 is de eerste tel van de maat na het aftellen. Op elke tel
+// valt er iets, op elke graad: je speelt altijd de hele beat mee, en dat is
+// precies wat een beat een beat maakt.
 //
-// De rij loopt op in twee dingen tegelijk: er komen noten bij en ze worden
-// minder voorspelbaar. Easy is een noot per maat, Expert is elke tel eentje en
-// je weet nooit welke.
+// Het verschil zit dus niet in hoeveel er valt maar in wat. Easy is alleen de
+// kick, dan komt de snare erbij, dan de hihat, en op Expert weet je nooit welke
+// van de drie er aankomt.
 const NIVEAUS = [
   { id: 'easy', naam: 'Easy',
-    toelichting: 'alleen de kick, op de eerste tel van elke maat',
-    noot: (i) => (i % 4 === 0 ? 'kick' : null) },
+    toelichting: 'alleen de kick, op elke tel',
+    noot: () => 'kick' },
 
   { id: 'medium', naam: 'Medium',
-    toelichting: 'kick, kick, snare, rust',
-    noot: (i) => ['kick', 'kick', 'snare', null][i % 4] },
+    toelichting: 'kick en snare, met de snare op de derde tel',
+    noot: (i) => ['kick', 'kick', 'snare', 'kick'][i % 4] },
 
   { id: 'hard', naam: 'Hard',
-    toelichting: 'kick, snare en hihat om de beurt, elke tel een',
+    toelichting: 'kick, snare en hihat om de beurt',
     noot: (i) => ['kick', 'snare', 'hihat'][i % 3] },
 
   { id: 'expert', naam: 'Expert',
@@ -441,9 +441,8 @@ function vulAan(nu) {
       spel.aanloop.push(spel.telTijd);
     } else {
       if (tel === AANLOOP_TELLEN) spel.eersteNoot = spel.telTijd;
-      // De graad zegt wat er op deze tel valt. Null is een rust: dan valt er niets.
-      const id = NIVEAUS[spel.niveau].noot(tel - AANLOOP_TELLEN);
-      if (id) spel.noten.push(maakNoot(id, spel.telTijd));
+      // De graad zegt wat er op deze tel valt.
+      spel.noten.push(maakNoot(NIVEAUS[spel.niveau].noot(tel - AANLOOP_TELLEN), spel.telTijd));
     }
 
     spel.bpm = bpmVoor(tel);
