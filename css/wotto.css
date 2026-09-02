@@ -17,7 +17,47 @@
   --font-kop: 'Fredoka', sans-serif;
   --font-body: 'Nunito', sans-serif;
 
+  /* Tekstschaal: 12, 14, 16, 18, 20, 24, 32, 40, 48. Zit een maat er tussenin,
+     dan kies je de dichtstbijzijnde uit de rij -- geen eigen getal. */
+  --text-xs:   0.75rem;
+  --text-sm:   0.875rem;
+  --text-base: 1rem;
+  --text-md:   1.125rem;
+  --text-lg:   1.25rem;
+  --text-xl:   1.5rem;
+  --text-2xl:  2rem;
+  --text-3xl:  2.5rem;
+  --text-4xl:  3rem;
+
+  /* Koppen die meeschalen met het scherm. Ook dit zijn vaste tokens: elf losse
+     clamp-formules door de site heen is geen schaal maar een verzameling. */
+  --text-hero:     clamp(2.4rem, 7vw, 5rem);
+  --text-kop:      clamp(1.4rem, 3.5vw, 1.9rem);
+  --text-kaartkop: clamp(1.4rem, 5vw, 2rem);
+  --text-melding:  clamp(1.6rem, 7vw, 3.2rem);
+  --text-cijfer:       clamp(2.4rem, 10vw, 4rem);
+  --text-cijfer-klein: clamp(1.6rem, 6vw, 2.4rem);
+  --text-aftellen: clamp(4rem, 13vw, 8rem);
+  --text-label:    clamp(0.85rem, 2.2vw, 1.15rem);
+
+  /* Ruimte: 4, 8, 12, 16, 24, 32, 48, 64 */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 64px;
+
+  /* Layout */
+  --content-max: 1200px;
+  --gutter: clamp(16px, 5vw, 64px);
+  --section-y: clamp(40px, 6vw, 72px);
+
   /* Vorm */
+  --radius-sm: 8px;
+  --radius-md: 16px;
   --radius: 24px;
   --radius-pill: 999px;
 
