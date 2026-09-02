@@ -93,6 +93,7 @@ const knoppenEl = spelEl && spelEl.querySelector('[data-knoppen]');
 const veldEl = spelEl && spelEl.querySelector('.spel-veld');
 const vrijEl = spelEl && spelEl.querySelector('[data-vrij]');
 const meldingEl = document.querySelector('[data-melding]');
+const spelblokEl = document.querySelector('[data-spelblok]');
 // De graadknoppen staan op twee plekken: boven het veld en op de kaart. Ze
 // worden allebei uit dezelfde lijst gebouwd en samen bijgewerkt.
 const niveauRijen = spelEl ? Array.from(spelEl.querySelectorAll('[data-niveaus]')) : [];
@@ -300,6 +301,12 @@ function huidigNiveau() { return NIVEAUS[niveauNr]; }
 
 function spelOpen() { return voortgang.gedraaid.length >= ALLE_SCHUIFJES.length; }
 
+// De game staat er pas als hij vrijgespeeld is. Er komt geen kaart met een slot
+// in beeld: tot die tijd bestaat het gedeelte gewoon niet voor je.
+function werkSlotBij() {
+  if (spelblokEl) spelblokEl.hidden = !spelOpen();
+}
+
 // Elk schuifje telt een keer mee. Terugdraaien maakt niet uit: je hebt hem
 // aangeraakt, en daar ging het om.
 function meldSchuifje(id, param) {
@@ -312,6 +319,7 @@ function meldSchuifje(id, param) {
   bewaarVoortgang();
 
   if (!wasOpen && spelOpen()) {
+    werkSlotBij();
     meld('Game vrijgespeeld!', 'Ga gerust verder met geluiden ontwerpen.');
     werkNiveausBij();
   }
@@ -346,6 +354,7 @@ function wisVoortgang() {
   niveauNr = 0;
   record = 0;
   bewaarVoortgang();
+  werkSlotBij();
   werkNiveausBij();
   werkBalkBij();
   toonStartkaart();
@@ -919,6 +928,7 @@ function toonStartkaart() {
 
 if (spelEl) {
   bijSchuifje = meldSchuifje;
+  werkSlotBij();
   bouwBanen();
   bouwNiveaus();
   werkNiveausBij();

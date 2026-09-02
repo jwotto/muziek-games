@@ -546,6 +546,10 @@ input[type="range"]::-moz-range-thumb {
    de game begint, ook als het vak zelf nog dicht is. */
 .kop-spel { margin-top: 2.5rem; }
 
+/* Het hele gamegedeelte is er nog niet zolang je niet aan alle schuifjes hebt
+   gezeten. Niet op slot in beeld, maar gewoon weg: dan is het een verrassing. */
+.spelblok[hidden] { display: none; }
+
 .spel-uitleg { margin: 0 0 1.1rem; line-height: 1.5; }
 
 /* De vier moeilijkheidsgraden staan als een rij boven het veld. De graad waar je
