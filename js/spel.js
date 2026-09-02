@@ -522,7 +522,7 @@ function stap() {
   spel.noten.forEach((noot) => {
     if (noot.tijd + grens < nu) {
       noot.el.remove();
-      misNoot();
+      misNoot(noot.betaald);
       return;
     }
     const deel = (noot.tijd - nu) / VOORUIT;
@@ -535,9 +535,11 @@ function stap() {
   if (spel.loopt) lus = requestAnimationFrame(stap);
 }
 
-function misNoot() {
+// betaald: je hebt er net al voor geboet met een misklik. De mis telt dan wel
+// mee in je eindstand maar kost geen tweede hartje.
+function misNoot(betaald) {
   spel.gemist += 1;
-  spel.hartjes -= 1;
+  if (!betaald) spel.hartjes -= 1;
   toonOordeel('Mis');
   werkBalkBij();
   // Eerst afgaan, dan pas vrijspelen: is de twintigste noot je laatste hartje,
@@ -684,6 +686,17 @@ function beoordeel(id, wanneer) {
     // Slaan waar geen noot is kost punten en een hartje. Alleen punten was niet
     // genoeg: dan kon je alle drie de toetsen elke tel blijven rammen en altijd
     // raak zitten, want de score gaat toch niet onder nul.
+    //
+    // Maar dan wel een hartje en niet twee. Sla je net te vroeg, dan kost dat er
+    // hier een, en even later loopt diezelfde noot voorbij zijn venster en zou
+    // dat er nog een kosten. Dat is een fout en geen twee, dus de noot waar je
+    // op mikte wordt hier afgevinkt: zijn mis telt straks nog wel mee in je
+    // eindstand, maar hij pakt geen hartje meer.
+    //
+    // Alleen als hij binnen een tel ligt. Ram je op een lege baan, dan is de
+    // eerstvolgende noot daar over twee seconden en daar mikte je niet op.
+    if (noot && afwijking < 60 / spel.bpm) noot.betaald = true;
+
     spel.score = Math.max(0, spel.score - MIS_KOSTEN);
     spel.hartjes -= 1;
     toonOordeel('Naast');
