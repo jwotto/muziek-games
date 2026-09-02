@@ -125,6 +125,84 @@ body {
 
 .lead + .lead { margin-top: 0.9rem; }
 
+.hero h2,
+.kop {
+  margin: 1.6rem 0 0.7rem;
+  font-size: clamp(1.4rem, 3.5vw, 1.9rem);
+}
+
+.kop { margin: 0 0 1rem; }
+
+/* De foto van het hele drumstel. Erop klikken maakt hem groot, zodat je op het
+   digibord de klas kunt laten raden hoe de onderdelen heten. */
+.drumstel-groot { margin: 1.4rem 0 0; }
+
+.vergroot {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: zoom-in;
+}
+
+.vergroot img {
+  display: block;
+  width: 100%;
+  height: auto;
+  background: var(--wit);
+  border: 4px solid var(--ink);
+  border-radius: var(--radius);
+  transition: transform 0.15s var(--bounce);
+}
+
+/* Geen loepje en geen tekst over de foto heen: bij het raadspel wil je alleen de
+   foto zien. De muisaanwijzer verklapt wel dat je erop kunt klikken. */
+.vergroot:hover img { transform: scale(1.01); }
+.vergroot:focus-visible { outline: 4px solid var(--blauw); outline-offset: 3px; }
+
+.drumstel-groot figcaption {
+  margin-top: 0.8rem;
+  font-family: var(--font-kop);
+  font-weight: 600;
+  font-size: 1.05rem;
+}
+
+/* Groot in beeld. Een dialog en geen eigen laag, want die regelt Escape, de
+   achtergrond en de focus zelf al. */
+.grootbeeld {
+  width: min(96vw, 1500px);
+  max-width: none;
+  padding: 1rem;
+  background: var(--wit);
+  border: 4px solid var(--ink);
+  border-radius: var(--radius);
+}
+
+/* Voluit en niet als tint: een halfdoorzichtige laag hoort niet bij de huisstijl,
+   en op een digibord wil je de rest van de bladzijde toch niet meer zien. De
+   kleur staat er als waarde, want ::backdrop erft niet overal de variabelen. */
+.grootbeeld::backdrop { background: #1A2233; }
+
+.grootbeeld img {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 76vh;
+  object-fit: contain;
+  cursor: zoom-out;
+}
+
+.grootbeeld .knop {
+  display: block;
+  margin: 0.9rem auto 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vergroot img { transition: none; }
+  .vergroot:hover img { transform: none; }
+}
+
 /* De foto van het drumstel hoort bij de uitleg: hij laat zien wat de drie
    onderdelen zijn voordat je ze hoort. */
 .drumstel {
@@ -451,6 +529,18 @@ input[type="range"]::-moz-range-thumb {
   font-size: clamp(1.3rem, 4vw, 1.8rem);
   padding: 0.6em 1.8em;
 }
+
+/* Op slot moet je kunnen zien. De knop houdt zijn plek, maar krijgt dezelfde
+   gestippelde taal als een graad die nog dicht zit, en veert niet meer op. */
+.knop:disabled {
+  color: var(--ink);
+  background: var(--wit);
+  border: 3px dotted var(--blauw);
+  cursor: not-allowed;
+}
+
+.knop:disabled:hover,
+.knop:disabled:active { transform: none; }
 
 .knop:focus-visible { outline: 4px solid var(--blauw); outline-offset: 3px; }
 
@@ -780,6 +870,41 @@ input[type="range"]::-moz-range-thumb {
 .spel-vrij span {
   display: block;
   font-size: 0.42em;
+}
+
+/* Een melding over de hele bladzijde, voor iets wat je moet zien terwijl je
+   ergens anders op de pagina bezig bent. Vangt geen klikken: je hoeft er niets
+   mee, je speelt gewoon door. */
+.melding {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-content: center;
+  pointer-events: none;
+}
+
+.melding:empty { display: none; }
+
+.melding b {
+  display: block;
+  padding: 0.35em 0.8em;
+  text-align: center;
+  font-family: var(--font-kop);
+  font-weight: 700;
+  font-size: clamp(1.6rem, 7vw, 3.2rem);
+  line-height: 1.1;
+  color: var(--ink);
+  background: var(--zon);
+  border: 4px solid var(--ink);
+  border-radius: var(--radius);
+  transform: rotate(-3deg);
+}
+
+.melding span {
+  display: block;
+  margin-top: 0.2em;
+  font-size: 0.4em;
 }
 
 /* Confetti: losse snippers die het veld uit vallen. Ze ruimen zichzelf op zodra

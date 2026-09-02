@@ -70,6 +70,12 @@ const NIVEAUS = [
 // oplopen: het is een tussenstand, geen eindstreep.
 const VRIJSPEEL_NOTEN = 20;
 
+// De game zelf zit ook op slot: eerst aan alle schuifjes hierboven draaien. Zo
+// gaat niemand meteen naar beneden scrollen om te spelen zonder eerst met de
+// geluiden te hebben zitten spelen.
+const ALLE_SCHUIFJES = [];
+KIT.forEach((inst) => inst.schuifjes.forEach((s) => ALLE_SCHUIFJES.push(inst.id + '.' + s.id)));
+
 // ============================================================
 //  Het scherm
 // ============================================================
@@ -86,6 +92,7 @@ const recordEl = spelEl && spelEl.querySelector('[data-record]');
 const knoppenEl = spelEl && spelEl.querySelector('[data-knoppen]');
 const veldEl = spelEl && spelEl.querySelector('.spel-veld');
 const vrijEl = spelEl && spelEl.querySelector('[data-vrij]');
+const meldingEl = document.querySelector('[data-melding]');
 // De graadknoppen staan op twee plekken: boven het veld en op de kaart. Ze
 // worden allebei uit dezelfde lijst gebouwd en samen bijgewerkt.
 const niveauRijen = spelEl ? Array.from(spelEl.querySelectorAll('[data-niveaus]')) : [];
@@ -236,7 +243,7 @@ const OPSLAG_SLEUTEL = 'wotto-muziekgames-les1-spel';
 function legeStand() {
   const records = {};
   NIVEAUS.forEach((niveau) => { records[niveau.id] = 0; });
-  return { vrij: 1, records: records };
+  return { vrij: 1, records: records, gedraaid: [] };
 }
 
 // Elke waarde apart nakijken. Opslag van een oudere versie, of iets wat met de
@@ -262,6 +269,16 @@ function laadVoortgang() {
       if (Number.isFinite(waarde) && waarde >= 0) stand.records[niveau.id] = waarde;
     });
   }
+
+  // Alleen namen die echt bestaan, en elk hooguit een keer: dan kan een oude of
+  // aangepaste opslag de game niet openzetten met verzonnen schuifjes.
+  if (Array.isArray(bewaard.gedraaid)) {
+    bewaard.gedraaid.forEach((naam) => {
+      if (ALLE_SCHUIFJES.indexOf(naam) >= 0 && stand.gedraaid.indexOf(naam) < 0) {
+        stand.gedraaid.push(naam);
+      }
+    });
+  }
   return stand;
 }
 
@@ -280,6 +297,26 @@ let voortgang = laadVoortgang();
 let niveauNr = voortgang.vrij - 1;
 
 function huidigNiveau() { return NIVEAUS[niveauNr]; }
+
+function spelOpen() { return voortgang.gedraaid.length >= ALLE_SCHUIFJES.length; }
+
+// Elk schuifje telt een keer mee. Terugdraaien maakt niet uit: je hebt hem
+// aangeraakt, en daar ging het om.
+function meldSchuifje(id, param) {
+  const naam = id + '.' + param;
+  if (ALLE_SCHUIFJES.indexOf(naam) < 0) return;
+  if (voortgang.gedraaid.indexOf(naam) >= 0) return;
+
+  const wasOpen = spelOpen();
+  voortgang.gedraaid.push(naam);
+  bewaarVoortgang();
+
+  if (!wasOpen && spelOpen()) {
+    meld('Game vrijgespeeld!', 'Ga gerust verder met geluiden ontwerpen.');
+    werkNiveausBij();
+  }
+  if (!spel || !spel.loopt) toonStartkaart();
+}
 
 // record is de topscore van de graad waar je nu op staat, zodat de balk ernaast
 // er live in mee kan lopen. De andere drie blijven intussen in voortgang staan.
@@ -339,7 +376,7 @@ function bpmVoor(telNr) {
 }
 
 function start() {
-  if (!spelEl) return;
+  if (!spelEl || !spelOpen()) return;
   cancelAnimationFrame(lus);
 
   spel = {
@@ -585,6 +622,28 @@ function kijkVrijspelen() {
 // Groot in beeld, maar het spel loopt er gewoon onderdoor. Vandaar dat de melding
 // geen muisklikken vangt en boven in het veld hangt, waar nog geen noot geraakt
 // hoeft te worden: je hebt iets verdiend, je wordt niet onderbroken.
+let meldTimer = 0;
+
+// Groot midden in beeld, waar je ook op de bladzijde bent. Dat is nodig voor het
+// vrijspelen van de game zelf: dat gebeurt boven bij de schuifjes, terwijl het
+// slot beneden zit.
+function meld(kop, regel) {
+  if (!meldingEl) return;
+  meldingEl.innerHTML = '<b>' + kop + '<span>' + regel + '</span></b>';
+  clearTimeout(meldTimer);
+  meldTimer = setTimeout(() => { meldingEl.textContent = ''; }, 4200);
+
+  confetti(54, meldingEl);
+  const kaart = meldingEl.firstElementChild;
+  if (minderBeweging.matches || !kaart.animate) return;
+  kaart.animate([
+    { transform: 'scale(0.3) rotate(-14deg)', opacity: 0, easing: 'cubic-bezier(0.34, 1.56, 0.64, 1)' },
+    { transform: 'scale(1) rotate(-3deg)', opacity: 1, offset: 0.12, easing: 'linear' },
+    { transform: 'scale(1) rotate(-3deg)', opacity: 1, offset: 0.85, easing: 'ease-in' },
+    { transform: 'scale(1.15) rotate(-3deg)', opacity: 0 }
+  ], { duration: 4200 });
+}
+
 let vrijTimer = 0;
 
 function vier(naam) {
@@ -611,9 +670,10 @@ function vier(naam) {
 // een handjevol spannetjes met elk een eigen val is precies genoeg.
 const SNIPPERKLEUREN = ['--koraal', '--zon', '--blauw', '--mint', '--bubblegum'];
 
-function confetti(aantal) {
-  if (!veldEl || minderBeweging.matches || !veldEl.animate) return;
-  const val = veldEl.clientHeight + 60;
+function confetti(aantal, laag) {
+  const waar = laag || veldEl;
+  if (!waar || minderBeweging.matches || !waar.animate) return;
+  const val = waar.clientHeight + 60;
 
   for (let i = 0; i < aantal; i++) {
     const snipper = document.createElement('span');
@@ -621,7 +681,7 @@ function confetti(aantal) {
     snipper.style.background = 'var(' + SNIPPERKLEUREN[i % SNIPPERKLEUREN.length] + ')';
     snipper.style.left = Math.round(Math.random() * 100) + '%';
     if (i % 3 === 0) snipper.style.borderRadius = '50%';
-    veldEl.appendChild(snipper);
+    waar.appendChild(snipper);
 
     const beweging = snipper.animate([
       { transform: 'translate3d(0, -30px, 0) rotate(0deg)' },
@@ -790,8 +850,8 @@ function werkNiveausBij() {
     knop.classList.toggle('op-slot', !open);
     knop.setAttribute('aria-pressed', String(i === niveauNr));
     // Tijdens het spelen staat de rij vast, anders speel je met een misklik je
-    // eigen beurt weg.
-    knop.disabled = !open || bezig;
+    // eigen beurt weg. En zolang de game zelf nog dicht zit valt er niets te kiezen.
+    knop.disabled = !open || bezig || !spelOpen();
     // Alleen het getal. Onder de naam van de graad is er niets anders wat het kan
     // zijn, en de balk naast het veld zegt tijdens het spelen 'beste' voluit.
     // Zit de graad nog dicht, dan staat daar een slotje.
@@ -837,6 +897,17 @@ function toonKaart(titel, cijfers, tekst, knop) {
 }
 
 function toonStartkaart() {
+  if (!spelOpen()) {
+    const nog = ALLE_SCHUIFJES.length - voortgang.gedraaid.length;
+    toonKaart('Nog even sleutelen', '',
+      'Draai eerst aan <b>alle schuifjes</b> hierboven, dan gaat de game open.<br>' +
+      'Nog <b>' + nog + '</b> te gaan.',
+      'Start');
+    kaartKnopEl.disabled = true;
+    return;
+  }
+
+  kaartKnopEl.disabled = false;
   toonKaart('Klaar?', '',
     'Je speelt <b>' + huidigNiveau().naam + '</b>.<br>Je krijgt eerst vier tellen om mee te tellen.',
     'Start');
@@ -847,6 +918,7 @@ function toonStartkaart() {
 // ============================================================
 
 if (spelEl) {
+  bijSchuifje = meldSchuifje;
   bouwBanen();
   bouwNiveaus();
   werkNiveausBij();

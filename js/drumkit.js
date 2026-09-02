@@ -503,6 +503,11 @@ function flits(id) {
 // toetsenbord, muis en aanraken lopen allemaal via raak.
 let bijAanslag = null;
 
+// En hier hangt het spel zijn slot aan op: pas als er aan alle schuifjes is
+// gedraaid mag je spelen. Dit bestand houdt dat niet zelf bij; het geeft alleen
+// door wat er beweegt.
+let bijSchuifje = null;
+
 function raak(id) {
   // Zo vroeg mogelijk klokken, want hier hangt de score van het spel aan vast.
   const wanneer = Tone.now();
@@ -567,12 +572,36 @@ document.addEventListener('keydown', (e) => {
   raak(pad.dataset.id);
 });
 
+// ============================================================
+//  9. De foto uitvergroten
+// ============================================================
+
+// Voor op het digibord: klik de foto groot en laat de klas raden hoe de
+// onderdelen heten. Het is een dialog, dus Escape, de achtergrond en de focus
+// zijn al geregeld; hier hoeft alleen open en dicht bij.
+const grootbeeld = document.querySelector('[data-grootbeeld]');
+
+document.addEventListener('click', (e) => {
+  if (!grootbeeld || !grootbeeld.showModal) return;
+
+  if (e.target.closest('[data-vergroot]')) {
+    if (!grootbeeld.open) grootbeeld.showModal();
+    return;
+  }
+
+  // Staat hij open, dan doet de volgende klik hem weer dicht: op de grote foto
+  // zelf, op de sluitknop, of ernaast. Dat laatste komt bij de dialog binnen,
+  // want de foto en de knop liggen erbovenop.
+  if (grootbeeld.open) grootbeeld.close();
+});
+
 // Schuifjes
 document.addEventListener('input', (e) => {
   const el = e.target;
   if (el.type !== 'range') return;
   stand[el.dataset.id][el.dataset.param] = parseFloat(el.value);
   pasToe(el.dataset.id);
+  if (bijSchuifje) bijSchuifje(el.dataset.id, el.dataset.param);
 });
 
 // Loslaten: je hoort meteen wat je gedraaid hebt, en het wordt bewaard. Bewust
