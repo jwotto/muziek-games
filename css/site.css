@@ -1,0 +1,613 @@
+/* Muziek Games - layout en componenten bovenop de Wotto huisstijl.
+
+   Vlakke kleurvlakken met ruime afrondingen en een stevige inkt-omlijning.
+   Geen slagschaduwen: diepte komt uit beweging, niet uit een getekend schuintje.
+   Dotted randen blijven de zachte variant uit de huisstijl. */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  min-height: 100dvh;
+  background: var(--wit);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.wrap {
+  width: min(1100px, 100%);
+  margin-inline: auto;
+  padding: 1.25rem 1.25rem 4rem;
+}
+
+/* ---------- Topbar ---------- */
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 2.5rem;
+}
+
+.merk {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-family: var(--font-kop);
+  font-weight: 600;
+  font-size: 1.05rem;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.merk .bol {
+  display: grid;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 50%;
+  background: var(--blauw);
+  border: 3px solid var(--ink);
+  color: var(--wit);
+  font-size: 1.1rem;
+}
+
+.terug {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: var(--font-kop);
+  font-weight: 600;
+  color: var(--blauw);
+  text-decoration: none;
+  border-radius: var(--radius-pill);
+  padding: 0.35em 0.9em 0.35em 0.6em;
+  transition: transform 0.15s var(--bounce);
+}
+
+.terug:hover { transform: translateX(-3px); }
+.terug:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
+
+.lesnummer {
+  font-family: var(--font-kop);
+  font-weight: 600;
+  background: var(--zon);
+  color: var(--ink);
+  border: 3px solid var(--ink);
+  border-radius: var(--radius-pill);
+  padding: 0.3em 1em;
+}
+
+/* ---------- Hero ---------- */
+
+.hero { margin-bottom: 2.5rem; }
+
+.hero h1 {
+  font-size: clamp(2.4rem, 7vw, 5rem);
+  line-height: 1.05;
+  margin: 0 0 0.6rem;
+  letter-spacing: -0.02em;
+}
+
+.hero h1 em {
+  font-style: normal;
+  background: var(--zon);
+  border-radius: 12px;
+  padding: 0 0.15em;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+
+.lead {
+  font-size: 1.15rem;
+  line-height: 1.55;
+  margin: 0;
+}
+
+.lead + .lead { margin-top: 0.9rem; }
+
+/* De foto van het drumstel hoort bij de uitleg: hij laat zien wat de drie
+   onderdelen zijn voordat je ze hoort. */
+.drumstel {
+  margin: 1.75rem 0 0;
+}
+
+.drumstel img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 4px solid var(--ink);
+  border-radius: var(--radius);
+  background: var(--wit);
+}
+
+.drumstel figcaption {
+  margin-top: 0.8rem;
+  font-family: var(--font-kop);
+  font-weight: 600;
+  font-size: 1.05rem;
+}
+
+.stippels {
+  height: 14px;
+  margin-top: 1.5rem;
+  background-image: radial-gradient(circle, var(--bubblegum) 5px, transparent 5.5px);
+  background-size: 26px 14px;
+  background-position: center;
+}
+
+/* ---------- Lessenrooster ---------- */
+
+.lessen {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.5rem;
+}
+
+.les {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1.5rem;
+  border-radius: var(--radius);
+  color: var(--ink);
+  text-decoration: none;
+  min-height: 250px;
+}
+
+/* Actieve les: vol gekleurd met inkt-omlijning. Diepte komt van het optillen. */
+.les.klaar {
+  background: var(--kleur);
+  border: 4px solid var(--ink);
+  transition: transform 0.15s var(--bounce);
+}
+
+.les.klaar:hover { transform: translateY(-6px); }
+.les.klaar:active { transform: translateY(-1px) scale(0.985); }
+.les.klaar:focus-visible { outline: 4px solid var(--blauw); outline-offset: 4px; }
+
+/* Nog te ontwerpen: dotted, de zachte variant uit de huisstijl */
+.les.binnenkort {
+  border: 3px dotted var(--kleur);
+  background: var(--wit);
+}
+
+.les .icoon {
+  display: grid;
+  place-items: center;
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 50%;
+  font-size: 1.9rem;
+  flex: none;
+}
+
+.les.klaar .icoon { background: var(--wit); border: 3px solid var(--ink); color: var(--ink); }
+.les.binnenkort .icoon { background: var(--kleur); color: var(--ink); }
+
+.les h2 { margin: 0; font-size: 1.45rem; line-height: 1.15; }
+.les .nr { font-family: var(--font-kop); font-weight: 600; font-size: 0.95rem; margin: 0; }
+.les p.tekst { margin: 0; line-height: 1.5; flex: 1; }
+
+.badge {
+  align-self: flex-start;
+  font-family: var(--font-kop);
+  font-weight: 600;
+  border-radius: var(--radius-pill);
+  padding: 0.45em 1.1em;
+  border: 3px solid var(--ink);
+}
+
+.badge.spelen { background: var(--blauw); color: var(--wit); }
+.badge.wacht { background: var(--wit); color: var(--ink); border-style: dotted; border-color: var(--kleur); }
+
+/* ---------- Les 1: de kit ---------- */
+
+.kit {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+  align-items: start; /* de hihat heeft meer schuifjes en mag langer zijn */
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.paneel {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1.25rem;
+  border-radius: var(--radius);
+  border: 4px solid var(--ink);
+  background: var(--wit);
+}
+
+/* ---------- Pad ---------- */
+
+.pad {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  padding: 1rem;
+  border: 4px solid var(--ink);
+  border-radius: 20px;
+  background: var(--kleur);
+  color: var(--op-kleur, var(--ink));
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;
+  transition: transform 0.12s var(--bounce);
+}
+
+.pad:hover { transform: scale(1.02); }
+.pad:focus-visible { outline: 4px solid var(--blauw); outline-offset: 4px; }
+.pad.aan { transform: scale(0.94); transition-duration: 0.02s; }
+
+/* Elk geluid heeft zijn eigen vorm: kick rond, snare vierkant, hihat driehoek.
+   Bij een aanslag geeft die vorm een stuiterende puls. */
+.vorm {
+  width: min(46%, 108px);
+  height: auto;
+  aspect-ratio: 1;
+  fill: var(--wit);
+  stroke: var(--ink);
+  stroke-width: 7;
+  stroke-linejoin: round;
+  will-change: transform;
+}
+
+.pad-naam {
+  font-family: var(--font-kop);
+  font-weight: 600;
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.pad-toets {
+  font-family: var(--font-kop);
+  font-weight: 700;
+  font-size: 0.9rem;
+  line-height: 1.3;
+  background: var(--wit);
+  color: var(--ink);
+  border: 3px solid var(--ink);
+  border-radius: var(--radius-pill);
+  padding: 0.1em 0.8em;
+}
+
+/* De drie teksten zijn even lang geschreven, dus ze lopen over evenveel regels
+   en de schuifjes eronder staan gelijk. De min-height is het vangnet voor als
+   er ooit eentje net iets korter wordt. */
+.uitleg {
+  margin: 0;
+  line-height: 1.5;
+  min-height: calc(3 * 1.5em);
+  text-wrap: pretty;
+}
+
+/* ---------- Schuifjes ---------- */
+
+.schuifjes { display: flex; flex-direction: column; gap: 1.1rem; }
+
+.slider label {
+  display: block;
+  font-family: var(--font-kop);
+  font-weight: 600;
+  margin-bottom: 0.35rem;
+}
+
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  display: block;
+  width: 100%;
+  height: 34px;
+  margin: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+input[type="range"]:focus-visible {
+  outline: 3px solid var(--blauw);
+  outline-offset: 4px;
+  border-radius: var(--radius-pill);
+}
+
+input[type="range"]::-webkit-slider-runnable-track {
+  height: 16px;
+  border-radius: var(--radius-pill);
+  background: var(--wit);
+  border: 3px solid var(--ink);
+}
+
+/* De knop heeft dezelfde vorm als het pad erboven: rond, vierkant of driehoek.
+   Dat kan niet met border-radius, dus het is een klein plaatje dat drumkit.js
+   in --knop zet. De baan is 16px hoog, dus het midden zit op 8; een knop van 32
+   hangt daar gecentreerd als hij 8 omhoog schuift. */
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 32px;
+  height: 32px;
+  margin-top: -8px;
+  border: none;
+  border-radius: 0;
+  background: var(--knop) center / contain no-repeat;
+}
+
+input[type="range"]::-moz-range-track {
+  height: 16px;
+  border-radius: var(--radius-pill);
+  background: var(--wit);
+  border: 3px solid var(--ink);
+}
+
+input[type="range"]::-moz-range-thumb {
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 0;
+  background: var(--knop) center / contain no-repeat;
+}
+
+/* ---------- Kleine knop ---------- */
+
+.knop.klein {
+  align-self: flex-start;
+  font-size: 0.95rem;
+  padding: 0.5em 1.1em;
+  background: var(--wit);
+  color: var(--ink);
+  border: 3px solid var(--ink);
+}
+
+.knop:focus-visible { outline: 4px solid var(--blauw); outline-offset: 3px; }
+
+/* ---------- Het spelletje ---------- */
+
+.spel { margin-top: 2rem; }
+
+.spel h2 { margin: 0; font-size: 1.6rem; }
+
+.spel-uitleg { margin: 0; line-height: 1.5; }
+
+/* Het speelveld: een smal rechtop scherm in het midden, met de cijfers links en
+   rechts ernaast in plaats van erboven. */
+.spel-veld {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr min(100%, 430px) 1fr;
+  align-items: center;
+  gap: clamp(0.75rem, 3vw, 2rem);
+  --noot: 52px;   /* maat van de noten en de doelvorm, schaalt mee op klein scherm */
+}
+
+.spel-zij {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  font-family: var(--font-kop);
+  font-weight: 600;
+}
+
+/* Tegen de banen aan schuiven, zodat het bij elkaar hoort. */
+.spel-zij.links { justify-self: end; }
+.spel-zij.rechts { justify-self: start; }
+
+.spel-label { font-size: 0.95rem; }
+.spel-label b { font-variant-numeric: tabular-nums; }
+
+.spel-record { margin-top: 0.5rem; }
+
+/* Klein en rustig: je moet hem kunnen vinden, maar er niet tegenaan vallen. */
+.spel-wis {
+  align-self: center;
+  margin-top: 0.35rem;
+  font-size: 0.8rem;
+  padding: 0.25em 0.9em;
+  border-width: 2px;
+}
+
+.spel-groot {
+  font-size: 2.6rem;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.spel-hartjes {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.spel-hartjes .heel { color: var(--koraal); }
+.spel-hartjes .kwijt { color: var(--ink); }
+
+/* Het speelveld schaalt mee in plaats van vaste maten te gebruiken, zodat het
+   op een laptop, een tablet en een telefoon allemaal past. */
+.spel-midden {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+/* Drie banen, dicht tegen elkaar aan, met de knoppen er precies onder. */
+.spel-banen,
+.spel-knoppen {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(4px, 1.2vw, 8px);
+}
+
+/* De knoppen zijn gewone pads, dus ze doen alles wat een pad doet. Alleen wat
+   platter, want ze staan onder een baan van 460 pixels. */
+.spel-knop {
+  aspect-ratio: auto;
+  height: clamp(64px, 11vw, 88px);
+  padding: 0.4rem;
+  gap: 0.25rem;
+  border-radius: 16px;
+}
+
+.spel-knop .vorm { width: var(--noot); }
+.spel-knop .pad-toets { font-size: 0.8rem; padding: 0.05em 0.6em; }
+
+/* Eén baan per geluid, rechtop. overflow hidden houdt de noten netjes binnen de
+   rand terwijl ze van boven komen vallen. */
+.baan {
+  position: relative;
+  height: clamp(260px, 46vh, 480px);
+  border: 3px solid var(--ink);
+  border-radius: 16px;
+  background: var(--wit);
+  overflow: hidden;
+}
+
+/* Op een tablet of telefoon past er niets meer naast het veld, dus gaan de
+   hartjes erboven en de score eronder. */
+@media (max-width: 720px) {
+  .spel-veld {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    gap: 0.75rem;
+    --noot: 42px;
+  }
+  .spel-zij,
+  .spel-hartjes { flex-direction: row; align-items: center; }
+  .spel-zij { gap: 0.7rem; }
+  .spel-zij.links, .spel-zij.rechts { justify-self: center; }
+  .spel-groot { font-size: 1.9rem; }
+  .spel-hartjes { font-size: 1.6rem; }
+}
+
+/* De plek waar je hem moet raken: dezelfde vorm, maar leeg. */
+.baan-doel {
+  position: absolute;
+  left: 50%;
+  bottom: calc(48px - var(--noot) / 2);
+  width: var(--noot);
+  height: var(--noot);
+  margin-left: calc(var(--noot) / -2);
+  z-index: 1;
+}
+
+.baan-doel svg {
+  width: 100%;
+  height: 100%;
+  fill: var(--wit);
+  stroke: var(--ink);
+  stroke-width: 9;
+  stroke-linejoin: round;
+}
+
+
+.baan-noten { position: absolute; inset: 0; }
+
+.noot {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: var(--noot);
+  height: var(--noot);
+  margin: calc(var(--noot) / -2) 0 0 calc(var(--noot) / -2);
+  will-change: transform;
+}
+
+.noot svg {
+  width: 100%;
+  height: 100%;
+  fill: var(--kleur);
+  stroke: var(--ink);
+  stroke-width: 9;
+  stroke-linejoin: round;
+}
+
+/* De inline transform op .noot komt van het spel zelf, dus de klap-animatie
+   gaat op de vorm erbinnen. */
+@keyframes raakWeg {
+  from { transform: scale(1); }
+  to { transform: scale(1.9); }
+}
+
+.noot.raak svg { animation: raakWeg 0.18s var(--bounce) forwards; }
+
+/* Het aftellen staat over de banen heen, maar onder het startkaartje. */
+.spel-aftellen {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+  font-family: var(--font-kop);
+  font-weight: 700;
+  font-size: clamp(4rem, 13vw, 8rem);
+  line-height: 1;
+  color: var(--ink);
+}
+
+.spel-aftellen:empty { display: none; }
+
+.spel-kaart {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: grid;
+  place-content: center;
+  gap: 0.5rem;
+  justify-items: center;
+  text-align: center;
+  padding: 1rem;
+  background: var(--wit);
+  border: 3px dotted var(--blauw);
+  border-radius: var(--radius);
+}
+
+.spel-kaart[hidden] { display: none; }
+.spel-kaart h3 { margin: 0; font-size: 1.4rem; }
+.spel-kaart p { margin: 0; line-height: 1.5; }
+
+/* Vaste hoogte, anders springt de pagina bij elk oordeel. */
+.spel-oordeel {
+  margin: 0;
+  min-height: 1.6em;
+  font-family: var(--font-kop);
+  font-weight: 700;
+  font-size: 1.2rem;
+}
+
+.spel-oordeel[data-soort="perfect"] { color: var(--mint); }
+.spel-oordeel[data-soort="goed"] { color: var(--mint); }
+.spel-oordeel[data-soort="net"] { color: var(--blauw); }
+.spel-oordeel[data-soort="mis"],
+.spel-oordeel[data-soort="naast"] { color: var(--koraal); }
+
+@media (prefers-reduced-motion: reduce) {
+  .noot.raak svg { animation: none; }
+}
+
+/* ---------- Footer ---------- */
+
+.voet {
+  margin-top: 3rem;
+  padding-top: 1.5rem;
+  border-top: 3px dotted var(--blauw);
+  font-size: 0.9rem;
+}
+
+/* ---------- Beweging uit ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .les.klaar, .pad, .terug { transition: none; }
+  .les.klaar:hover, .les.klaar:active, .pad:hover, .pad.aan, .terug:hover { transform: none; }
+}

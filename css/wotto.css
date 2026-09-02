@@ -1,0 +1,77 @@
+/* Wotto huisstijl tokens
+   Drop-in stylesheet voor Studio Wotto gamification webapps */
+
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400..700&family=Nunito:wght@400..900&display=swap');
+
+:root {
+  /* Kleuren */
+  --blauw: #0061E0;
+  --koraal: #FF5757;
+  --mint: #38C789;
+  --zon: #FFF069;
+  --bubblegum: #F9B3D5;
+  --ink: #1A2233; /* check, voorstel */
+  --wit: #FFFFFF;
+
+  /* Typografie */
+  --font-kop: 'Fredoka', sans-serif;
+  --font-body: 'Nunito', sans-serif;
+
+  /* Vorm */
+  --radius: 24px;
+  --radius-pill: 999px;
+
+  /* Beweging */
+  --bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+body {
+  font-family: var(--font-body);
+  color: var(--ink);
+  background: var(--wit);
+}
+
+h1, h2, h3, .ui {
+  font-family: var(--font-kop);
+  font-weight: 600;
+}
+
+/* Bouncy knop */
+.knop {
+  font-family: var(--font-kop);
+  font-weight: 600;
+  font-size: 1.1rem;
+  color: var(--wit);
+  background: var(--blauw);
+  border: none;
+  border-radius: var(--radius-pill);
+  padding: 0.8em 1.6em;
+  cursor: pointer;
+  transition: transform 0.15s var(--bounce);
+}
+
+.knop:hover { transform: scale(1.06); }
+.knop:active { transform: scale(0.94); }
+
+.knop.koraal { background: var(--koraal); }
+.knop.mint { background: var(--mint); }
+.knop.zon { background: var(--zon); color: var(--ink); }
+
+/* Zachte variant met dotted border */
+.soft {
+  border: 3px dotted var(--blauw);
+  border-radius: var(--radius);
+  background: transparent;
+}
+
+/* Kaart */
+.kaart {
+  background: var(--wit);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .knop { transition: none; }
+  .knop:hover, .knop:active { transform: none; }
+}

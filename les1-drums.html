@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Les 1 · Maak je eigen drum muziek — Muziek Games</title>
+<meta name="description" content="Leer de drie onderdelen van een drumstel kennen en speel er je eigen beat mee.">
+<link rel="stylesheet" href="css/wotto.css">
+<link rel="stylesheet" href="css/site.css">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.2/src/bold/style.css">
+</head>
+<body>
+
+<div class="wrap">
+
+  <header class="topbar">
+    <a class="terug" href="index.html">
+      <i class="ph-bold ph-arrow-left" aria-hidden="true"></i> Alle lessen
+    </a>
+    <span class="lesnummer">Les 1</span>
+  </header>
+
+  <div class="hero">
+    <h1>Maak je eigen <em>drum muziek</em></h1>
+    <p class="lead">
+      Een drumstel heeft heel veel onderdelen, maar drie daarvan hoor je in bijna
+      elk nummer: de <b>kick</b>, de <b>snare</b> en de <b>hihat</b>. Met alleen
+      die drie speel je al een echte beat.
+    </p>
+    <p class="lead">
+      Hieronder staan ze alle drie. Lees wat ze zijn, draai aan de schuifjes tot
+      het klinkt zoals jij wilt, en speel ze met <b>A</b>, <b>S</b> en <b>D</b>
+      of tik op de vormen.
+    </p>
+
+    <figure class="drumstel">
+      <img src="img/drumstel.png" width="1506" height="1044"
+           alt="Drie onderdelen van een drumstel naast elkaar: links de grote rode kick die op de grond staat, in het midden de gele snare op een standaard, rechts de blauwe hihat.">
+      <figcaption>
+        Links de <b>kick</b>, in het midden de <b>snare</b>, rechts de <b>hihat</b>.
+      </figcaption>
+    </figure>
+
+    <div class="stippels" aria-hidden="true"></div>
+  </div>
+
+  <main class="kit" id="kit"></main>
+
+  <section class="paneel spel" id="spel">
+    <h2>Speel de game</h2>
+
+    <p class="spel-uitleg">
+      Elke tel valt er een vorm naar beneden. Raak hem precies als hij op de lege
+      vorm onderaan staat, met <b>A</b>, <b>S</b> en <b>D</b> of door op de pads
+      hierboven te tikken. Hoe strakker je zit, hoe meer punten. Mis je er een,
+      dan ben je een hartje kwijt. En het tempo loopt langzaam op.
+    </p>
+
+    <div class="spel-veld">
+      <div class="spel-zij links">
+        <span class="spel-hartjes" data-hartjes></span>
+      </div>
+
+      <div class="spel-midden">
+        <div class="spel-banen" data-banen></div>
+        <div class="spel-knoppen" data-knoppen></div>
+      </div>
+
+      <div class="spel-zij rechts">
+        <span class="spel-label">score</span>
+        <b class="spel-groot" data-score>0</b>
+        <span class="spel-label"><b data-bpm>70</b> bpm</span>
+        <span class="spel-label spel-record">beste <b data-record>0</b></span>
+        <button class="knop klein spel-wis" type="button" data-wis>Wis</button>
+      </div>
+
+      <div class="spel-aftellen" data-aftellen aria-hidden="true"></div>
+
+      <div class="spel-kaart" data-kaart>
+        <h3>Klaar?</h3>
+        <p>Je krijgt eerst vier tellen om mee te tellen.</p>
+        <button class="knop" type="button">Start</button>
+      </div>
+    </div>
+
+    <p class="spel-oordeel" data-oordeel aria-live="polite"></p>
+  </section>
+
+  <footer class="voet">
+    Studio Wotto · Muziek Games · Les 1
+  </footer>
+
+</div>
+
+<script src="js/vendor/Tone.js"></script>
+<script src="js/drumkit.js"></script>
+<script src="js/spel.js"></script>
+
+</body>
+</html>
