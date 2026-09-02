@@ -1195,15 +1195,26 @@ input[type="range"]::-moz-range-thumb {
 
 .klap-noten { position: absolute; inset: 0; }
 
+/* De maat zegt hetzelfde als de kleur: hoeveel klappen er in die tel zitten. Een
+   enkele klap krijgt de ruimte, vier klappen kruipen tegen elkaar aan. Dat scheelt
+   ook echt ruimte -- vier klapjes op een tel staan anders bijna over elkaar heen.
+
+   Het gaat via de breedte en niet via een transform, want de span zelf schuift
+   elk beeld op met een transform en die twee zouden elkaar overschrijven. */
 .klap-noot {
+  --maat: 1;
   position: absolute;
   top: 50%;
   left: 0;
-  width: var(--klap);
-  height: var(--klap);
-  margin: calc(var(--klap) / -2) 0 0 calc(var(--klap) / -2);
+  width: calc(var(--klap) * var(--maat));
+  height: calc(var(--klap) * var(--maat));
+  margin: calc(var(--klap) * var(--maat) / -2) 0 0 calc(var(--klap) * var(--maat) / -2);
   will-change: transform;
 }
+
+.klap-noot.aantal-1 { --maat: 1.15; }
+.klap-noot.aantal-2 { --maat: 1; }
+.klap-noot.aantal-4 { --maat: 0.85; }
 
 .klap-noot svg {
   display: block;
