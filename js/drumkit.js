@@ -39,9 +39,10 @@ const KIT = [
     vorm: 'vierkant',
     uitleg: 'Een trommel met metalen snaartjes onder het vel. Die ratelen mee als je slaat en maken die scherpe tsjak.',
     schuifjes: [
-      // Stand 12 is periode 762: rond de 2,3 kHz. Daar zit de ruis van een echte
-      // snare ook ongeveer; de standen eronder klinken al gauw als sissen.
-      { id: 'ruistoon', label: 'Ruistoon', min: 0, max: 15, step: 1, waarde: 12 },
+      // Het spiegelbeeld van stand 12: even ver van de andere kant. De periode is
+      // hier zo kort dat de ruis breed uitwaaiert in plaats van op een toon te
+      // gaan hangen -- dat scherpe tsjak van een snare met de snaartjes eronder.
+      { id: 'ruistoon', label: 'Ruistoon', min: 0, max: 15, step: 1, waarde: 3 },
       { id: 'lengte', label: 'Lengte', min: 0.03, max: 0.5, step: 0.01, waarde: 0.19 },
       { id: 'galm', label: 'Galm', min: 0, max: 1, step: 0.02, waarde: 0 }
     ]
