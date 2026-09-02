@@ -1212,26 +1212,20 @@ input[type="range"]::-moz-range-thumb {
   overflow: visible;
 }
 
-/* Altijd een zwarte lijn eromheen. Die staat buiten de vorm getekend, vandaar de
-   dubbele dikte: de helft valt binnen de vulling weg. */
-.klap-noot path {
-  fill: var(--blauw);
-  stroke: var(--ink);
-  stroke-width: 22;
-  stroke-linejoin: round;
-  paint-order: stroke fill;
-}
+/* Het vlak eronder geeft de kleur, de lijntekening erbovenop de zwarte omtrek. */
+.klap-noot .vlak { fill: var(--blauw); }
+.klap-noot .lijn { fill: var(--ink); }
 
 /* De kleur zegt hoeveel klappen er in die ene tel zitten. Zo zie je een dubbele
    of een viervoudige al van rechts aankomen, en hoef je niet op de afstand
    tussen de klapjes te letten. */
-.klap-noot.aantal-1 path { fill: var(--blauw); }
-.klap-noot.aantal-2 path { fill: var(--mint); }
-.klap-noot.aantal-4 path { fill: var(--koraal); }
+.klap-noot.aantal-1 .vlak { fill: var(--blauw); }
+.klap-noot.aantal-2 .vlak { fill: var(--mint); }
+.klap-noot.aantal-4 .vlak { fill: var(--koraal); }
 
 /* Precies nu. Even oplichten, zodat de klas ziet dat het moment er is. Deze
    staat onderaan, want hij moet het van de kleuren hierboven winnen. */
-.klap-noot.raak path { fill: var(--zon); }
+.klap-noot.raak .vlak { fill: var(--zon); }
 
 .klap-aftellen {
   position: absolute;
