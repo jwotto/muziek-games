@@ -384,6 +384,12 @@ input[type="range"]::-moz-range-thumb {
   border: 3px solid var(--ink);
 }
 
+/* De knop waar je op moet klikken om te beginnen. Die mag je niet kunnen missen. */
+.knop.groot {
+  font-size: clamp(1.3rem, 4vw, 1.8rem);
+  padding: 0.6em 1.8em;
+}
+
 .knop:focus-visible { outline: 4px solid var(--blauw); outline-offset: 3px; }
 
 /* ---------- Het spelletje ---------- */
@@ -518,7 +524,9 @@ input[type="range"]::-moz-range-thumb {
   display: flex;
   flex-direction: column;
   gap: 0.2rem;
-  font-size: 2rem;
+  /* Even groot als de vormen die vallen: dan hoort het bij elkaar. --noot
+     schaalt op een telefoon vanzelf mee, dus daar hoeft niets extra's voor. */
+  font-size: var(--noot);
   line-height: 1;
 }
 
@@ -580,7 +588,6 @@ input[type="range"]::-moz-range-thumb {
   .spel-zij { gap: 0.7rem; }
   .spel-zij.links, .spel-zij.rechts { justify-self: center; }
   .spel-groot { font-size: 1.9rem; }
-  .spel-hartjes { font-size: 1.6rem; }
 }
 
 /* De plek waar je hem moet raken: dezelfde vorm, maar leeg. */
@@ -713,8 +720,52 @@ input[type="range"]::-moz-range-thumb {
   margin-left: -5px;
   pointer-events: none;
 }
-.spel-kaart h3 { margin: 0; font-size: 1.4rem; }
+.spel-kaart h3 { margin: 0; font-size: clamp(1.4rem, 5vw, 2rem); }
 .spel-kaart p { margin: 0; line-height: 1.5; }
+
+/* Wat je net gehaald hebt, groot, met je topscore ernaast. */
+.kaart-cijfers {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.2rem 2.5rem;
+  margin: 0.2rem 0;
+}
+
+.kaart-cijfers:empty { display: none; }
+
+.cijfer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.cijfer span {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.cijfer b {
+  font-family: var(--font-kop);
+  font-weight: 700;
+  font-size: clamp(2.4rem, 10vw, 4rem);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+/* De topscore staat ernaast en is de kleinste van de twee: het gaat om wat je
+   nu gehaald hebt. */
+.cijfer.beste b {
+  font-size: clamp(1.6rem, 6vw, 2.4rem);
+  color: var(--blauw);
+}
+
+/* Dezelfde knoppenrij als boven het veld, zodat je vanaf de kaart meteen een
+   andere graad kunt kiezen zonder eerst weg te klikken. */
+.kaart-niveaus {
+  width: min(100%, 380px);
+  margin-top: 0.3rem;
+}
 
 /* Vaste hoogte, anders springt de pagina bij elk oordeel. */
 .spel-oordeel {

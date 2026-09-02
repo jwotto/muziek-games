@@ -86,7 +86,12 @@ const recordEl = spelEl && spelEl.querySelector('[data-record]');
 const knoppenEl = spelEl && spelEl.querySelector('[data-knoppen]');
 const veldEl = spelEl && spelEl.querySelector('.spel-veld');
 const vrijEl = spelEl && spelEl.querySelector('[data-vrij]');
-const niveausEl = spelEl && spelEl.querySelector('[data-niveaus]');
+// De graadknoppen staan op twee plekken: boven het veld en op de kaart. Ze
+// worden allebei uit dezelfde lijst gebouwd en samen bijgewerkt.
+const niveauRijen = spelEl ? Array.from(spelEl.querySelectorAll('[data-niveaus]')) : [];
+const kaartCijfersEl = spelEl && spelEl.querySelector('[data-kaart-cijfers]');
+const kaartTekstEl = spelEl && spelEl.querySelector('[data-kaart-tekst]');
+const kaartKnopEl = spelEl && spelEl.querySelector('[data-kaart-knop]');
 const niveauUitlegEl = spelEl && spelEl.querySelector('[data-niveau-uitleg]');
 // Deze staat bovenaan in de balk, buiten het spel: het is de knop die alles wist.
 const wisAllesEl = document.querySelector('[data-wis-alles]');
@@ -384,8 +389,10 @@ function stop() {
   const nieuwRecord = spel.score > spel.recordBijStart;
   toonKaart(
     nieuwRecord ? 'Nieuw record!' : 'Game over',
-    'Je score is <b>' + spel.score + '</b>.<br>' + spel.geraakt + ' van de ' + totaal +
-      ' goed geraakt, tot ' + Math.round(spel.bpm) + ' slagen per minuut.',
+    '<div class="cijfer"><span>jouw score</span><b>' + spel.score + '</b></div>' +
+    '<div class="cijfer beste"><span>beste op ' + huidigNiveau().naam + '</span><b>' + record + '</b></div>',
+    spel.geraakt + ' van de ' + totaal + ' goed geraakt, tot ' +
+      Math.round(spel.bpm) + ' slagen per minuut.',
     'Nog een keer'
   );
   werkNiveausBij();
@@ -736,28 +743,32 @@ function toonOordeel(tekst, soort, ms) {
 const niveauKnoppen = [];
 
 function bouwNiveaus() {
-  if (!niveausEl) return;
-  NIVEAUS.forEach((niveau, i) => {
-    const knop = document.createElement('button');
-    knop.className = 'niveau';
-    knop.type = 'button';
-    knop.dataset.niveau = niveau.id;
-    knop.innerHTML =
-      '<span class="niveau-naam">' + niveau.naam + '</span>' +
-      '<span class="niveau-beste"></span>';
-    knop.addEventListener('click', () => kiesNiveau(i));
-    niveausEl.appendChild(knop);
-    niveauKnoppen.push(knop);
+  niveauRijen.forEach((rij) => {
+    NIVEAUS.forEach((niveau, i) => {
+      const knop = document.createElement('button');
+      knop.className = 'niveau';
+      knop.type = 'button';
+      knop.dataset.niveau = niveau.id;
+      knop.innerHTML =
+        '<span class="niveau-naam">' + niveau.naam + '</span>' +
+        '<span class="niveau-beste"></span>';
+      knop.addEventListener('click', () => kiesNiveau(i));
+      rij.appendChild(knop);
+      niveauKnoppen.push(knop);
+    });
   });
 }
 
 // Een plek waar de hele rij wordt bijgewerkt: welke graad aan staat, wat er open
 // is, en hoe hoog je er ooit kwam.
 function werkNiveausBij() {
-  if (!niveausEl) return;
+  if (!niveauRijen.length) return;
   const bezig = !!(spel && spel.loopt);
 
-  niveauKnoppen.forEach((knop, i) => {
+  // Over alle knoppen van alle rijen: welke rij ze staan doet er niet toe, hun
+  // graad staat op de knop zelf.
+  niveauKnoppen.forEach((knop) => {
+    const i = NIVEAUS.findIndex((niveau) => niveau.id === knop.dataset.niveau);
     const open = i < voortgang.vrij;
     knop.classList.toggle('op-slot', !open);
     knop.setAttribute('aria-pressed', String(i === niveauNr));
@@ -792,16 +803,19 @@ function kiesNiveau(i) {
   toonStartkaart();
 }
 
-function toonKaart(titel, tekst, knop) {
+// cijfers is de grote score met de topscore ernaast; op de startkaart blijft dat
+// leeg en klapt het blokje vanzelf dicht.
+function toonKaart(titel, cijfers, tekst, knop) {
   if (!kaartEl) return;
   kaartEl.querySelector('h3').textContent = titel;
-  kaartEl.querySelector('p').innerHTML = tekst;
-  kaartEl.querySelector('button').textContent = knop;
+  kaartCijfersEl.innerHTML = cijfers;
+  kaartTekstEl.innerHTML = tekst;
+  kaartKnopEl.textContent = knop;
   kaartEl.hidden = false;
 }
 
 function toonStartkaart() {
-  toonKaart('Klaar?',
+  toonKaart('Klaar?', '',
     'Je speelt <b>' + huidigNiveau().naam + '</b>.<br>Je krijgt eerst vier tellen om mee te tellen.',
     'Start');
 }
@@ -816,7 +830,7 @@ if (spelEl) {
   werkNiveausBij();
   werkBalkBij();
   toonStartkaart();
-  kaartEl.querySelector('button').addEventListener('click', start);
+  kaartKnopEl.addEventListener('click', start);
 
   if (wisAllesEl) {
     wisAllesEl.addEventListener('click', () => {
