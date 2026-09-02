@@ -108,23 +108,57 @@ function niveauNu() {
 //  Het klapgeluid
 // ============================================================
 
-// Een handklap van één ruisstoot klinkt als een snare. Wat er een klap van
-// maakt is dat het er eigenlijk drie zijn: een handklap kaatst na, en de 909
-// bootst dat na met drie hele korte stootjes vlak achter elkaar en daarna een
-// langere staart. Dat ratelende begin is het hele verschil.
+// De klap is een opname. Hij moet het hele lokaal over, dus hij staat boven
+// alles uit.
 //
-// Elk stootje krijgt zijn eigen envelope. Eén envelope drie keer achter elkaar
-// aanslaan binnen twintig milliseconden vraagt om gedoe; vier losse envelopes
-// zijn goedkoop en doen precies wat er staat.
-const KLAP_TIKKEN = [0, 0.009, 0.019];   // de naklappers, in seconden
-const KLAP_STAART = 0.027;
+// De opname zit al aan de top van wat in een bestand past, dus die negen decibel
+// gaan daar overheen. Wat eronder zit -- het lijf van de klap -- wordt gewoon
+// negen decibel harder; alleen de punt van de aanslag loopt de zachte begrenzer
+// aan het eind van de keten in en wordt daar afgerond. Bij een klap hoor je dat
+// niet als vervorming. Nog veel harder zetten kan wel, maar dan gaat het ten
+// koste van de knal aan het begin en dat is nou juist wat een klap een klap
+// maakt.
+const KLAP_BESTAND = 'snd/klap.wav';
+const KLAP_LUID = 9;
+
+// Zoveel klappen kunnen tegelijk klinken. Bij vier klappen per tel op tempo 200
+// zit er 75 ms tussen en de opname duurt 180 ms, dus ze lopen over elkaar heen.
+// Eén speler zou de vorige dan afkappen.
+const KLAP_STEMMEN = 6;
 
 // De metronoom uit polka.js staat in de drumles zacht onder de muziek. Hier is
 // hij het houvast voor de hele klas, dus die gaat flink omhoog. Dit raakt alleen
 // deze bladzijde: elke bladzijde bouwt zijn eigen stemmen op.
 tikVol.volume.value = -1;
 
-const klapVol = new Tone.Volume(-3).connect(master);
+const klapVol = new Tone.Volume(KLAP_LUID).connect(master);
+
+const klapSpelers = [];
+for (let i = 0; i < KLAP_STEMMEN; i++) klapSpelers.push(new Tone.Player().connect(klapVol));
+
+let klapBeurt = 0;
+let klapOpnameKlaar = false;
+
+const klapOpname = new Tone.ToneAudioBuffer(KLAP_BESTAND, () => {
+  klapSpelers.forEach((speler) => { speler.buffer = klapOpname; });
+  klapOpnameKlaar = true;
+}, () => {
+  // Niet geladen: dan blijft de nagebouwde klap hieronder staan. Een oefening
+  // zonder klap is erger dan een klap die niet de opname is.
+  klapOpnameKlaar = false;
+});
+
+// Hieronder het vangnet: een klap nagebouwd uit ruis, voor als de opname niet
+// laadt. Een handklap van een enkele ruisstoot klinkt als een snare. Wat er een
+// klap van maakt is dat het er eigenlijk drie zijn -- een handklap kaatst na, en
+// de 909 bootst dat na met drie hele korte stootjes vlak achter elkaar en daarna
+// een langere staart. Dat ratelende begin is het hele verschil.
+//
+// Elk stootje krijgt zijn eigen envelope. Een envelope drie keer achter elkaar
+// aanslaan binnen twintig milliseconden vraagt om gedoe; vier losse envelopes
+// zijn goedkoop en doen precies wat er staat.
+const KLAP_TIKKEN = [0, 0.009, 0.019];   // de naklappers, in seconden
+const KLAP_STAART = 0.027;
 
 // Rond de 1100 hertz zit het lichaam van een klap; de hoogdoorlaat haalt het
 // gerommel eronder weg zodat hij droog blijft.
@@ -153,6 +187,12 @@ function startKlapRuis() {
 }
 
 function klapNu(tijd) {
+  if (klapOpnameKlaar) {
+    const speler = klapSpelers[klapBeurt];
+    klapBeurt = (klapBeurt + 1) % klapSpelers.length;
+    speler.start(tijd);
+    return;
+  }
   KLAP_TIKKEN.forEach((na, i) => klapTikEnvs[i].triggerAttack(tijd + na));
   klapStaartEnv.triggerAttack(tijd + KLAP_STAART);
 }
@@ -236,6 +276,7 @@ function stopKlap() {
 
   // Wat er nog vooruit gepland stond mag niet doorspelen over een gestopte
   // oefening heen.
+  klapSpelers.forEach((speler) => speler.stop(Tone.now()));
   klapTikEnvs.forEach((env) => env.cancel(Tone.now()));
   klapStaartEnv.cancel(Tone.now());
   basEnv.cancel(Tone.now());
@@ -339,6 +380,27 @@ function klappenInTel(stappen, inMaat) {
   return aantal;
 }
 
+// Bij de ring zwelt het klapje even op. De span zelf schuift elk beeld op met
+// een transform, dus de puls gaat op de tekening erbinnen: anders overschrijven
+// die twee elkaar en staat het klapje stil.
+//
+// De veer zit alleen op het eerste stuk van de animatie. Zet je hem over het
+// geheel, dan schiet hij al bij het eerste beeldje door zijn eindstand heen en
+// is de puls voorbij voordat je hem ziet.
+function zwelKlapOp(noot) {
+  if (noot.gezwollen) return;
+  noot.gezwollen = true;
+  if (minderBeweging.matches) return;
+
+  const vorm = noot.el.querySelector('svg');
+  if (!vorm || !vorm.animate) return;
+  vorm.animate([
+    { transform: 'scale(1)', easing: 'cubic-bezier(0.34, 1.56, 0.64, 1)' },
+    { transform: 'scale(1.5)', offset: 0.3, easing: 'ease-out' },
+    { transform: 'scale(1)' }
+  ], { duration: 300 });
+}
+
 function maakKlapNoot(tijd, aantal) {
   const el = document.createElement('span');
   el.className = 'klap-noot aantal-' + aantal;
@@ -374,7 +436,9 @@ function klapStap() {
       return;
     }
     noot.el.style.transform = 'translateX(' + x + 'px)';
-    noot.el.classList.toggle('raak', Math.abs(noot.tijd - nu) < 0.08);
+    const raak = Math.abs(noot.tijd - nu) < 0.08;
+    noot.el.classList.toggle('raak', raak);
+    if (raak) zwelKlapOp(noot);
     over.push(noot);
   });
 
