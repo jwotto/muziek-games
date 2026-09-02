@@ -422,7 +422,6 @@ KIT.forEach((inst) => {
       <span class="pad-naam">${inst.naam}</span>
       <span class="pad-toets">${inst.toetsLabel}</span>
     </button>
-    <p class="uitleg">${inst.uitleg}</p>
     <div class="schuifjes">${inst.schuifjes.map((p) => schuifjeMarkup(inst.id, p)).join('')}</div>
     <button class="knop klein" type="button" data-reset="${inst.id}">Reset</button>
   `;
@@ -435,7 +434,16 @@ KIT.forEach((inst) => {
 // De foto's boven aan de les doen mee als pad: erop tikken speelt het geluid en
 // laat dat onderdeel even opveren. Ze hebben geen .vorm om te laten pulseren, en
 // flits kan daartegen.
+// De uitleg over een onderdeel staat onder zijn foto, waar je hem leest voordat
+// je hem hoort. De tekst komt uit KIT hierboven, zodat hij maar op een plek staat.
 document.querySelectorAll('.deel[data-id]').forEach((deel) => meldPad(deel.dataset.id, deel));
+
+// De uitleg staat onder het vak met de foto's, in dezelfde kolommen. De tekst
+// komt uit KIT hierboven, zodat hij maar op een plek staat.
+KIT.forEach((inst) => {
+  const vak = document.querySelector('[data-uitleg="' + inst.id + '"]');
+  if (vak) vak.textContent = inst.uitleg;
+});
 
 // ============================================================
 //  7. Geluid aanzetten

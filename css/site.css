@@ -272,11 +272,32 @@ body {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   align-items: end;
-  gap: 1rem;
+  gap: 1rem 1.25rem;
   padding: 1.5rem 1.25rem 1.25rem;
   border: 4px solid var(--ink);
   border-radius: var(--radius);
   background: var(--wit);
+}
+
+/* De uitleg staat onder het vak, maar wel in dezelfde drie kolommen, zodat elke
+   tekst recht onder zijn eigen foto uitkomt. */
+.onderdelen-uitleg {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem 1.25rem;
+  margin-top: 1rem;
+  /* Dezelfde inspringing als de binnenkant van het kader hierboven: 4px rand
+     plus de padding. Anders staat elke tekst net naast zijn eigen foto. */
+  padding: 0 calc(1.25rem + 4px);
+}
+
+/* Even hoog, zodat de drie kolommen naast elkaar gelijk eindigen. De teksten in
+   KIT zijn ongeveer even lang gehouden; dit is het vangnet daaronder. */
+.deel-uitleg {
+  margin: 0;
+  line-height: 1.5;
+  min-height: calc(3 * 1.5em);
+  text-wrap: pretty;
 }
 
 .deel {
@@ -498,13 +519,6 @@ body {
 /* De drie teksten zijn even lang geschreven, dus ze lopen over evenveel regels
    en de schuifjes eronder staan gelijk. De min-height is het vangnet voor als
    er ooit eentje net iets korter wordt. */
-.uitleg {
-  margin: 0;
-  line-height: 1.5;
-  min-height: calc(3 * 1.5em);
-  text-wrap: pretty;
-}
-
 /* ---------- Schuifjes ---------- */
 
 .schuifjes { display: flex; flex-direction: column; gap: 1.1rem; }

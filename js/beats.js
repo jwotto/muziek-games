@@ -64,7 +64,6 @@ const BEATS = [
 ];
 
 const BEAT_STAPPEN = 16;         // zestienden in één maat
-const BEAT_RONDE = 2;            // zoveel maten is één ronde: daarna telt hij als gehoord
 const BEAT_VOORUIT = 0.03;       // seconden dat de planner vooruit kijkt
 const BEAT_TIK = 10;             // milliseconden tussen twee rondjes van de planner
 const BEAT_MAX_PER_RONDJE = 64;  // noodrem, zodat de lus nooit kan blijven hangen
@@ -122,11 +121,13 @@ function werkBeatsBij() {
 //  Afspelen
 // ============================================================
 
-// Hier hangt de les zijn slot aan op: pas als je alle drie de beats een ronde
-// hebt laten lopen mag je zelf aan de geluiden.
+// Hier hangt de les zijn slot aan op: pas als je alle drie de beats hebt
+// aangezet mag je zelf aan de geluiden. Aanzetten is genoeg -- hoe lang je
+// luistert bepaal je zelf, en een kind laten wachten tot een teller vol is
+// voelt als straf in plaats van als les.
 let bijBeat = null;
 
-let loopt = null;   // { beat, stap, tijd, gemeld, tikTimer }
+let loopt = null;   // { beat, stap, tijd, tikTimer }
 
 function tikBeat(beat) {
   if (loopt && loopt.beat === beat) {
@@ -148,10 +149,11 @@ function beginBeat(beat) {
 
   // Een kleine aanloop, zodat de eerste stap niet al voorbij is voordat de
   // planner voor het eerst rondgaat.
-  loopt = { beat: beat, stap: 0, tijd: Tone.now() + 0.12, gemeld: false, tikTimer: 0 };
+  loopt = { beat: beat, stap: 0, tijd: Tone.now() + 0.12, tikTimer: 0 };
   loopt.tikTimer = setInterval(planBeat, BEAT_TIK);
 
   werkBeatsBij();
+  if (bijBeat) bijBeat(beat.id);
   planBeat();
 }
 
@@ -164,12 +166,11 @@ function stopBeat() {
 }
 
 // Plant alles wat binnen de vooruitblik valt, en niet meer dan dat. De beat gaat
-// rond tot je hem stopt; alleen de eerste hele ronde meldt zich.
+// rond tot je hem stopt.
 function planBeat() {
   if (!loopt) return;
 
   const stapDuur = 15 / loopt.beat.bpm;   // 60 / bpm / 4 zestienden
-  const ronde = BEAT_STAPPEN * BEAT_RONDE;
 
   // Is de tab even weg geweest, dan loopt de agenda achter. Niet inhalen, want
   // dan komt er een lawine van klappen tegelijk: gewoon weer aansluiten bij nu.
@@ -188,13 +189,6 @@ function planBeat() {
     loopt.stap += 1;
     loopt.tijd += stapDuur;
     veilig += 1;
-
-    // Eén keer helemaal rond is genoeg om te zeggen dat je geluisterd hebt.
-    // Daarna loopt hij door, maar hij meldt zich niet nog een keer.
-    if (!loopt.gemeld && loopt.stap >= ronde) {
-      loopt.gemeld = true;
-      if (bijBeat) bijBeat(loopt.beat.id);
-    }
   }
 }
 
