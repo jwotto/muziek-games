@@ -1077,3 +1077,176 @@ input[type="range"]::-moz-range-thumb {
   .les.klaar, .pad, .terug { transition: none; }
   .les.klaar:hover, .les.klaar:active, .pad:hover, .pad.aan, .terug:hover { transform: none; }
 }
+
+/* ---------- Body percussion: klap mee ---------- */
+
+.klapspel { margin-top: var(--space-2); }
+
+/* De instellingen voor de juf. Op een digibord tik je met je vinger, dus alles
+   ruim: brede schuiven en knoppen die je niet kunt missen. */
+.klap-knoppen {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.klap-schuifjes {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--space-4);
+}
+
+.klap-schuif label {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--space-2);
+  margin-bottom: var(--space-1);
+  font-family: var(--font-kop);
+  font-weight: 600;
+  font-size: var(--text-base);
+}
+
+.klap-schuif label b { font-variant-numeric: tabular-nums; }
+/* De schuifjes van de drumles krijgen hun knop als getekende vorm mee (--knop).
+   Die is er hier niet, dus deze krijgen een eigen ronde knop. */
+.klapspel input[type="range"]::-webkit-slider-thumb {
+  width: 30px;
+  height: 30px;
+  margin-top: -7px;
+  background: var(--blauw);
+  border: 3px solid var(--ink);
+  border-radius: 50%;
+}
+
+.klapspel input[type="range"]::-moz-range-thumb {
+  width: 30px;
+  height: 30px;
+  background: var(--blauw);
+  border: 3px solid var(--ink);
+  border-radius: 50%;
+}
+
+.klap-keuzes {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: var(--space-2);
+}
+
+.klap-keus {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 0.6em var(--space-3);
+  text-align: center;
+  background: var(--wit);
+  border: 3px solid var(--ink);
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  transition: transform 0.15s var(--bounce);
+}
+
+.klap-keus:hover:not(:disabled) { transform: translateY(-2px); }
+.klap-keus:focus-visible { outline: 4px solid var(--blauw); outline-offset: 3px; }
+.klap-keus:disabled { cursor: default; color: var(--ink); }
+
+.klap-keus-naam {
+  font-family: var(--font-kop);
+  font-weight: 700;
+  font-size: var(--text-md);
+}
+
+.klap-keus-uitleg { font-size: var(--text-sm); line-height: 1.3; }
+
+/* De gekozen stand. Onderaan, want hij moet het van de uitgeschakelde stand
+   hierboven winnen. */
+.klap-keus[aria-pressed="true"],
+.klap-keus[aria-pressed="true"]:disabled {
+  color: var(--wit);
+  background: var(--blauw);
+}
+
+/* De baan waarover de klapjes van rechts naar links komen. */
+.klap-baan {
+  --klap: 60px;
+  /* Waar de ring staat. Javascript leest deze waarde uit, dus hij hoeft maar op
+     één plek te kloppen -- ook als hij op een telefoon dichter naar links gaat. */
+  --doel-x: 96px;
+  position: relative;
+  overflow: hidden;
+  height: clamp(120px, 22vw, 180px);
+  background: var(--wit);
+  border: 4px solid var(--ink);
+  border-radius: var(--radius);
+}
+
+/* De ring waar je op klapt. */
+.klap-doel {
+  position: absolute;
+  top: 50%;
+  left: var(--doel-x);
+  width: var(--klap);
+  height: var(--klap);
+  margin: calc(var(--klap) / -2) 0 0 calc(var(--klap) / -2);
+  border: 4px dashed var(--ink);
+  border-radius: 50%;
+}
+
+.klap-noten { position: absolute; inset: 0; }
+
+.klap-noot {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: var(--klap);
+  height: var(--klap);
+  margin: calc(var(--klap) / -2) 0 0 calc(var(--klap) / -2);
+  background: var(--koraal);
+  border: 4px solid var(--ink);
+  border-radius: 50%;
+  will-change: transform;
+}
+
+/* Precies nu. Even oplichten, zodat de klas ziet dat het moment er is. */
+.klap-noot.raak { background: var(--zon); }
+
+.klap-aftellen {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  font-family: var(--font-kop);
+  font-weight: 700;
+  font-size: var(--text-aftellen);
+  line-height: 1;
+  color: var(--ink);
+}
+
+.klap-aftellen:empty { display: none; }
+
+.klap-balk {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.klap-label {
+  font-family: var(--font-kop);
+  font-weight: 600;
+  font-size: var(--text-md);
+}
+
+.klap-label b { font-variant-numeric: tabular-nums; }
+
+/* De startknop rechts, zodat de cijfers links op hun plek blijven staan. */
+.klap-balk .knop { margin-left: auto; }
+
+@media (max-width: 720px) {
+  .klap-baan { --klap: 46px; --doel-x: 64px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .klap-keus { transition: none; }
+  .klap-keus:hover:not(:disabled) { transform: none; }
+}

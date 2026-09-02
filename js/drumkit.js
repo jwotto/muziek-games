@@ -426,8 +426,13 @@ KIT.forEach((inst) => {
     <button class="knop klein" type="button" data-reset="${inst.id}">Reset</button>
   `;
 
-  kitEl.appendChild(paneel);
-  meldPad(inst.id, paneel.querySelector('.pad'));
+  // Een bladzijde zonder schuifjes (de body-percussieles bijvoorbeeld) gebruikt
+  // alleen de geluiden. Dan is er geen kit om panelen in te hangen, maar de
+  // stemmen moeten wel op de bewaarde stand gezet worden.
+  if (kitEl) {
+    kitEl.appendChild(paneel);
+    meldPad(inst.id, paneel.querySelector('.pad'));
+  }
   pasToe(inst.id);
 });
 
@@ -667,7 +672,8 @@ function zetTerug(id) {
   const inst = KIT.find((i) => i.id === id);
   inst.schuifjes.forEach((p) => {
     stand[id][p.id] = p.waarde;
-    document.getElementById(id + '-' + p.id).value = p.waarde;
+    const schuif = document.getElementById(id + '-' + p.id);
+    if (schuif) schuif.value = p.waarde;
   });
   pasToe(id);
   bewaarStand();
