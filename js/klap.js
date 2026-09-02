@@ -126,10 +126,20 @@ const KLAP_LUID = 9;
 // Eén speler zou de vorige dan afkappen.
 const KLAP_STEMMEN = 6;
 
-// De metronoom uit polka.js staat in de drumles zacht onder de muziek. Hier is
-// hij het houvast voor de hele klas, dus die gaat flink omhoog. Dit raakt alleen
-// deze bladzijde: elke bladzijde bouwt zijn eigen stemmen op.
-tikVol.volume.value = -1;
+// De begeleiding uit polka.js staat in de drumles onder een kick, een snare en
+// een hihat: daar moet hij ruimte laten. Hier is er geen drumstel, dus die
+// ruimte is over en gaat naar de muziek zelf. Het zijn dezelfde noten, alleen
+// harder gezet.
+//
+// Dit raakt alleen deze bladzijde: elke bladzijde bouwt zijn eigen stemmen op,
+// dus in de drumles blijft de balans zoals hij was.
+//
+// De bas komt niet verder dan nul: een driehoeksgolf staat dan al tegen het
+// plafond, en een bas die de begrenzer in loopt gaat brommen. Bij het akkoord en
+// de tik is er meer ruimte, die kunnen verder omhoog.
+basVol.volume.value = 0;    // was -4
+akkVol.volume.value = -2;   // was -10
+tikVol.volume.value = -1;   // was -9
 
 const klapVol = new Tone.Volume(KLAP_LUID).connect(master);
 
@@ -309,22 +319,33 @@ function vulKlapAan(nu) {
       klap.klappen = klappenVoor(maat);
     }
 
+    // De polka is precies dezelfde als in het ritmespel van de drumles, tot en
+    // met het aftellen: oom op elke tel, pah op de helft ertussen, en op de
+    // oneven tellen wordt die pah verdubbeld tot twee zestienden. 1 en, 2 en-ne,
+    // 3 en, 4 en-ne -- dat is wat er huppelt. Speel je alleen de eerste pah, dan
+    // is het dezelfde muziek maar niet dezelfde gang.
+    //
+    // Hij loopt vanaf de eerste tel, dus ook onder het aftellen. Zo heb je de
+    // muziek al in je voordat het eerste klapje valt.
+    const tellengte = 60 / bpm;
+    if (stap % 4 === 0 && (inAanloop || maat < klapStand.maten)) {
+      const akkoord = akkoordVoor(tel);
+      basNoot(klap.stapTijd, akkoord, tellengte, tel % 4);
+      akkoordStoot(klap.stapTijd + tellengte / 2, akkoord, tellengte);
+      if (tel % 2 === 1) akkoordStoot(klap.stapTijd + tellengte * 0.75, akkoord, tellengte);
+    }
+
     if (inAanloop) {
       if (stap % 4 === 0) {
         tik(klap.stapTijd, stap === KLAP_AANLOOP_STAPPEN - 4);
         klap.aanloop.push(klap.stapTijd);
       }
     } else if (maat < klapStand.maten) {
-      const akkoord = akkoordVoor(tel);
-
-      // De polka: oom op de tel, pah op de helft ertussen.
-      if (inMaat % 4 === 0) basNoot(klap.stapTijd, akkoord, 60 / bpm, inMaat / 4);
-      if (inMaat % 4 === 2) akkoordStoot(klap.stapTijd, akkoord, 60 / bpm);
-
-      // De metronoom blijft doortikken, ook als het klappen begonnen is. Een
-      // drumbeat eronder maakt het gezellig maar niet duidelijker; een kale tik
-      // op elke tel is waar dertig kinderen zich aan vasthouden. De eerste tel
-      // van de maat krijgt de hoge tik, zodat je hoort waar de maat begint.
+      // De metronoom blijft doortikken, ook als het klappen begonnen is. In de
+      // drumles houdt hij na het aftellen op, want daar neemt de beat het over.
+      // Hier is er geen beat: een kale tik op elke tel is waar dertig kinderen
+      // zich aan vasthouden. De eerste tel van de maat krijgt de hoge tik, zodat
+      // je hoort waar de maat begint.
       if (inMaat % 4 === 0) tik(klap.stapTijd, inMaat === 0);
 
       if (klap.klappen[inMaat] === 'x') {
