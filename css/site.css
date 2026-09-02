@@ -1304,14 +1304,10 @@ input[type="range"]::-moz-range-thumb {
 .kop-knieen { margin-top: var(--space-7); }
 .kop-lees { margin-top: var(--space-6); }
 
-/* Het bord is de baas over zijn eigen breedte: vier vakjes naast elkaar moeten
-   van achter in de klas te lezen zijn, maar zestien vakjes onder elkaar mogen
-   het scherm niet uit lopen. Vandaar een plafond op de breedte in plaats van de
-   volle paneelbreedte. */
+/* Het bord neemt de volle breedte van het paneel: hij moet van achter in de klas
+   te lezen zijn. */
 .vierkant-bord {
   position: relative;
-  max-width: 760px;
-  margin: 0 auto;
 }
 
 .vierkant-raster {
@@ -1327,8 +1323,8 @@ input[type="range"]::-moz-range-thumb {
   align-items: center;
   justify-content: center;
   gap: 2%;
-  aspect-ratio: 1.35;
-  padding: 6%;
+  aspect-ratio: 1.5;
+  padding: 5%;
   background: var(--wit);
   border: 4px solid var(--ink);
   border-radius: var(--radius-md);
@@ -1352,22 +1348,33 @@ input[type="range"]::-moz-range-thumb {
    van de ruimte. */
 .vierkant-vak.dubbel img { max-width: 48%; }
 
-/* De metronoomknop staat vooraan in de balk, waar bij de klapoefening de
-   stipjes staan. */
-.klap-tik {
-  padding: 0.5em var(--space-4);
+/* Het uitklapmenu voor de leesrichting, naast het tempo. De eigen opmaak van de
+   browser gaat eraf en er komt een getekend pijltje voor in de plaats, zodat hij
+   bij de rest van de knoppen past.
+
+   Het pijltje staat als svg in de css zelf en niet als bestand: een menu waarvan
+   het pijltje niet laadt ziet eruit als een kapotte knop. */
+.vierkant-richting {
+  width: 100%;
+  padding: 0.35em var(--space-7) 0.35em var(--space-3);
   font-family: var(--font-kop);
   font-weight: 700;
   font-size: var(--text-base);
   color: var(--ink);
-  background: var(--wit);
+  background-color: var(--wit);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231a2233' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 9l7 7 7-7'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right var(--space-3) center;
+  background-size: 18px 18px;
   border: 3px solid var(--ink);
   border-radius: var(--radius-pill);
   cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
 }
 
-.klap-tik.aan { background: var(--mint); }
-.klap-tik:focus-visible { outline: 4px solid var(--blauw); outline-offset: 3px; }
+.vierkant-richting:focus-visible { outline: 4px solid var(--blauw); outline-offset: 3px; }
+.vierkant-richting:disabled { cursor: default; opacity: 0.6; }
 
 @media (max-width: 720px) {
   .klap-baan { --klap: 46px; --doel-x: 64px; }

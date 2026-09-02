@@ -58,6 +58,34 @@ const VIERKANTEN = [
   }
 ];
 
+// In welke volgorde de vakjes oplichten. Hetzelfde vierkant wordt een heel ander
+// ritme als je hem van boven naar beneden leest, dus vier vierkanten zijn er
+// eigenlijk zestien.
+//
+// leesVolgorde geeft terug welk vakje er als eerste komt, als tweede, enzovoort.
+// De vakjes zijn genummerd zoals ze in het raster staan: 0 tot en met 3 is de
+// bovenste regel, 4 tot en met 7 de tweede.
+const VIERKANT_RICHTINGEN = [
+  { id: 'rechts', pijl: '\u2192', naam: 'links naar rechts' },
+  { id: 'links',  pijl: '\u2190', naam: 'rechts naar links' },
+  { id: 'omlaag', pijl: '\u2193', naam: 'boven naar beneden' },
+  { id: 'omhoog', pijl: '\u2191', naam: 'beneden naar boven' }
+];
+
+function leesVolgorde(id) {
+  const uit = [];
+  if (id === 'links') {
+    for (let r = 0; r < 4; r++) for (let k = 3; k >= 0; k--) uit.push(r * 4 + k);
+  } else if (id === 'omlaag') {
+    for (let k = 0; k < 4; k++) for (let r = 0; r < 4; r++) uit.push(r * 4 + k);
+  } else if (id === 'omhoog') {
+    for (let k = 0; k < 4; k++) for (let r = 3; r >= 0; r--) uit.push(r * 4 + k);
+  } else {
+    for (let i = 0; i < 16; i++) uit.push(i);
+  }
+  return uit;
+}
+
 const VIERKANT_VAKJES = 16;
 const VIERKANT_AANLOOP = 4;      // tellen aftellen voordat het eerste vakje komt
 const VIERKANT_VOORUIT = 1.2;    // seconden dat een tik van tevoren wordt gepland
@@ -81,7 +109,6 @@ const vkKeuzeEl = vkEl && vkEl.querySelector('[data-vierkant-keuze]');
 const vkRasterEl = vkEl && vkEl.querySelector('[data-vierkant-raster]');
 const vkAftelEl = vkEl && vkEl.querySelector('[data-vierkant-aftellen]');
 const vkKnopEl = vkEl && vkEl.querySelector('[data-vierkant-start]');
-const vkTikEl = vkEl && vkEl.querySelector('[data-vierkant-metronoom]');
 
 // ============================================================
 //  Wat er is ingesteld
@@ -89,7 +116,7 @@ const vkTikEl = vkEl && vkEl.querySelector('[data-vierkant-metronoom]');
 
 const VIERKANT_SLEUTEL = 'wotto-muziekfles-vierkant';
 
-const vkStand = { keuze: 'een', metronoom: true };
+const vkStand = { keuze: 'een', richting: 'rechts' };
 VIERKANT_INSTELLINGEN.forEach((p) => { vkStand[p.id] = p.waarde; });
 
 // Elke waarde apart nakijken, net als bij de klapoefening: opslag van een oudere
@@ -108,7 +135,7 @@ function laadVkStand() {
     if (isFinite(w) && w >= p.min && w <= p.max) vkStand[p.id] = w;
   });
   if (VIERKANTEN.some((v) => v.id === bewaard.keuze)) vkStand.keuze = bewaard.keuze;
-  if (typeof bewaard.metronoom === 'boolean') vkStand.metronoom = bewaard.metronoom;
+  if (VIERKANT_RICHTINGEN.some((r) => r.id === bewaard.richting)) vkStand.richting = bewaard.richting;
 }
 
 function bewaarVkStand() {
@@ -121,6 +148,10 @@ function bewaarVkStand() {
 
 function vierkantNu() {
   return VIERKANTEN.find((v) => v.id === vkStand.keuze) || VIERKANTEN[0];
+}
+
+function richtingNu() {
+  return VIERKANT_RICHTINGEN.find((r) => r.id === vkStand.richting) || VIERKANT_RICHTINGEN[0];
 }
 
 // ============================================================
@@ -160,7 +191,14 @@ function bouwVierkantKnoppen() {
       <input type="range" id="vk-${p.id}" data-vk="${p.id}"
              min="${p.min}" max="${p.max}" step="${p.step}">
     </div>
-  `).join('');
+  `).join('') + `
+    <div class="klap-schuif">
+      <label for="vk-richting">Volgorde</label>
+      <select class="vierkant-richting" id="vk-richting" data-vierkant-richting>
+        ${VIERKANT_RICHTINGEN.map((r) => `<option value="${r.id}">${r.pijl} ${r.naam}</option>`).join('')}
+      </select>
+    </div>
+  `;
 
   vkKeuzeEl.innerHTML = VIERKANTEN.map((v) => `
     <button class="klap-keus" type="button" data-vierkant="${v.id}">
@@ -183,11 +221,8 @@ function werkVierkantKnoppenBij() {
   vkKeuzeEl.querySelectorAll('.klap-keus').forEach((knop) => {
     knop.setAttribute('aria-pressed', String(knop.dataset.vierkant === vkStand.keuze));
   });
-  if (vkTikEl) {
-    vkTikEl.classList.toggle('aan', vkStand.metronoom);
-    vkTikEl.textContent = vkStand.metronoom ? 'Metronoom aan' : 'Metronoom uit';
-    vkTikEl.setAttribute('aria-pressed', vkStand.metronoom ? 'true' : 'false');
-  }
+  const richting = vkSchuifEl.querySelector('[data-vierkant-richting]');
+  if (richting) richting.value = vkStand.richting;
 }
 
 // Tijdens een beurt staan de instellingen vast: halverwege van vierkant of tempo
@@ -195,7 +230,7 @@ function werkVierkantKnoppenBij() {
 // dat wil je onder het lopen kunnen proberen.
 function vierkantZetKnoppen(vast) {
   if (!vkEl) return;
-  vkEl.querySelectorAll('[data-vierkant], input[type="range"]').forEach((el) => {
+  vkEl.querySelectorAll('[data-vierkant], [data-vierkant-richting], input[type="range"]').forEach((el) => {
     el.disabled = vast;
   });
 }
@@ -222,10 +257,12 @@ function startVierkant() {
     telTijd: Tone.now() + 0.6,
     aanloop: [],
     tellen: [],
+    volgorde: leesVolgorde(vkStand.richting),
     vakAan: -1,
     aftelGetal: 0,
     aftelKlaar: false,
-    eersteVak: 0
+    eersteVak: 0,
+    einde: 0
   };
 
   vkKnopEl.textContent = 'Stop';
@@ -252,32 +289,32 @@ function stopVierkant() {
   vierkantZetKnoppen(false);
 }
 
-// De tikken vooruit plannen. Het vierkant blijft rondgaan tot je stopt: zo kun
-// je hem een paar keer achter elkaar doen zonder telkens opnieuw af te tellen.
+// De tikken vooruit plannen. Een beurt is precies een keer het vierkant door:
+// zestien tellen en dan is hij klaar. Wil je hem nog eens, dan druk je opnieuw op
+// start -- met het aftellen ervoor, zodat de klas er weer samen in komt.
 function vulVierkantAan(nu) {
   while (vierkant.telTijd < nu + VIERKANT_VOORUIT) {
     const tel = vierkant.telNr;
     const inAanloop = tel < VIERKANT_AANLOOP;
+    const nr = tel - VIERKANT_AANLOOP;
+    if (nr >= VIERKANT_VAKJES) return;
 
-    if (vkStand.metronoom) {
-      // Hoog op de laatste tel van het aftellen en daarna op elke eerste tel van
-      // een regel: dan hoor je waar een nieuwe regel begint.
-      const hoog = inAanloop
-        ? tel === VIERKANT_AANLOOP - 1
-        : (tel - VIERKANT_AANLOOP) % 4 === 0;
-      tik(vierkant.telTijd, hoog);
-    }
+    // Hoog op de laatste tel van het aftellen en daarna op elke eerste tel van
+    // een regel: dan hoor je waar een nieuwe regel begint.
+    tik(vierkant.telTijd, inAanloop ? tel === VIERKANT_AANLOOP - 1 : nr % 4 === 0);
 
     if (inAanloop) {
       vierkant.aanloop.push(vierkant.telTijd);
     } else {
-      const nr = tel - VIERKANT_AANLOOP;
       if (!vierkant.eersteVak) vierkant.eersteVak = vierkant.telTijd;
       vierkant.tellen.push({ nr: nr, tijd: vierkant.telTijd });
     }
 
     vierkant.telTijd += 60 / vkStand.bpm;
     vierkant.telNr += 1;
+
+    // Het laatste vakje mag zijn hele tel uitzitten voordat het bord uitgaat.
+    if (nr === VIERKANT_VAKJES - 1) vierkant.einde = vierkant.telTijd;
   }
 }
 
@@ -288,6 +325,11 @@ function vierkantStap() {
   vulVierkantAan(nu);
   werkVierkantAftellenBij(nu);
   werkVierkantVakBij(nu);
+
+  if (vierkant.einde && nu >= vierkant.einde) {
+    stopVierkant();
+    return;
+  }
 
   vierkantLus = requestAnimationFrame(vierkantStap);
 }
@@ -305,7 +347,7 @@ function werkVierkantVakBij(nu) {
   if (!nieuw || nieuw.nr === vierkant.vakAan) return;
 
   vierkant.vakAan = nieuw.nr;
-  toonVierkantVak(nieuw.nr % VIERKANT_VAKJES);
+  toonVierkantVak(vierkant.volgorde[nieuw.nr]);
 
   vierkant.tellen = vierkant.tellen.filter((t) => t.tijd > nu - 0.5);
 }
@@ -387,14 +429,12 @@ if (vkEl) {
     bewaarVkStand();
   });
 
-  if (vkTikEl) {
-    vkTikEl.addEventListener('click', () => {
-      vkStand.metronoom = !vkStand.metronoom;
-      werkVierkantKnoppenBij();
-      bewaarVkStand();
-      // Loopt hij al, dan staan er nog tikken vooruit gepland. Die zouden
-      // doorlopen nadat je hem net hebt uitgezet.
-      if (!vkStand.metronoom && vierkant && vierkant.loopt) tikEnv.cancel(Tone.now());
-    });
-  }
+  vkSchuifEl.addEventListener('change', (e) => {
+    const keuze = e.target.closest('[data-vierkant-richting]');
+    if (!keuze) return;
+    if (!VIERKANT_RICHTINGEN.some((r) => r.id === keuze.value)) return;
+    vkStand.richting = keuze.value;
+    werkVierkantKnoppenBij();
+    bewaarVkStand();
+  });
 }
