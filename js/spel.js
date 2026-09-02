@@ -663,16 +663,23 @@ function dichtstbij(id, wanneer) {
 function beoordeel(id, wanneer) {
   if (!spel || !spel.loopt) return null;
 
+  // Tijdens het aftellen speel je nog niet mee. Daar mag je vrij op de pads
+  // tikken zonder dat het je meteen een hartje kost.
+  if (spel.eersteNoot && wanneer < spel.eersteNoot - MIS_NA) return null;
+
   const schaal = vensterSchaal();
   const noot = dichtstbij(id, wanneer);
   const afwijking = noot ? Math.abs(noot.tijd - wanneer) : Infinity;
 
   if (afwijking > MIS_NA * schaal) {
-    // Slaan waar geen noot is kost punten. Anders zou je alle drie de toetsen
-    // elke tel kunnen rammen en altijd raak zitten.
+    // Slaan waar geen noot is kost punten en een hartje. Alleen punten was niet
+    // genoeg: dan kon je alle drie de toetsen elke tel blijven rammen en altijd
+    // raak zitten, want de score gaat toch niet onder nul.
     spel.score = Math.max(0, spel.score - MIS_KOSTEN);
+    spel.hartjes -= 1;
     toonOordeel('Naast');
     werkBalkBij();
+    if (spel.hartjes <= 0) stop();
     return 'Naast';
   }
 
@@ -740,6 +747,16 @@ function toonOordeel(tekst, soort, ms) {
 //  De rij met de vier graden
 // ============================================================
 
+// Een slotje in plaats van het woord. Inline getekend en niet uit het
+// icoonlettertype: dat komt van buiten, en zonder internet zou er dan niets
+// staan waar juist iets moet staan.
+const SLOTJE =
+  '<svg class="slotje" viewBox="0 0 24 24" aria-hidden="true">' +
+  '<path d="M7.5 10.5V7a4.5 4.5 0 0 1 9 0v3.5" fill="none" stroke="currentColor"' +
+  ' stroke-width="2.6" stroke-linecap="round"/>' +
+  '<rect x="3.5" y="10" width="17" height="11.5" rx="2.6"/>' +
+  '</svg>';
+
 const niveauKnoppen = [];
 
 function bouwNiveaus() {
@@ -777,8 +794,13 @@ function werkNiveausBij() {
     knop.disabled = !open || bezig;
     // Alleen het getal. Onder de naam van de graad is er niets anders wat het kan
     // zijn, en de balk naast het veld zegt tijdens het spelen 'beste' voluit.
+    // Zit de graad nog dicht, dan staat daar een slotje.
     knop.querySelector('.niveau-beste').innerHTML =
-      open ? '<b>' + voortgang.records[NIVEAUS[i].id] + '</b>' : 'op slot';
+      open ? '<b>' + voortgang.records[NIVEAUS[i].id] + '</b>' : SLOTJE;
+
+    // Een tekening zegt een schermlezer niets, dus daar gaat het er in woorden bij.
+    if (open) knop.removeAttribute('aria-label');
+    else knop.setAttribute('aria-label', NIVEAUS[i].naam + ', op slot');
   });
 
   if (!niveauUitlegEl) return;

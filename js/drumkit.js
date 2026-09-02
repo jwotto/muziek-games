@@ -370,10 +370,13 @@ const kitEl = document.getElementById('kit');
 const pads = {};
 const vormen = {};
 
+// Wat er bij een aanslag mag opveren: op een pad is dat de vorm, op een foto het
+// plaatje zelf. Vindt hij niets, dan blijft het bij het oplichten; flits kan
+// tegen een lege plek.
 function meldPad(id, padEl) {
   if (!pads[id]) { pads[id] = []; vormen[id] = []; }
   pads[id].push(padEl);
-  vormen[id].push(padEl.querySelector('.vorm'));
+  vormen[id].push(padEl.querySelector('.vorm, .puls'));
 }
 
 const stijl = getComputedStyle(document.documentElement);
@@ -424,6 +427,11 @@ KIT.forEach((inst) => {
   meldPad(inst.id, paneel.querySelector('.pad'));
   pasToe(inst.id);
 });
+
+// De foto's boven aan de les doen mee als pad: erop tikken speelt het geluid en
+// laat dat onderdeel even opveren. Ze hebben geen .vorm om te laten pulseren, en
+// flits kan daartegen.
+document.querySelectorAll('.deel[data-id]').forEach((deel) => meldPad(deel.dataset.id, deel));
 
 // ============================================================
 //  7. Geluid aanzetten
@@ -479,11 +487,14 @@ function flits(id) {
   // ook als je hem midden in een vorige aanslag weer raakt.
   vormen[id].forEach((vorm) => {
     if (!vorm || !vorm.animate) return;
+    // De bounce hoort op het uitzetten, niet over de hele animatie. Stond hij op
+    // het geheel, dan schoot de overshoot al voorbij de laatste keyframe en was
+    // de puls na een goede honderd milliseconden alweer voorbij.
     vorm.animate([
-      { transform: 'scale(1)' },
-      { transform: 'scale(1.32)', offset: 0.35 },
+      { transform: 'scale(1)', easing: 'cubic-bezier(0.34, 1.56, 0.64, 1)' },
+      { transform: 'scale(1.32)', offset: 0.35, easing: 'ease-out' },
       { transform: 'scale(1)' }
-    ], { duration: 280, easing: 'cubic-bezier(0.34, 1.56, 0.64, 1)' });
+    ], { duration: 280 });
   });
 }
 
@@ -524,14 +535,18 @@ document.addEventListener('pointerdown', (e) => {
   // bewust niet op isPrimary, want een tweede vinger moet ook gewoon spelen.
   if (e.button !== 0) return;
 
-  const pad = e.target.closest('.pad');
+  const pad = e.target.closest('.pad, .deel');
   if (!pad) return;
 
   // preventDefault houdt het slepen en selecteren tegen, maar neemt ook de focus
   // weg. Die zetten we er zelf op, zodat je na een klik gewoon de spatiebalk kunt
   // gebruiken. Zonder scrollen, anders springt de pagina op een klein scherm.
+  //
+  // Alleen op de pads. Op de foto's boven aan de les hield je er anders een
+  // blauwe rand aan over die je met de muis niet gevraagd hebt. Loop je er met
+  // het toetsenbord langs, dan komt die rand er via :focus-visible gewoon bij.
   e.preventDefault();
-  pad.focus({ preventScroll: true });
+  if (pad.classList.contains('pad')) pad.focus({ preventScroll: true });
 
   raak(pad.dataset.id);
 });
@@ -546,7 +561,7 @@ document.addEventListener('click', (e) => {
 // het geluid een tweede keer starten en zichzelf afkappen.
 document.addEventListener('keydown', (e) => {
   if (e.key !== 'Enter' && e.key !== ' ') return;
-  const pad = e.target.closest && e.target.closest('.pad');
+  const pad = e.target.closest && e.target.closest('.pad, .deel');
   if (!pad) return;
   e.preventDefault();
   raak(pad.dataset.id);

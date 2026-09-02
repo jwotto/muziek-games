@@ -37,10 +37,28 @@
     </p>
 
     <figure class="drumstel">
-      <img src="img/drumstel.png" width="1506" height="1044"
-           alt="Drie onderdelen van een drumstel naast elkaar: links de grote rode kick die op de grond staat, in het midden de gele snare op een standaard, rechts de blauwe hihat.">
+      <div class="onderdelen">
+        <button class="deel" type="button" data-id="kick" style="--kleur: var(--koraal)">
+          <img class="puls" src="img/kick.png" width="1434" height="1097"
+               alt="De kick: een grote rode trommel die op de grond staat.">
+          <span class="deel-naam">Kick</span>
+        </button>
+
+        <button class="deel" type="button" data-id="snare" style="--kleur: var(--zon)">
+          <img class="puls" src="img/snare.png" width="1442" height="1091"
+               alt="De snare: een gele trommel op een standaard.">
+          <span class="deel-naam">Snare</span>
+        </button>
+
+        <button class="deel" type="button" data-id="hihat"
+                style="--kleur: var(--blauw); --op-kleur: var(--wit)">
+          <img class="puls" src="img/hihat.png" width="1024" height="1536"
+               alt="De hihat: twee blauwe bekkens boven elkaar op een standaard met een pedaal.">
+          <span class="deel-naam">Hihat</span>
+        </button>
+      </div>
       <figcaption>
-        Links de <b>kick</b>, in het midden de <b>snare</b>, rechts de <b>hihat</b>.
+        Tik op een onderdeel om te horen hoe het klinkt.
       </figcaption>
     </figure>
 
@@ -55,8 +73,8 @@
     <p class="spel-uitleg">
       Er vallen vormen naar beneden. Raak ze precies als ze op de lege vorm
       onderaan staan, met <b>A</b>, <b>S</b> en <b>D</b> of door op de knoppen
-      te tikken. Hoe strakker je zit, hoe meer punten. Mis je er een, dan ben je
-      een hartje kwijt. En het tempo loopt langzaam op.
+      te tikken. Hoe strakker je zit, hoe meer punten. Mis je er een, of sla je
+      ernaast, dan ben je een hartje kwijt. En het tempo loopt langzaam op.
     </p>
 
     <div class="spel-niveaus" data-niveaus role="group" aria-label="Moeilijkheidsgraad"></div>
@@ -87,8 +105,6 @@
         <div class="kaart-cijfers" data-kaart-cijfers></div>
         <p data-kaart-tekst>Je krijgt eerst vier tellen om mee te tellen.</p>
         <button class="knop groot" type="button" data-kaart-knop>Start</button>
-        <div class="spel-niveaus kaart-niveaus" data-niveaus role="group"
-             aria-label="Kies een moeilijkheidsgraad"></div>
       </div>
     </div>
 
