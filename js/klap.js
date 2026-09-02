@@ -20,18 +20,32 @@
 // Hoeveel klappen er in één tel passen. De maat wordt per tel opgebouwd: elke
 // tel krijgt een van de aantallen hieronder, of een rust. Zo is geen maat
 // hetzelfde en blijft de tel toch altijd voelbaar.
+// De keuzes staan van makkelijk naar moeilijk. Hoe vaak een tel leeg blijft
+// verschilt per niveau: bij één klap per tel is de rust de enige afwisseling die
+// er is, dus daar mag hij vaker vallen. Zodra er ook twee of vier klappen in een
+// tel kunnen, zit de afwisseling in het aantal en hoeft de rust niet zo hard te
+// werken.
 const KLAPNIVEAUS = [
   { id: 'een',  naam: '1 klap per tel',
-    uitleg: 'op elke tel een klap, soms een rust', keuzes: [1] },
+    uitleg: 'op elke tel een klap, soms een rust', keuzes: [1], rust: 0.28 },
   { id: 'twee', naam: '1 of 2 per tel',
-    uitleg: 'een klap of twee, soms een rust', keuzes: [1, 2] },
+    uitleg: 'een klap of twee, soms een rust', keuzes: [1, 2], rust: 0.16 },
   { id: 'vier', naam: '1, 2 of 4 per tel',
-    uitleg: 'een, twee of vier klappen, soms een rust', keuzes: [1, 2, 4] }
+    uitleg: 'een, twee of vier klappen, soms een rust', keuzes: [1, 2, 4], rust: 0.14 }
 ];
 
-// Hoe vaak een tel leeg blijft. De eerste tel van een maat nooit: daar hangt de
-// hele klas aan, en een gat op de een raak je met zijn dertigen niet meer terug.
-const KLAP_RUST_KANS = 0.18;
+// De eerste tel van een maat blijft altijd staan: daar hangt de hele klas aan,
+// en een gat op de een raak je met zijn dertigen niet meer terug.
+
+// Hoe vaak een tel iets anders wordt dan de vorige. Zonder deze duw komen
+// dezelfde tellen zomaar drie keer achter elkaar, en dan valt er niets af te
+// wisselen. Met een halve duw hoor je afwisseling zonder dat het een vast
+// om-en-om wordt -- dat laatste hoor je na twee maten niet meer.
+const KLAP_WISSEL_KANS = 0.55;
+
+// Na een moeilijke tel vaker een makkelijke. Vier klappen achter elkaar en dan
+// meteen weer vier is voor groep 3 geen afwisseling maar een muur.
+const KLAP_BIJKOM_KANS = 0.5;
 
 // Zoveel maten eerst gewoon op de tel, ongeacht wat er is ingesteld. Even samen
 // in de maat komen voordat het gaat afwisselen.
@@ -222,19 +236,44 @@ function klapBpmVoor(maat) {
   return klapStand.begin + (klapStand.eind - klapStand.begin) * deel;
 }
 
+// Wat er op de vorige tel stond, zodat de volgende daarop kan reageren. Loopt
+// door over de maatstreep heen: de tel na een maatstreep is gewoon de volgende
+// tel, en die hoort net zo goed af te wisselen. Nul betekent een rust.
+let klapVorigAantal = 0;
+
+// Hoeveel klappen er op deze tel komen. Niet zomaar een greep uit de keuzes:
+// dan komt hetzelfde aantal te vaak achter elkaar. Na een moeilijke tel is er
+// een flinke kans op de makkelijkste, en verder gaat de voorkeur naar iets
+// anders dan de vorige tel. Allebei kansen en geen regels -- een vast om-en-om
+// hoor je na twee maten niet meer.
+function kiesAantal(keuzes, vorig) {
+  const makkelijkst = keuzes[0];
+  if (vorig > makkelijkst && Math.random() < KLAP_BIJKOM_KANS) return makkelijkst;
+
+  const anders = keuzes.filter((k) => k !== vorig);
+  if (anders.length && Math.random() < KLAP_WISSEL_KANS) {
+    return anders[Math.floor(Math.random() * anders.length)];
+  }
+  return keuzes[Math.floor(Math.random() * keuzes.length)];
+}
+
 // Een maat wordt tel voor tel opgebouwd. Elke tel krijgt een van de aantallen
 // van het gekozen niveau, verdeeld over de tel: één klap valt op de tel zelf,
 // twee klappen op de achtsten, vier op de zestienden.
 function klappenVoor(maat) {
   const stappen = new Array(KLAP_STAPPEN).fill('.');
-  const keuzes = niveauNu().keuzes;
+  const niveau = niveauNu();
   const rustig = maat < KLAP_AANLOOPMATEN;
 
   for (let tel = 0; tel < 4; tel++) {
     // De eerste tel van de maat blijft altijd staan.
-    if (!rustig && tel > 0 && Math.random() < KLAP_RUST_KANS) continue;
+    if (!rustig && tel > 0 && Math.random() < niveau.rust) {
+      klapVorigAantal = 0;
+      continue;
+    }
 
-    const aantal = rustig ? 1 : keuzes[Math.floor(Math.random() * keuzes.length)];
+    const aantal = rustig ? 1 : kiesAantal(niveau.keuzes, klapVorigAantal);
+    klapVorigAantal = aantal;
     const om = 4 / aantal;
     for (let i = 0; i < aantal; i++) stappen[tel * 4 + i * om] = 'x';
   }
@@ -250,6 +289,8 @@ function startKlap() {
     return;
   }
   startKlapRuis();
+
+  klapVorigAantal = 0;
 
   klap = {
     loopt: true,
