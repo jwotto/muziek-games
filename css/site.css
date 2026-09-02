@@ -1053,6 +1053,13 @@ input[type="range"]::-moz-range-thumb {
   font-size: 0.9rem;
 }
 
+/* De onderstreping blijft staan: daaraan zie je dat het een link is. Alleen de
+   standaardkleur van de browser vervangen we door die van de huisstijl. */
+.voet a {
+  color: var(--blauw);
+  font-weight: 600;
+}
+
 /* ---------- Beweging uit ---------- */
 
 @media (prefers-reduced-motion: reduce) {
