@@ -286,6 +286,11 @@ function startKlap() {
   if (!klapEl) return;
   cancelAnimationFrame(klapLus);
 
+  // Op deze bladzijde staan twee oefeningen onder elkaar. Twee tellen door
+  // elkaar heen is voor een klas onmogelijk, dus de ander gaat uit. Hij staat
+  // hieronder in de bladzijde geladen, vandaar de vraag of hij er al is.
+  if (typeof stopVierkant === 'function') stopVierkant();
+
   if (Tone.getContext().state !== 'running') {
     startGeluid().then(startKlap).catch(() => {});
     return;

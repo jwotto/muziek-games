@@ -80,15 +80,21 @@
   <div class="hero">
     <h1>Maak muziek met je <em>lijf</em></h1>
 
-    <h2>Wat is body percussion?</h2>
-    <p class="lead">
-      Body percussion is muziek maken met je eigen lijf. Je hebt er niets voor
-      nodig: klappen in je handen, stampen met je voeten, tikken op je benen.
-      Samen wordt dat een ritme.
-    </p>
-    <p class="lead">
-      In deze les gaan we klappen. Later komen er meer geluiden bij.
-    </p>
+    <div class="met-plaatje">
+      <img class="met-plaatje-beeld" src="img/bodypercussion.png" alt=""
+           width="520" height="520">
+      <div class="met-plaatje-tekst">
+        <h2>Wat is body percussion?</h2>
+        <p class="lead">
+          Body percussion is muziek maken met je eigen lijf. Je hebt er niets voor
+          nodig: klappen in je handen, stampen met je voeten, tikken op je benen.
+          Samen wordt dat een ritme.
+        </p>
+        <p class="lead">
+          In deze les gaan we klappen. Later komen er meer geluiden bij.
+        </p>
+      </div>
+    </div>
 
     <div class="stippels" aria-hidden="true"></div>
   </div>
@@ -124,14 +130,18 @@
 
   </section>
 
-  <h2 class="kop kop-knieen">Tik op je knieën</h2>
-
-  <p class="blok-uitleg">
-    Je hebt nu twee geluiden: klappen en op je knieën tikken. Dat tikken klinkt
-    lager en doffer dan een klap — een beetje als een trom onder je handen. Sla
-    met je vlakke handen op allebei je knieën tegelijk. Zeg er <b>boem</b> bij,
-    dan hoor je meteen waar het naartoe moet.
-  </p>
+  <div class="met-plaatje kop-knieen">
+    <img class="met-plaatje-beeld" src="img/boem.png" alt="" width="320" height="320">
+    <div class="met-plaatje-tekst">
+      <h2 class="kop">Tik op je knieën</h2>
+      <p class="blok-uitleg">
+        Je hebt nu twee geluiden: klappen en op je knieën tikken. Dat tikken klinkt
+        lager en doffer dan een klap — een beetje als een trom onder je handen. Sla
+        met je vlakke handen op allebei je knieën tegelijk. Zeg er <b>boem</b> bij,
+        dan hoor je meteen waar het naartoe moet.
+      </p>
+    </div>
+  </div>
 
   <h3 class="kop kop-lees">Lees het ritme</h3>
 
@@ -143,19 +153,12 @@
 
   <section class="paneel klapspel" id="vierkantspel">
 
-    <!-- Voor de juf: welk vierkant, hoe snel, en of de metronoom meetikt. -->
-    <div class="klap-knoppen">
-      <div class="klap-schuifjes" data-vierkant-schuifjes></div>
-      <div class="klap-keuzes" data-vierkant-keuze role="group" aria-label="Welk ritmevierkant"></div>
-    </div>
+    <!-- Voor de juf: afspelen, hoe snel, welk vierkant en in welke volgorde. -->
+    <div class="vierkant-instellingen" data-vierkant-schuifjes></div>
 
     <div class="vierkant-bord">
       <div class="vierkant-raster" data-vierkant-raster></div>
       <div class="klap-aftellen" data-vierkant-aftellen aria-hidden="true"></div>
-    </div>
-
-    <div class="klap-balk">
-      <button class="knop groot" type="button" data-vierkant-start>Start</button>
     </div>
 
   </section>

@@ -1348,13 +1348,74 @@ input[type="range"]::-moz-range-thumb {
    van de ruimte. */
 .vierkant-vak.dubbel img { max-width: 48%; }
 
-/* Het uitklapmenu voor de leesrichting, naast het tempo. De eigen opmaak van de
+/* Een plaatje links van een kop met tekst. Het plaatje wordt even hoog als de
+   tekst ernaast in plaats van een vaste maat te krijgen: zo blijft het blok een
+   blok, ook als de tekst later langer of korter wordt. De breedte volgt uit de
+   hoogte, want een plaatje houdt zijn verhouding.
+
+   Wel een plafond erop. Bij een lang stuk tekst zou hij anders het halve scherm
+   vullen en dan gaat de illustratie de tekst overschreeuwen. */
+.met-plaatje {
+  display: flex;
+  gap: var(--space-5);
+  align-items: stretch;
+}
+
+.met-plaatje-beeld {
+  display: block;
+  flex: 0 0 auto;
+  align-self: stretch;
+  width: auto;
+  height: auto;
+  max-width: 260px;
+  object-fit: contain;
+}
+
+.met-plaatje-tekst { flex: 1 1 0; min-width: 0; }
+
+.kop-knieen .kop { margin-top: 0; }
+
+@media (max-width: 720px) {
+  .met-plaatje { flex-direction: column; align-items: flex-start; }
+  .met-plaatje-beeld { align-self: flex-start; max-width: 160px; }
+}
+
+/* Alles in een regel: de afspeelknop vooraan, het tempo op de halve breedte, en
+   daarnaast de twee menu's. Ze staan onderlangs uitgelijnd, zodat de knop en de
+   schuif op dezelfde lijn liggen ook al heeft de schuif een label boven zich. */
+.vierkant-instellingen {
+  display: grid;
+  grid-template-columns: auto 2fr 1fr 1fr;
+  gap: var(--space-4);
+  align-items: end;
+}
+
+.vierkant-play {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  padding: 0;
+  color: var(--wit);
+  background: var(--blauw);
+  border: 3px solid var(--ink);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: transform 0.15s var(--bounce);
+}
+
+.vierkant-play svg { width: 26px; height: 26px; fill: currentColor; }
+.vierkant-play:hover { transform: translateY(-2px); }
+.vierkant-play:focus-visible { outline: 4px solid var(--blauw); outline-offset: 3px; }
+.vierkant-play.loopt { background: var(--koraal); }
+
+/* De uitklapmenu's voor het ritme en de leesrichting. De eigen opmaak van de
    browser gaat eraf en er komt een getekend pijltje voor in de plaats, zodat hij
    bij de rest van de knoppen past.
 
    Het pijltje staat als svg in de css zelf en niet als bestand: een menu waarvan
    het pijltje niet laadt ziet eruit als een kapotte knop. */
-.vierkant-richting {
+.vierkant-menu {
   width: 100%;
   padding: 0.35em var(--space-7) 0.35em var(--space-3);
   font-family: var(--font-kop);
@@ -1373,8 +1434,18 @@ input[type="range"]::-moz-range-thumb {
   -webkit-appearance: none;
 }
 
-.vierkant-richting:focus-visible { outline: 4px solid var(--blauw); outline-offset: 3px; }
-.vierkant-richting:disabled { cursor: default; opacity: 0.6; }
+.vierkant-menu:focus-visible { outline: 4px solid var(--blauw); outline-offset: 3px; }
+.vierkant-menu:disabled { cursor: default; opacity: 0.6; }
+
+@media (max-width: 720px) {
+  .vierkant-instellingen { grid-template-columns: auto 1fr; }
+  .vierkant-play { width: 48px; height: 48px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vierkant-play { transition: none; }
+  .vierkant-play:hover { transform: none; }
+}
 
 @media (max-width: 720px) {
   .klap-baan { --klap: 46px; --doel-x: 64px; }

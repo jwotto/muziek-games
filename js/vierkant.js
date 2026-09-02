@@ -21,7 +21,7 @@
 // zo snel dus.
 const VIERKANTEN = [
   {
-    id: 'een', naam: 'Vierkant 1', uitleg: 'alles op de tel',
+    id: 'een', naam: 'Vierkant 1', uitleg: 'op de tel',
     vakjes: [
       'boem', 'boem', 'boem', 'boem',
       'klap', 'klap', 'klap', 'klap',
@@ -30,7 +30,7 @@ const VIERKANTEN = [
     ]
   },
   {
-    id: 'twee', naam: 'Vierkant 2', uitleg: 'boem en klap door elkaar',
+    id: 'twee', naam: 'Vierkant 2', uitleg: 'om en om',
     vakjes: [
       'boem', 'boem', 'klap', 'klap',
       'boem', 'klap', 'boem', 'klap',
@@ -39,7 +39,7 @@ const VIERKANTEN = [
     ]
   },
   {
-    id: 'drie', naam: 'Vierkant 3', uitleg: 'twee in een tel',
+    id: 'drie', naam: 'Vierkant 3', uitleg: 'twee per tel',
     vakjes: [
       'boem+boem', 'klap', 'boem+boem', 'klap',
       'boem+boem', 'boem+boem', 'klap+klap', 'klap',
@@ -48,7 +48,7 @@ const VIERKANTEN = [
     ]
   },
   {
-    id: 'vier', naam: 'Vierkant 4', uitleg: 'de snelle regels door elkaar',
+    id: 'vier', naam: 'Vierkant 4', uitleg: 'veel dubbel',
     vakjes: [
       'boem+boem', 'boem+boem', 'boem+boem', 'klap',
       'boem+boem', 'klap+klap', 'boem+boem', 'klap',
@@ -105,10 +105,17 @@ const VIERKANT_INSTELLINGEN = [
 
 const vkEl = document.getElementById('vierkantspel');
 const vkSchuifEl = vkEl && vkEl.querySelector('[data-vierkant-schuifjes]');
-const vkKeuzeEl = vkEl && vkEl.querySelector('[data-vierkant-keuze]');
 const vkRasterEl = vkEl && vkEl.querySelector('[data-vierkant-raster]');
 const vkAftelEl = vkEl && vkEl.querySelector('[data-vierkant-aftellen]');
-const vkKnopEl = vkEl && vkEl.querySelector('[data-vierkant-start]');
+
+// De afspeelknop staat in dezelfde regel als de instellingen en wordt daar mee
+// opgebouwd, dus hij is er pas na bouwVierkantKnoppen.
+let vkKnopEl = null;
+
+// Een driehoekje en een blokje, uitgeschreven in de code: een knop waarvan het
+// pictogram niet laadt is geen knop meer.
+const VK_PLAY = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5l11 7-11 7z"/></svg>';
+const VK_STOP = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>';
 
 // ============================================================
 //  Wat er is ingesteld
@@ -182,10 +189,17 @@ function bouwVierkantRaster() {
   });
 }
 
+// Alles in een regel: de afspeelknop vooraan, dan het tempo op de halve breedte
+// en daarnaast de twee menu's. Een schuif heeft die ruimte nodig om nauwkeurig te
+// zijn; een menu niet.
 function bouwVierkantKnoppen() {
-  if (!vkSchuifEl || !vkKeuzeEl) return;
+  if (!vkSchuifEl) return;
 
-  vkSchuifEl.innerHTML = VIERKANT_INSTELLINGEN.map((p) => `
+  vkSchuifEl.innerHTML = `
+    <button class="vierkant-play" type="button" data-vierkant-start aria-label="Speel het ritme af">
+      ${VK_PLAY}
+    </button>
+  ` + VIERKANT_INSTELLINGEN.map((p) => `
     <div class="klap-schuif">
       <label for="vk-${p.id}">${p.label}<b data-vk-toon="${p.id}"></b></label>
       <input type="range" id="vk-${p.id}" data-vk="${p.id}"
@@ -193,24 +207,33 @@ function bouwVierkantKnoppen() {
     </div>
   `).join('') + `
     <div class="klap-schuif">
+      <label for="vk-vierkant">Ritme</label>
+      <select class="vierkant-menu" id="vk-vierkant" data-vierkant>
+        ${VIERKANTEN.map((v) => `<option value="${v.id}">${v.naam} &middot; ${v.uitleg}</option>`).join('')}
+      </select>
+    </div>
+    <div class="klap-schuif">
       <label for="vk-richting">Volgorde</label>
-      <select class="vierkant-richting" id="vk-richting" data-vierkant-richting>
+      <select class="vierkant-menu" id="vk-richting" data-vierkant-richting>
         ${VIERKANT_RICHTINGEN.map((r) => `<option value="${r.id}">${r.pijl} ${r.naam}</option>`).join('')}
       </select>
     </div>
   `;
 
-  vkKeuzeEl.innerHTML = VIERKANTEN.map((v) => `
-    <button class="klap-keus" type="button" data-vierkant="${v.id}">
-      <span class="klap-keus-naam">${v.naam}</span>
-      <span class="klap-keus-uitleg">${v.uitleg}</span>
-    </button>
-  `).join('');
-
+  vkKnopEl = vkSchuifEl.querySelector('[data-vierkant-start]');
   VIERKANT_INSTELLINGEN.forEach((p) => {
     document.getElementById('vk-' + p.id).value = vkStand[p.id];
   });
+  toonVierkantPlay(false);
   werkVierkantKnoppenBij();
+}
+
+// Loopt hij, dan wordt het driehoekje een blokje: dezelfde knop stopt hem ook.
+function toonVierkantPlay(loopt) {
+  if (!vkKnopEl) return;
+  vkKnopEl.innerHTML = loopt ? VK_STOP : VK_PLAY;
+  vkKnopEl.setAttribute('aria-label', loopt ? 'Stop het ritme' : 'Speel het ritme af');
+  vkKnopEl.classList.toggle('loopt', loopt);
 }
 
 function werkVierkantKnoppenBij() {
@@ -218,9 +241,8 @@ function werkVierkantKnoppenBij() {
     const toon = vkSchuifEl.querySelector('[data-vk-toon="' + p.id + '"]');
     if (toon) toon.textContent = vkStand[p.id] + ' ' + p.achter;
   });
-  vkKeuzeEl.querySelectorAll('.klap-keus').forEach((knop) => {
-    knop.setAttribute('aria-pressed', String(knop.dataset.vierkant === vkStand.keuze));
-  });
+  const keuze = vkSchuifEl.querySelector('[data-vierkant]');
+  if (keuze) keuze.value = vkStand.keuze;
   const richting = vkSchuifEl.querySelector('[data-vierkant-richting]');
   if (richting) richting.value = vkStand.richting;
 }
@@ -246,6 +268,10 @@ function startVierkant() {
   if (!vkEl) return;
   cancelAnimationFrame(vierkantLus);
 
+  // Loopt de klapoefening hierboven nog, dan gaat die uit: twee tellen door
+  // elkaar heen is voor een klas onmogelijk.
+  if (typeof stopKlap === 'function') stopKlap();
+
   if (Tone.getContext().state !== 'running') {
     startGeluid().then(startVierkant).catch(() => {});
     return;
@@ -265,7 +291,7 @@ function startVierkant() {
     einde: 0
   };
 
-  vkKnopEl.textContent = 'Stop';
+  toonVierkantPlay(true);
   vierkantZetKnoppen(true);
   wisVierkantVak();
   toonVierkantAftellen(0);
@@ -285,7 +311,7 @@ function stopVierkant() {
 
   wisVierkantVak();
   toonVierkantAftellen(0);
-  vkKnopEl.textContent = 'Start';
+  toonVierkantPlay(false);
   vierkantZetKnoppen(false);
 }
 
@@ -408,7 +434,8 @@ if (vkEl) {
   bouwVierkantKnoppen();
   bouwVierkantRaster();
 
-  vkKnopEl.addEventListener('click', () => {
+  vkSchuifEl.addEventListener('click', (e) => {
+    if (!e.target.closest('[data-vierkant-start]')) return;
     if (vierkant && vierkant.loopt) stopVierkant();
     else startVierkant();
   });
@@ -420,20 +447,20 @@ if (vkEl) {
     bewaarVkStand();
   });
 
-  vkKeuzeEl.addEventListener('click', (e) => {
-    const knop = e.target.closest('[data-vierkant]');
-    if (!knop || knop.disabled) return;
-    vkStand.keuze = knop.dataset.vierkant;
-    werkVierkantKnoppenBij();
-    bouwVierkantRaster();
-    bewaarVkStand();
-  });
-
   vkSchuifEl.addEventListener('change', (e) => {
-    const keuze = e.target.closest('[data-vierkant-richting]');
-    if (!keuze) return;
-    if (!VIERKANT_RICHTINGEN.some((r) => r.id === keuze.value)) return;
-    vkStand.richting = keuze.value;
+    const menu = e.target;
+
+    if (menu.matches('[data-vierkant-richting]')) {
+      if (!VIERKANT_RICHTINGEN.some((r) => r.id === menu.value)) return;
+      vkStand.richting = menu.value;
+    } else if (menu.matches('[data-vierkant]')) {
+      if (!VIERKANTEN.some((v) => v.id === menu.value)) return;
+      vkStand.keuze = menu.value;
+      bouwVierkantRaster();
+    } else {
+      return;
+    }
+
     werkVierkantKnoppenBij();
     bewaarVkStand();
   });
