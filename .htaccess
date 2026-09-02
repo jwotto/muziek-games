@@ -16,6 +16,13 @@ ErrorDocument 404 /404.html
 <IfModule mod_rewrite.c>
   RewriteEngine On
 
+  # Let's Encrypt controleert of jij de eigenaar bent door via http een bestandje
+  # op te halen uit .well-known/acme-challenge/. Die ene map mag dus niet worden
+  # doorgestuurd, anders kan het certificaat nooit worden aangevraagd of
+  # vernieuwd. Deze regel staat bewust boven de twee hieronder: hij vangt het
+  # verzoek af voordat een van die twee eraan toekomt.
+  RewriteRule ^\.well-known/ - [L]
+
   # www weg: www.muziekfles.nl -> muziekfles.nl
   RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
   RewriteRule ^ https://%1%{REQUEST_URI} [L,R=301]
