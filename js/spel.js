@@ -1,4 +1,4 @@
-/* Les 1 — het spelletje onder aan de pagina
+/* Het spelletje onder aan de les
 
    Elke tel valt er een van de drie geluiden naar beneden. Raak hem op het moment
    dat hij op de doelvorm onderaan staat: hoe strakker, hoe meer punten. Mis je er

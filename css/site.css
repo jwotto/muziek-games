@@ -47,14 +47,6 @@ body {
 .terug:hover { transform: translateX(-3px); }
 .terug:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
 
-/* Het lesnummer met daaronder het knopje om opnieuw te beginnen. */
-.lesinfo {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: var(--space-2);
-}
-
 /* Klein en rustig: je moet hem kunnen vinden, maar er niet tegenaan vallen. */
 .knop.mini {
   font-size: var(--text-xs);
@@ -62,16 +54,6 @@ body {
   color: var(--ink);
   background: var(--wit);
   border: 2px solid var(--ink);
-}
-
-.lesnummer {
-  font-family: var(--font-kop);
-  font-weight: 600;
-  background: var(--zon);
-  color: var(--ink);
-  border: 3px solid var(--ink);
-  border-radius: var(--radius-pill);
-  padding: 0.3em 1em;
 }
 
 /* ---------- Hero ---------- */
@@ -442,7 +424,6 @@ body {
 .les.binnenkort .icoon { background: var(--kleur); color: var(--ink); }
 
 .les h2 { margin: 0; font-size: var(--text-xl); line-height: 1.15; }
-.les .nr { font-family: var(--font-kop); font-weight: 600; font-size: var(--text-base); margin: 0; }
 .les p.tekst { margin: 0; line-height: 1.5; flex: 1; }
 
 .badge {
@@ -457,7 +438,7 @@ body {
 .badge.spelen { background: var(--blauw); color: var(--wit); }
 .badge.wacht { background: var(--wit); color: var(--ink); border-style: dotted; border-color: var(--kleur); }
 
-/* ---------- Les 1: de kit ---------- */
+/* ---------- De kit ---------- */
 
 .kit {
   display: grid;

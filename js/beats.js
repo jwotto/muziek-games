@@ -1,4 +1,4 @@
-/* Les 1 — drie beats om naar te luisteren
+/* Drie beats om naar te luisteren
 
    Met dezelfde drie geluiden kun je heel verschillende muziek maken. Dat hoor je
    pas als je het naast elkaar zet, dus staan hier drie beats klaar.
