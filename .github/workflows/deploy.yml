@@ -49,6 +49,10 @@ jobs:
           # Wat niet mee naar de live site gaat: git zelf en de werkbestanden.
           # De rest is de site, inclusief js/vendor/Tone.js -- die staat er met
           # opzet bij, zodat de les ook werkt als het internet in de klas hapert.
+          # De aiff'en zijn de bronbestanden van de geluiden: die blijven hier, op
+          # de server staat alleen wat de browser echt afspeelt.
+          # Let op: hieronder staat een letterlijk blok, daar is een # geen
+          # opmerking maar gewoon een regel die de actie als patroon leest.
           exclude: |
             **/.git*
             **/.git*/**
@@ -56,3 +60,5 @@ jobs:
             README.md
             huisstijl.md
             stijl.md
+            **/*.aiff
+            **/*.aif
