@@ -10,19 +10,18 @@ name: Deploy naar Vimexx
 #   FTP_USERNAME  je FTP-gebruikersnaam
 #   FTP_PASSWORD  je FTP-wachtwoord
 #
-# server-dir hieronder is de map op Vimexx waar de site in moet, gerekend vanaf
-# de plek waar je FTP-account binnenkomt. En dat verschilt per soort account:
+# Dit gaat uit van een eigen FTP-account voor dit domein, niet het hoofdaccount.
+# Dat is met opzet: zo'n account kan alleen bij muziekfles.nl, dus een typefout
+# in het pad hieronder kan studiowotto.com of technomaker.org nooit raken.
 #
-#   het hoofdaccount (u158514p148271) komt binnen in je home-map, met daarin
-#   domains/ voor al je domeinen samen -> domains/muziekfles.nl/public_html/
+# server-dir is de map waar de site in moet, gerekend vanaf de plek waar je
+# binnenkomt. Een FTP-account van het type 'domein' komt binnen in
+# domains/muziekfles.nl/, en dan is public_html/ het goede pad. Heb je het als
+# 'aangepast' aangemaakt en meteen op public_html gezet, dan sta je er al in en
+# moet hier alleen / staan.
 #
-#   een FTP-account dat je speciaal voor dit domein aanmaakt komt al binnen in
-#   domains/muziekfles.nl/ -> dan is public_html/ genoeg
-#
-# Het staat hieronder op het hoofdaccount. Controleer het pad even met FileZilla
-# of de bestandsbeheerder van Vimexx voordat je de eerste keer draait: met het
-# hoofdaccount kun je bij al je domeinen, dus een verkeerd pad zet deze site in
-# de map van een andere site.
+# Zie je na de eerste deploy niets op de site, dan zit je een map te hoog of te
+# laag. Kijk met FileZilla waar je landt en pas deze ene regel aan.
 #
 # Deze actie houdt een bestandje .ftp-deploy-sync-state.json op de server bij en
 # uploadt daarna alleen wat er veranderd is. De eerste keer duurt dus het langst
@@ -46,7 +45,7 @@ jobs:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          server-dir: domains/muziekfles.nl/public_html/
+          server-dir: public_html/
           # Wat niet mee naar de live site gaat: git zelf en de werkbestanden.
           # De rest is de site, inclusief js/vendor/Tone.js -- die staat er met
           # opzet bij, zodat de les ook werkt als het internet in de klas hapert.
