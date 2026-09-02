@@ -76,6 +76,11 @@ const VRIJSPEEL_NOTEN = 20;
 const ALLE_SCHUIFJES = [];
 KIT.forEach((inst) => inst.schuifjes.forEach((s) => ALLE_SCHUIFJES.push(inst.id + '.' + s.id)));
 
+// En de geluiden zelf zitten weer achter de beats: eerst luisteren wat je met
+// drie klappen kunt maken, dan pas zelf sleutelen. De les gaat zo stap voor stap
+// open in plaats van in een keer.
+const ALLE_BEATS = BEATS.map((beat) => beat.id);
+
 // ============================================================
 //  Het scherm
 // ============================================================
@@ -94,6 +99,7 @@ const veldEl = spelEl && spelEl.querySelector('.spel-veld');
 const vrijEl = spelEl && spelEl.querySelector('[data-vrij]');
 const meldingEl = document.querySelector('[data-melding]');
 const spelblokEl = document.querySelector('[data-spelblok]');
+const kitblokEl = document.querySelector('[data-kitblok]');
 // De graadknoppen staan op twee plekken: boven het veld en op de kaart. Ze
 // worden allebei uit dezelfde lijst gebouwd en samen bijgewerkt.
 const niveauRijen = spelEl ? Array.from(spelEl.querySelectorAll('[data-niveaus]')) : [];
@@ -244,7 +250,7 @@ const OPSLAG_SLEUTEL = 'wotto-muziekgames-les1-spel';
 function legeStand() {
   const records = {};
   NIVEAUS.forEach((niveau) => { records[niveau.id] = 0; });
-  return { vrij: 1, records: records, gedraaid: [] };
+  return { vrij: 1, records: records, geluisterd: [], gedraaid: [] };
 }
 
 // Elke waarde apart nakijken. Opslag van een oudere versie, of iets wat met de
@@ -272,14 +278,15 @@ function laadVoortgang() {
   }
 
   // Alleen namen die echt bestaan, en elk hooguit een keer: dan kan een oude of
-  // aangepaste opslag de game niet openzetten met verzonnen schuifjes.
-  if (Array.isArray(bewaard.gedraaid)) {
-    bewaard.gedraaid.forEach((naam) => {
-      if (ALLE_SCHUIFJES.indexOf(naam) >= 0 && stand.gedraaid.indexOf(naam) < 0) {
-        stand.gedraaid.push(naam);
-      }
+  // aangepaste opslag niets openzetten met verzonnen namen.
+  const overnemen = (bron, mag, naar) => {
+    if (!Array.isArray(bron)) return;
+    bron.forEach((naam) => {
+      if (mag.indexOf(naam) >= 0 && naar.indexOf(naam) < 0) naar.push(naam);
     });
-  }
+  };
+  overnemen(bewaard.geluisterd, ALLE_BEATS, stand.geluisterd);
+  overnemen(bewaard.gedraaid, ALLE_SCHUIFJES, stand.gedraaid);
   return stand;
 }
 
@@ -299,12 +306,30 @@ let niveauNr = voortgang.vrij - 1;
 
 function huidigNiveau() { return NIVEAUS[niveauNr]; }
 
+function geluidenOpen() { return voortgang.geluisterd.length >= ALLE_BEATS.length; }
 function spelOpen() { return voortgang.gedraaid.length >= ALLE_SCHUIFJES.length; }
 
-// De game staat er pas als hij vrijgespeeld is. Er komt geen kaart met een slot
-// in beeld: tot die tijd bestaat het gedeelte gewoon niet voor je.
+// Elk gedeelte staat er pas als het vrijgespeeld is. Er komt geen kaart met een
+// slot in beeld: tot die tijd bestaat het gewoon niet voor je.
 function werkSlotBij() {
+  if (kitblokEl) kitblokEl.hidden = !geluidenOpen();
   if (spelblokEl) spelblokEl.hidden = !spelOpen();
+}
+
+// Een beat telt zodra hij helemaal is afgespeeld: even doorklikken is dus geen
+// luisteren.
+function meldBeat(id) {
+  if (ALLE_BEATS.indexOf(id) < 0) return;
+  if (voortgang.geluisterd.indexOf(id) >= 0) return;
+
+  const was = geluidenOpen();
+  voortgang.geluisterd.push(id);
+  bewaarVoortgang();
+
+  if (!was && geluidenOpen()) {
+    werkSlotBij();
+    meld('Geluiden vrijgespeeld!', 'Nu mag je zelf aan de knoppen draaien.');
+  }
 }
 
 // Elk schuifje telt een keer mee. Terugdraaien maakt niet uit: je hebt hem
@@ -354,6 +379,11 @@ function wisVoortgang() {
   niveauNr = 0;
   record = 0;
   bewaarVoortgang();
+
+  // Wissen is wissen: ook de geluiden staan weer zoals ze begonnen, en de
+  // gehoorde beats zijn hun vinkje kwijt.
+  if (typeof zetTerug === 'function') KIT.forEach((inst) => zetTerug(inst.id));
+
   werkSlotBij();
   werkNiveausBij();
   werkBalkBij();
@@ -387,6 +417,9 @@ function bpmVoor(telNr) {
 function start() {
   if (!spelEl || !spelOpen()) return;
   cancelAnimationFrame(lus);
+
+  // Een beat van hierboven mag niet dwars door je beurt heen blijven lopen.
+  if (typeof stopBeat === 'function') stopBeat();
 
   spel = {
     loopt: true,
@@ -928,6 +961,7 @@ function toonStartkaart() {
 
 if (spelEl) {
   bijSchuifje = meldSchuifje;
+  bijBeat = meldBeat;
   werkSlotBij();
   bouwBanen();
   bouwNiveaus();

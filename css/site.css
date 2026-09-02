@@ -132,6 +132,67 @@ body {
 }
 
 .kop { margin: 0 0 1rem; }
+.kop-kit { margin-top: 2.5rem; }
+
+.blok-uitleg { margin: 0 0 1.1rem; line-height: 1.5; }
+
+/* ---------- Luisteren ---------- */
+
+/* Drie kaarten naast elkaar, en onder elkaar zodra ze niet meer passen. */
+.beats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+}
+
+.beat {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  padding: 0.85em 1rem;
+  background: var(--wit);
+  border: 4px solid var(--ink);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: transform 0.15s var(--bounce);
+}
+
+.beat:hover { transform: translateY(-3px); }
+.beat:focus-visible { outline: 4px solid var(--blauw); outline-offset: 3px; }
+
+/* Deze speelt nu. */
+.beat.speelt { background: var(--zon); }
+
+.beat-naam {
+  font-family: var(--font-kop);
+  font-weight: 700;
+  font-size: clamp(1.3rem, 3.5vw, 1.8rem);
+  color: var(--ink);
+}
+
+/* Een driehoekje of een blokje achter de naam, zodat je ziet of hij loopt. */
+.beat-teken {
+  display: block;
+  width: clamp(1.05rem, 2.8vw, 1.45rem);
+  height: clamp(1.05rem, 2.8vw, 1.45rem);
+  color: var(--ink);
+}
+
+.beat-teken svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  fill: currentColor;
+}
+
+
+.kitblok[hidden] { display: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .beat { transition: none; }
+  .beat:hover { transform: none; }
+}
 
 /* De foto van het hele drumstel. Erop klikken maakt hem groot, zodat je op het
    digibord de klas kunt laten raden hoe de onderdelen heten. */

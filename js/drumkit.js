@@ -39,8 +39,10 @@ const KIT = [
     vorm: 'vierkant',
     uitleg: 'Een trommel met metalen snaartjes onder het vel. Die ratelen mee als je slaat en maken die scherpe tsjak.',
     schuifjes: [
-      { id: 'ruistoon', label: 'Ruistoon', min: 0, max: 15, step: 1, waarde: 9 },
-      { id: 'lengte', label: 'Lengte', min: 0.03, max: 0.5, step: 0.01, waarde: 0.14 },
+      // Stand 11 is periode 508: rond de 3,5 kHz. Dat zit lager en dichter bij een
+      // echte snare dan de scherpere standen eronder.
+      { id: 'ruistoon', label: 'Ruistoon', min: 0, max: 15, step: 1, waarde: 11 },
+      { id: 'lengte', label: 'Lengte', min: 0.03, max: 0.5, step: 0.01, waarde: 0.19 },
       { id: 'galm', label: 'Galm', min: 0, max: 1, step: 0.02, waarde: 0 }
     ]
   },
@@ -321,8 +323,10 @@ const VOORSPRONG = 0.012;
 
 const gepland = { kick: 0, snare: 0, hihat: 0 };
 
-function tijdstip(id) {
-  const nu = Tone.now() + VOORSPRONG;
+// wanneer is optioneel: laat je hem weg, dan is het nu. De beats hierboven geven
+// hem wel mee, want die plannen een paar honderdste vooruit.
+function tijdstip(id, wanneer) {
+  const nu = (wanneer === undefined) ? Tone.now() + VOORSPRONG : wanneer;
   const t = (nu > gepland[id]) ? nu : gepland[id] + 0.001;
   gepland[id] = t;
   return t;
@@ -332,9 +336,9 @@ function tijdstip(id) {
 // zichzelf uit na zijn decay, dus een release voegt niets toe aan het geluid --
 // hij zet alleen een tweede moment in de agenda dat de eerste kan verstoren.
 // Eén gepland moment per aanslag is er precies één.
-function speel(id) {
+function speel(id, wanneer) {
   const s = stand[id];
-  const t = tijdstip(id);
+  const t = tijdstip(id, wanneer);
 
   if (id === 'kick') {
     valToon(kickStem, s.toon * Math.pow(2, s.sweep), s.toon, t, 0.03);
@@ -630,7 +634,9 @@ window.addEventListener('keydown', (e) => {
 //  9. Terug naar de beginstand
 // ============================================================
 
-function herstel(id) {
+// Alleen terugzetten, zonder geluid. Wis voortgang zet zo alle drie de geluiden
+// tegelijk terug, en drie klappen door elkaar is geen bevestiging maar schrikken.
+function zetTerug(id) {
   const inst = KIT.find((i) => i.id === id);
   inst.schuifjes.forEach((p) => {
     stand[id][p.id] = p.waarde;
@@ -638,5 +644,10 @@ function herstel(id) {
   });
   pasToe(id);
   bewaarStand();
+}
+
+// De Reset-knop op een paneel: terugzetten en meteen laten horen wat dat doet.
+function herstel(id) {
+  zetTerug(id);
   raak(id);
 }
