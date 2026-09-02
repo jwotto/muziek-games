@@ -764,10 +764,10 @@ function werkNiveausBij() {
     // Tijdens het spelen staat de rij vast, anders speel je met een misklik je
     // eigen beurt weg.
     knop.disabled = !open || bezig;
+    // Alleen het getal. Onder de naam van de graad is er niets anders wat het kan
+    // zijn, en de balk naast het veld zegt tijdens het spelen 'beste' voluit.
     knop.querySelector('.niveau-beste').innerHTML =
-      // De spatie zit in de span en niet ertussen: zo leest een schermlezer
-      // 'beste 120' terwijl de flex-gap de ruimte op het scherm regelt.
-      open ? '<span>beste </span><b>' + voortgang.records[NIVEAUS[i].id] + '</b>' : 'op slot';
+      open ? '<b>' + voortgang.records[NIVEAUS[i].id] + '</b>' : 'op slot';
   });
 
   if (!niveauUitlegEl) return;

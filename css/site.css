@@ -423,15 +423,13 @@ input[type="range"]::-moz-range-thumb {
 }
 
 .niveau-beste {
-  display: flex;
-  align-items: baseline;
-  gap: 0.3em;
   font-family: var(--font-tekst);
   font-weight: 600;
   font-size: 0.85rem;
 }
 
-/* De score zelf mag groot: daar kijk je naar. Het woordje ervoor blijft klein. */
+/* De score is het enige getal op de knop, dus die mag groot. 'op slot' blijft
+   klein: dat is geen score maar een mededeling. */
 .niveau-beste b {
   font-family: var(--font-kop);
   font-weight: 700;
@@ -474,10 +472,6 @@ input[type="range"]::-moz-range-thumb {
    woord toe in plaats van naar de marge ernaast. */
 @media (max-width: 720px) {
   .niveau { padding: 0.45em 0.35em; font-size: 0.95rem; }
-  /* Een knop is hier nog geen 90 px breed. Een score van vier cijfers past er
-     alleen naast het woordje 'beste' als je dat woordje weglaat, en onder de
-     naam van de graad is ook zonder dat woord duidelijk wat dat getal is. */
-  .niveau-beste span { display: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {
