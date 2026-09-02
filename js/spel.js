@@ -36,30 +36,33 @@ const MIS_KOSTEN = 25;       // punten kwijt als je slaat waar geen noot is
 //  De vier moeilijkheidsgraden
 // ============================================================
 
-// Elke graad bepaalt zelf wat er op een tel valt. De teller loopt vanaf de
-// eerste noot, dus 0 is de eerste tel van de maat na het aftellen. Op elke tel
-// valt er iets, op elke graad: je speelt altijd de hele beat mee, en dat is
-// precies wat een beat een beat maakt.
+// Op elke tel valt er iets, op elke graad: je speelt altijd de hele beat mee, en
+// dat is precies wat een beat een beat maakt. Het verschil zit dus niet in
+// hoeveel er valt maar in wat.
 //
-// Het verschil zit dus niet in hoeveel er valt maar in wat. Easy is alleen de
-// kick, dan komt de snare erbij, dan de hihat, en op Expert weet je nooit welke
-// van de drie er aankomt.
+// Elke graad heeft twee dingen. In geluiden staat waar hij uit put -- Easy is
+// alleen de kick, dan komt de snare erbij, dan de hihat. In noot staat het vaste
+// patroon waarmee hij begint, met een teller die vanaf de eerste noot loopt, dus
+// 0 is de eerste tel van de maat na het aftellen.
+//
+// Dat vaste patroon houdt het maar even vol: zodra je de graad gehaald hebt laat
+// het los en wordt het willekeurig, binnen de geluiden van die graad. Zie
+// geluidVoor hieronder.
 const NIVEAUS = [
   { id: 'easy', naam: 'Easy',
     toelichting: 'alleen de kick, op elke tel',
+    geluiden: ['kick'],
     noot: () => 'kick' },
 
   { id: 'medium', naam: 'Medium',
-    toelichting: 'kick en snare, met de snare op de derde tel',
-    noot: (i) => ['kick', 'kick', 'snare', 'kick'][i % 4] },
+    toelichting: 'kick en snare, om en om',
+    geluiden: ['kick', 'snare'],
+    noot: (i) => ['kick', 'snare'][i % 2] },
 
   { id: 'hard', naam: 'Hard',
-    toelichting: 'kick, snare en hihat om de beurt',
-    noot: (i) => ['kick', 'snare', 'hihat'][i % 3] },
-
-  { id: 'expert', naam: 'Expert',
-    toelichting: 'alles door elkaar, met de kick op 1 en de snare op 3',
-    noot: (i) => kiesGeluid(i) }
+    toelichting: 'kick, hihat, snare, hihat',
+    geluiden: ['kick', 'snare', 'hihat'],
+    noot: (i) => ['kick', 'hihat', 'snare', 'hihat'][i % 4] }
 ];
 
 // Zoveel noten moet je halen zonder al je hartjes te verliezen; dan gaat de
@@ -82,6 +85,8 @@ const aftelEl = spelEl && spelEl.querySelector('[data-aftellen]');
 const recordEl = spelEl && spelEl.querySelector('[data-record]');
 const wisEl = spelEl && spelEl.querySelector('[data-wis]');
 const knoppenEl = spelEl && spelEl.querySelector('[data-knoppen]');
+const veldEl = spelEl && spelEl.querySelector('.spel-veld');
+const vrijEl = spelEl && spelEl.querySelector('[data-vrij]');
 const niveausEl = spelEl && spelEl.querySelector('[data-niveaus]');
 const niveauUitlegEl = spelEl && spelEl.querySelector('[data-niveau-uitleg]');
 
@@ -355,6 +360,7 @@ function start() {
 function stop() {
   spel.loopt = false;
   cancelAnimationFrame(lus);
+  if (vrijEl) { clearTimeout(vrijTimer); vrijEl.textContent = ''; }
   spel.noten.forEach((noot) => noot.el.remove());
   spel.noten = [];
   toonAftellen(0);
@@ -382,27 +388,45 @@ function stop() {
 // het half-time patroon waar bijna elk nummer op leunt. Tel 2 en 4 blijven vrij,
 // en ook op 1 en 3 zit een kans op iets anders, anders wordt het voorspelbaar.
 const KANS_OP_PATROON = 0.8;
+const ALLE_GELUIDEN = KIT.map((inst) => inst.id);
 
-function kiesGeluid(tel) {
+// Kiest uit de geluiden die de graad heeft. Op Medium zit daar geen hihat bij,
+// dus die kan er ook niet uit rollen.
+function kiesGeluid(tel, geluiden) {
+  const uit = geluiden || ALLE_GELUIDEN;
   const inMaat = tel % 4;
   // Ook het patroon houdt zich aan de regel van hooguit twee dezelfde op rij,
   // anders kon je met een vaste kick op tel 1 alsnog aan drie komen.
   const magNog = (id) => !(spel.laatste[0] === id && spel.laatste[1] === id);
-  if (inMaat === 0 && magNog('kick') && Math.random() < KANS_OP_PATROON) return onthoud('kick');
-  if (inMaat === 2 && magNog('snare') && Math.random() < KANS_OP_PATROON) return onthoud('snare');
-  return onthoud(willekeurig());
+  const heeft = (id) => uit.indexOf(id) >= 0;
+  if (inMaat === 0 && heeft('kick') && magNog('kick') && Math.random() < KANS_OP_PATROON) return onthoud('kick');
+  if (inMaat === 2 && heeft('snare') && magNog('snare') && Math.random() < KANS_OP_PATROON) return onthoud('snare');
+  return onthoud(willekeurig(uit));
 }
 
 // Willekeurig, maar nooit drie keer achter elkaar hetzelfde: dat speelt prettiger
-// en het blijft even onvoorspelbaar.
-function willekeurig() {
+// en het blijft even onvoorspelbaar. Heeft een graad maar een geluid, dan valt er
+// niets te kiezen en vervalt die regel vanzelf.
+function willekeurig(geluiden) {
+  const uit = geluiden || ALLE_GELUIDEN;
   const laatste = spel.laatste;
-  const keus = KIT[Math.floor(Math.random() * KIT.length)].id;
-  if (laatste.length >= 2 && laatste[0] === laatste[1] && laatste[0] === keus) {
-    const anders = KIT.filter((i) => i.id !== keus);
-    return anders[Math.floor(Math.random() * anders.length)].id;
+  const keus = uit[Math.floor(Math.random() * uit.length)];
+  if (uit.length > 1 && laatste.length >= 2 && laatste[0] === laatste[1] && laatste[0] === keus) {
+    const anders = uit.filter((id) => id !== keus);
+    return anders[Math.floor(Math.random() * anders.length)];
   }
   return keus;
+}
+
+// Welk geluid valt er op noot i? De eerste noten volgen het vaste patroon van de
+// graad, zodat je het in je vingers krijgt. Heb je er VRIJSPEEL_NOTEN gehaald --
+// precies het punt waarop de volgende graad opengaat -- dan laat het patroon los
+// en wordt het willekeurig, maar wel binnen de geluiden van die graad. Zo blijft
+// dezelfde beurt tot het eind spannend in plaats van een rondje dat zich herhaalt.
+function geluidVoor(i) {
+  const niveau = NIVEAUS[spel.niveau];
+  if (i < VRIJSPEEL_NOTEN) return onthoud(niveau.noot(i));
+  return kiesGeluid(i, niveau.geluiden);
 }
 
 function onthoud(keus) {
@@ -442,7 +466,7 @@ function vulAan(nu) {
     } else {
       if (tel === AANLOOP_TELLEN) spel.eersteNoot = spel.telTijd;
       // De graad zegt wat er op deze tel valt.
-      spel.noten.push(maakNoot(NIVEAUS[spel.niveau].noot(tel - AANLOOP_TELLEN), spel.telTijd));
+      spel.noten.push(maakNoot(geluidVoor(tel - AANLOOP_TELLEN), spel.telTijd));
     }
 
     spel.bpm = bpmVoor(tel);
@@ -540,7 +564,62 @@ function kijkVrijspelen() {
   voortgang.vrij = volgende + 1;
   bewaarVoortgang();
   werkNiveausBij();
-  toonOordeel(NIVEAUS[volgende].naam + ' open!', 'open', 1800);
+  vier(NIVEAUS[volgende].naam);
+}
+
+// Groot in beeld, maar het spel loopt er gewoon onderdoor. Vandaar dat de melding
+// geen muisklikken vangt en boven in het veld hangt, waar nog geen noot geraakt
+// hoeft te worden: je hebt iets verdiend, je wordt niet onderbroken.
+let vrijTimer = 0;
+
+function vier(naam) {
+  if (!vrijEl) return;
+  vrijEl.innerHTML = '<b>' + naam + '<span>vrijgespeeld!</span></b>';
+  clearTimeout(vrijTimer);
+  vrijTimer = setTimeout(() => { vrijEl.textContent = ''; }, 2200);
+
+  confetti(44);
+  const kaart = vrijEl.firstElementChild;
+  if (minderBeweging.matches || !kaart.animate) return;
+  // De bounce hoort alleen op het opkomen. Zet je hem over de hele animatie, dan
+  // schiet de overshoot voorbij de laatste keyframes en fadet het kaartje al weg
+  // terwijl het nog groot in beeld hoort te staan.
+  kaart.animate([
+    { transform: 'scale(0.3) rotate(-14deg)', opacity: 0, easing: 'cubic-bezier(0.34, 1.56, 0.64, 1)' },
+    { transform: 'scale(1) rotate(-3deg)', opacity: 1, offset: 0.18, easing: 'linear' },
+    { transform: 'scale(1) rotate(-3deg)', opacity: 1, offset: 0.8, easing: 'ease-in' },
+    { transform: 'scale(1.15) rotate(-3deg)', opacity: 0 }
+  ], { duration: 2200 });
+}
+
+// Losse snippers die het veld uit vallen en zichzelf opruimen. Geen bibliotheek:
+// een handjevol spannetjes met elk een eigen val is precies genoeg.
+const SNIPPERKLEUREN = ['--koraal', '--zon', '--blauw', '--mint', '--bubblegum'];
+
+function confetti(aantal) {
+  if (!veldEl || minderBeweging.matches || !veldEl.animate) return;
+  const val = veldEl.clientHeight + 60;
+
+  for (let i = 0; i < aantal; i++) {
+    const snipper = document.createElement('span');
+    snipper.className = 'snipper';
+    snipper.style.background = 'var(' + SNIPPERKLEUREN[i % SNIPPERKLEUREN.length] + ')';
+    snipper.style.left = Math.round(Math.random() * 100) + '%';
+    if (i % 3 === 0) snipper.style.borderRadius = '50%';
+    veldEl.appendChild(snipper);
+
+    const beweging = snipper.animate([
+      { transform: 'translate3d(0, -30px, 0) rotate(0deg)' },
+      { transform: 'translate3d(' + Math.round((Math.random() - 0.5) * 200) + 'px, ' +
+                   val + 'px, 0) rotate(' + Math.round((Math.random() * 4 - 2) * 360) + 'deg)' }
+    ], {
+      duration: 1500 + Math.random() * 1100,
+      delay: Math.random() * 320,
+      easing: 'cubic-bezier(0.3, 0.2, 0.7, 1)',
+      fill: 'both'
+    });
+    beweging.onfinish = () => snipper.remove();
+  }
 }
 
 // ============================================================
@@ -686,8 +765,10 @@ function werkNiveausBij() {
   const volgende = NIVEAUS[niveauNr + 1];
   let tekst = nu.naam + ': ' + nu.toelichting + '.';
   if (volgende && voortgang.vrij <= niveauNr + 1) {
-    tekst += ' Haal ' + VRIJSPEEL_NOTEN + ' noten zonder al je hartjes te verliezen,' +
-             ' dan gaat ' + volgende.naam + ' open.';
+    tekst += ' Haal er ' + VRIJSPEEL_NOTEN + ' zonder al je hartjes te verliezen:' +
+             ' dan gaat ' + volgende.naam + ' open en laat het patroon los.';
+  } else {
+    tekst += ' Na ' + VRIJSPEEL_NOTEN + ' noten laat het patroon los en wordt het willekeurig.';
   }
   niveauUitlegEl.textContent = tekst;
 }

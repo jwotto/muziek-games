@@ -382,14 +382,10 @@ input[type="range"]::-moz-range-thumb {
    op de voorpagina die nog niet af zijn. */
 .spel-niveaus {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  /* minmax(0, 1fr) en niet 1fr: anders duwt het langste woord zijn eigen kolom
+     breder en staan de drie knoppen niet meer even groot naast elkaar. */
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 0.5rem;
-}
-
-/* Op een telefoon passen er geen vier naast elkaar zonder dat de laatste alleen
-   op een eigen regel belandt. Twee bij twee blijft een blok. */
-@media (max-width: 720px) {
-  .spel-niveaus { grid-template-columns: repeat(2, 1fr); }
 }
 
 .niveau {
@@ -444,6 +440,12 @@ input[type="range"]::-moz-range-thumb {
   margin: 0;
   line-height: 1.5;
   font-size: 0.95rem;
+}
+
+/* Op een telefoon is er per knop nog geen 90 px; dan moet de ruimte naar het
+   woord toe in plaats van naar de marge ernaast. */
+@media (max-width: 720px) {
+  .niveau { padding: 0.45em 0.35em; font-size: 0.95rem; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -648,6 +650,52 @@ input[type="range"]::-moz-range-thumb {
 }
 
 .spel-kaart[hidden] { display: none; }
+
+/* De melding als er een graad opengaat. Hij ligt over het veld heen maar vangt
+   geen klikken en staat boven in beeld: het spel loopt er gewoon onderdoor. */
+.spel-vrij {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  display: grid;
+  place-content: start center;
+  padding-top: 6%;
+  pointer-events: none;
+}
+
+.spel-vrij:empty { display: none; }
+
+.spel-vrij b {
+  display: block;
+  padding: 0.3em 0.7em;
+  text-align: center;
+  font-family: var(--font-kop);
+  font-weight: 700;
+  font-size: clamp(1.5rem, 6vw, 2.6rem);
+  line-height: 1.1;
+  color: var(--ink);
+  background: var(--zon);
+  border: 4px solid var(--ink);
+  border-radius: var(--radius);
+  transform: rotate(-3deg);
+}
+
+.spel-vrij span {
+  display: block;
+  font-size: 0.42em;
+}
+
+/* Confetti: losse snippers die het veld uit vallen. Ze ruimen zichzelf op zodra
+   hun val klaar is. */
+.snipper {
+  position: absolute;
+  top: 0;
+  z-index: 5;
+  width: 10px;
+  height: 14px;
+  margin-left: -5px;
+  pointer-events: none;
+}
 .spel-kaart h3 { margin: 0; font-size: 1.4rem; }
 .spel-kaart p { margin: 0; line-height: 1.5; }
 
@@ -665,8 +713,6 @@ input[type="range"]::-moz-range-thumb {
 .spel-oordeel[data-soort="net"] { color: var(--blauw); }
 .spel-oordeel[data-soort="mis"],
 .spel-oordeel[data-soort="naast"] { color: var(--koraal); }
-/* Een graad die opengaat blijft wat langer staan en krijgt zijn eigen kleur. */
-.spel-oordeel[data-soort="open"] { color: var(--blauw); }
 
 @media (prefers-reduced-motion: reduce) {
   .noot.raak svg { animation: none; }
