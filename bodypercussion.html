@@ -124,6 +124,43 @@
 
   </section>
 
+  <h2 class="kop kop-knieen">Tik op je knieën</h2>
+
+  <p class="blok-uitleg">
+    Je hebt nu twee geluiden: klappen en op je knieën tikken. Dat tikken klinkt
+    lager en doffer dan een klap — een beetje als een trom onder je handen. Sla
+    met je vlakke handen op allebei je knieën tegelijk. Zeg er <b>boem</b> bij,
+    dan hoor je meteen waar het naartoe moet.
+  </p>
+
+  <h3 class="kop kop-lees">Lees het ritme</h3>
+
+  <p class="blok-uitleg">
+    In elk vakje staat wat je op die tel doet. Lees van links naar rechts en dan
+    naar de volgende regel, net als bij lezen. Staan er twee plaatjes in één
+    vakje, dan doe je ze allebei in die ene tel — twee keer zo snel dus.
+  </p>
+
+  <section class="paneel klapspel" id="vierkantspel">
+
+    <!-- Voor de juf: welk vierkant, hoe snel, en of de metronoom meetikt. -->
+    <div class="klap-knoppen">
+      <div class="klap-schuifjes" data-vierkant-schuifjes></div>
+      <div class="klap-keuzes" data-vierkant-keuze role="group" aria-label="Welk ritmevierkant"></div>
+    </div>
+
+    <div class="vierkant-bord">
+      <div class="vierkant-raster" data-vierkant-raster></div>
+      <div class="klap-aftellen" data-vierkant-aftellen aria-hidden="true"></div>
+    </div>
+
+    <div class="klap-balk">
+      <button class="klap-tik aan" type="button" data-vierkant-metronoom aria-pressed="true">Metronoom aan</button>
+      <button class="knop groot" type="button" data-vierkant-start>Start</button>
+    </div>
+
+  </section>
+
   <footer class="voet">
     muziekfles.nl · gemaakt door <a href="https://studiowotto.com">Studio Wotto</a>
   </footer>
@@ -134,6 +171,7 @@
 <script src="js/drumkit.js"></script>
 <script src="js/polka.js"></script>
 <script src="js/klap.js"></script>
+<script src="js/vierkant.js"></script>
 
 </body>
 </html>

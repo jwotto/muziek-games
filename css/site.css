@@ -1297,10 +1297,84 @@ input[type="range"]::-moz-range-thumb {
 /* De startknop rechts, zodat de cijfers links op hun plek blijven staan. */
 .klap-balk .knop { margin-left: auto; }
 
+/* ============================================================
+   De ritmevierkanten
+   ============================================================ */
+
+.kop-knieen { margin-top: var(--space-7); }
+.kop-lees { margin-top: var(--space-6); }
+
+/* Het bord is de baas over zijn eigen breedte: vier vakjes naast elkaar moeten
+   van achter in de klas te lezen zijn, maar zestien vakjes onder elkaar mogen
+   het scherm niet uit lopen. Vandaar een plafond op de breedte in plaats van de
+   volle paneelbreedte. */
+.vierkant-bord {
+  position: relative;
+  max-width: 760px;
+  margin: 0 auto;
+}
+
+.vierkant-raster {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-2);
+}
+
+/* De verhouding van het werkblad: iets breder dan hoog. Zo passen vier regels
+   op een digibord zonder scrollen. */
+.vierkant-vak {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2%;
+  aspect-ratio: 1.35;
+  padding: 6%;
+  background: var(--wit);
+  border: 4px solid var(--ink);
+  border-radius: var(--radius-md);
+  /* Vooraf een eigen laag, zodat de puls op een traag digibord niet elke tel
+     opnieuw een laag hoeft te maken. */
+  will-change: transform;
+}
+
+/* Dit vakje is aan de beurt. */
+.vierkant-vak.aan { background: var(--zon); }
+
+.vierkant-vak img {
+  display: block;
+  width: auto;
+  height: 100%;
+  max-width: 100%;
+  object-fit: contain;
+}
+
+/* Twee plaatjes in een vakje staan naast elkaar en krijgen dus allebei de helft
+   van de ruimte. */
+.vierkant-vak.dubbel img { max-width: 48%; }
+
+/* De metronoomknop staat vooraan in de balk, waar bij de klapoefening de
+   stipjes staan. */
+.klap-tik {
+  padding: 0.5em var(--space-4);
+  font-family: var(--font-kop);
+  font-weight: 700;
+  font-size: var(--text-base);
+  color: var(--ink);
+  background: var(--wit);
+  border: 3px solid var(--ink);
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+}
+
+.klap-tik.aan { background: var(--mint); }
+.klap-tik:focus-visible { outline: 4px solid var(--blauw); outline-offset: 3px; }
+
 @media (max-width: 720px) {
   .klap-baan { --klap: 46px; --doel-x: 64px; }
   .klap-tellen { gap: var(--space-2); height: 15px; }
   .klap-tel { width: 15px; height: 15px; border-width: 2px; }
+  .vierkant-raster { gap: var(--space-1); }
+  .vierkant-vak { border-width: 3px; padding: 4%; }
 }
 
 @media (prefers-reduced-motion: reduce) {
