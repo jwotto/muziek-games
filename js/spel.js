@@ -21,7 +21,7 @@ const DOEL_ONDER = 48;       // hoogte van de doelvorm, in pixels vanaf de onder
 const START_BPM = 70;        // rustig beginnen: op 70 duurt een tel bijna een seconde
 const MAX_BPM = 300;         // een plafond dat je eigenlijk niet hoort te halen
 const BPM_STAP = 4;
-const NOTEN_PER_STAP = 6;    // om de zes noten gaat het tempo omhoog
+const TELLEN_PER_STAP = 6;   // om de zes tellen gaat het tempo omhoog
 
 // Hoe dicht je erbij moet zitten, en wat het oplevert.
 const VENSTERS = [
@@ -31,6 +31,41 @@ const VENSTERS = [
 ];
 const MIS_NA = 0.15;         // daarna telt de noot als gemist
 const MIS_KOSTEN = 25;       // punten kwijt als je slaat waar geen noot is
+
+// ============================================================
+//  De vier moeilijkheidsgraden
+// ============================================================
+
+// Elke graad bepaalt zelf wat er op een tel valt. De teller loopt vanaf de
+// eerste noot, dus 0 is de eerste tel van de maat na het aftellen. Geeft een
+// graad null terug, dan valt er niets: dat is een rust, en juist die rusten
+// maken de makkelijke graden rustig.
+//
+// De rij loopt op in twee dingen tegelijk: er komen noten bij en ze worden
+// minder voorspelbaar. Easy is een noot per maat, Expert is elke tel eentje en
+// je weet nooit welke.
+const NIVEAUS = [
+  { id: 'easy', naam: 'Easy',
+    toelichting: 'alleen de kick, op de eerste tel van elke maat',
+    noot: (i) => (i % 4 === 0 ? 'kick' : null) },
+
+  { id: 'medium', naam: 'Medium',
+    toelichting: 'kick, kick, snare, rust',
+    noot: (i) => ['kick', 'kick', 'snare', null][i % 4] },
+
+  { id: 'hard', naam: 'Hard',
+    toelichting: 'kick, snare en hihat om de beurt, elke tel een',
+    noot: (i) => ['kick', 'snare', 'hihat'][i % 3] },
+
+  { id: 'expert', naam: 'Expert',
+    toelichting: 'alles door elkaar, met de kick op 1 en de snare op 3',
+    noot: (i) => kiesGeluid(i) }
+];
+
+// Zoveel noten moet je halen zonder al je hartjes te verliezen; dan gaat de
+// graad erboven open. Het spel loopt daarna gewoon door en het tempo blijft
+// oplopen: het is een tussenstand, geen eindstreep.
+const VRIJSPEEL_NOTEN = 20;
 
 // ============================================================
 //  Het scherm
@@ -47,6 +82,8 @@ const aftelEl = spelEl && spelEl.querySelector('[data-aftellen]');
 const recordEl = spelEl && spelEl.querySelector('[data-record]');
 const wisEl = spelEl && spelEl.querySelector('[data-wis]');
 const knoppenEl = spelEl && spelEl.querySelector('[data-knoppen]');
+const niveausEl = spelEl && spelEl.querySelector('[data-niveaus]');
+const niveauUitlegEl = spelEl && spelEl.querySelector('[data-niveau-uitleg]');
 
 const banen = {};
 
@@ -177,27 +214,69 @@ function akkoordStoot(tijd, akkoord, tellengte) {
 }
 
 // ============================================================
-//  De topscore
+//  Topscores en vrijgespeelde graden
 // ============================================================
 
-// Blijft in deze browser bewaard, net als de standen van de schuifjes hierboven.
-const RECORD_SLEUTEL = 'wotto-muziekgames-les1-record';
+// Alles wat je opbouwt staat onder een sleutel: hoeveel graden er open staan en
+// de beste score per graad. Blijft in deze browser bewaard, net als de standen
+// van de schuifjes hierboven.
+const OPSLAG_SLEUTEL = 'wotto-muziekgames-les1-spel';
 
-function laadRecord() {
-  try {
-    const waarde = parseInt(localStorage.getItem(RECORD_SLEUTEL), 10);
-    return Number.isFinite(waarde) && waarde >= 0 ? waarde : 0;
-  } catch (e) {
-    return 0;  // geen opslag beschikbaar: dan begin je elke keer op nul
-  }
+function legeStand() {
+  const records = {};
+  NIVEAUS.forEach((niveau) => { records[niveau.id] = 0; });
+  return { vrij: 1, records: records };
 }
 
-function bewaarRecord() {
+// Elke waarde apart nakijken. Opslag van een oudere versie, of iets wat met de
+// hand is aangepast, mag de bladzijde nooit stukmaken: wat niet klopt valt terug
+// op nul en op alleen Easy open.
+function laadVoortgang() {
+  const stand = legeStand();
+  let bewaard = null;
   try {
-    localStorage.setItem(RECORD_SLEUTEL, String(record));
+    bewaard = JSON.parse(localStorage.getItem(OPSLAG_SLEUTEL));
+  } catch (e) {
+    return stand;  // geen opslag beschikbaar, of er staat geen geldige tekst in
+  }
+  if (!bewaard || typeof bewaard !== 'object') return stand;
+
+  const vrij = parseInt(bewaard.vrij, 10);
+  if (Number.isFinite(vrij)) stand.vrij = Math.min(NIVEAUS.length, Math.max(1, vrij));
+
+  const records = bewaard.records;
+  if (records && typeof records === 'object') {
+    NIVEAUS.forEach((niveau) => {
+      const waarde = parseInt(records[niveau.id], 10);
+      if (Number.isFinite(waarde) && waarde >= 0) stand.records[niveau.id] = waarde;
+    });
+  }
+  return stand;
+}
+
+function bewaarVoortgang() {
+  try {
+    localStorage.setItem(OPSLAG_SLEUTEL, JSON.stringify(voortgang));
   } catch (e) {
     // Opslag kan uit staan of vol zijn. Het spel werkt gewoon door.
   }
+}
+
+let voortgang = laadVoortgang();
+
+// Je begint op de hoogste graad die je hebt vrijgespeeld: daar was je gebleven.
+// De makkelijkere staan er gewoon naast als je terug wilt.
+let niveauNr = voortgang.vrij - 1;
+
+function huidigNiveau() { return NIVEAUS[niveauNr]; }
+
+// record is de topscore van de graad waar je nu op staat, zodat de balk ernaast
+// er live in mee kan lopen. De andere drie blijven intussen in voortgang staan.
+function laadRecord() { return voortgang.records[huidigNiveau().id]; }
+
+function bewaarRecord() {
+  voortgang.records[huidigNiveau().id] = record;
+  bewaarVoortgang();
 }
 
 let record = laadRecord();
@@ -208,10 +287,13 @@ let record = laadRecord();
 // werk en blijft in de bladzijde.
 let wisTimer = 0;
 
+// Wist alleen de topscore van de graad waar je op staat; de andere drie en wat
+// je hebt vrijgespeeld blijven staan.
 function wisRecord() {
   record = 0;
   bewaarRecord();
   werkBalkBij();
+  werkNiveausBij();
 }
 
 function ontwapenWissen() {
@@ -234,7 +316,7 @@ let spel = null;
 let lus = 0;
 
 function bpmVoor(telNr) {
-  const stappen = Math.floor(Math.max(0, telNr - AANLOOP_TELLEN) / NOTEN_PER_STAP);
+  const stappen = Math.floor(Math.max(0, telNr - AANLOOP_TELLEN) / TELLEN_PER_STAP);
   return Math.min(MAX_BPM, START_BPM + stappen * BPM_STAP);
 }
 
@@ -244,6 +326,7 @@ function start() {
 
   spel = {
     loopt: true,
+    niveau: niveauNr,   // vast voor deze beurt, zodat wisselen halverwege niet kan
     telNr: 0,
     telTijd: Tone.now() + 0.6,
     bpm: START_BPM,
@@ -257,6 +340,7 @@ function start() {
     aftelGetal: 0,
     aftelKlaar: false,
     eersteNoot: 0,
+    vrijgespeeld: false,
     recordBijStart: record
   };
 
@@ -264,6 +348,7 @@ function start() {
   toonAftellen(0);
   toonOordeel('');
   werkBalkBij();
+  werkNiveausBij();
   lus = requestAnimationFrame(stap);
 }
 
@@ -283,11 +368,13 @@ function stop() {
 
   const totaal = spel.geraakt + spel.gemist;
   const nieuwRecord = spel.score > spel.recordBijStart;
-  kaartEl.querySelector('h3').textContent = nieuwRecord ? 'Nieuw record!' : 'Game over';
-  kaartEl.querySelector('p').innerHTML = 'Je score is <b>' + spel.score + '</b>.<br>' +
-    spel.geraakt + ' van de ' + totaal + ' goed geraakt, tot ' + Math.round(spel.bpm) + ' slagen per minuut.';
-  kaartEl.querySelector('button').textContent = 'Nog een keer';
-  kaartEl.hidden = false;
+  toonKaart(
+    nieuwRecord ? 'Nieuw record!' : 'Game over',
+    'Je score is <b>' + spel.score + '</b>.<br>' + spel.geraakt + ' van de ' + totaal +
+      ' goed geraakt, tot ' + Math.round(spel.bpm) + ' slagen per minuut.',
+    'Nog een keer'
+  );
+  werkNiveausBij();
 }
 
 // Niet zomaar willekeurig, want dan wordt het een reeks losse noten in plaats van
@@ -354,7 +441,9 @@ function vulAan(nu) {
       spel.aanloop.push(spel.telTijd);
     } else {
       if (tel === AANLOOP_TELLEN) spel.eersteNoot = spel.telTijd;
-      spel.noten.push(maakNoot(kiesGeluid(tel), spel.telTijd));
+      // De graad zegt wat er op deze tel valt. Null is een rust: dan valt er niets.
+      const id = NIVEAUS[spel.niveau].noot(tel - AANLOOP_TELLEN);
+      if (id) spel.noten.push(maakNoot(id, spel.telTijd));
     }
 
     spel.bpm = bpmVoor(tel);
@@ -427,7 +516,32 @@ function misNoot() {
   spel.hartjes -= 1;
   toonOordeel('Mis');
   werkBalkBij();
-  if (spel.hartjes <= 0) stop();
+  // Eerst afgaan, dan pas vrijspelen: is de twintigste noot je laatste hartje,
+  // dan ben je er wel gekomen maar niet doorheen.
+  if (spel.hartjes <= 0) { stop(); return; }
+  kijkVrijspelen();
+}
+
+// ============================================================
+//  Vrijspelen
+// ============================================================
+
+// Haal je de eerste VRIJSPEEL_NOTEN noten zonder al je hartjes te verliezen, dan
+// gaat de graad erboven open. Het spel stopt daar niet voor: je speelt door, het
+// tempo blijft oplopen en je topscore kun je nog altijd verbeteren.
+function kijkVrijspelen() {
+  if (!spel || !spel.loopt || spel.vrijgespeeld) return;
+  if (spel.geraakt + spel.gemist < VRIJSPEEL_NOTEN) return;
+  spel.vrijgespeeld = true;   // hooguit een keer per beurt
+
+  const volgende = spel.niveau + 1;
+  if (volgende >= NIVEAUS.length) return;   // Expert is de laatste
+  if (voortgang.vrij > volgende) return;    // stond allang open
+
+  voortgang.vrij = volgende + 1;
+  bewaarVoortgang();
+  werkNiveausBij();
+  toonOordeel(NIVEAUS[volgende].naam + ' open!', 'open', 1800);
 }
 
 // ============================================================
@@ -480,6 +594,7 @@ function beoordeel(id, wanneer) {
 
   toonOordeel(venster.naam);
   werkBalkBij();
+  kijkVrijspelen();
   return venster.naam;
 }
 
@@ -518,12 +633,87 @@ function werkBalkBij() {
 
 let oordeelTimer = 0;
 
-function toonOordeel(tekst) {
+// Een oordeel flitst voorbij, maar een vrijgespeelde graad mag wat langer blijven
+// staan en zijn eigen kleur krijgen.
+function toonOordeel(tekst, soort, ms) {
   if (!spelEl) return;
   oordeelEl.textContent = tekst;
-  oordeelEl.dataset.soort = tekst.toLowerCase();
+  oordeelEl.dataset.soort = soort || tekst.toLowerCase();
   clearTimeout(oordeelTimer);
-  if (tekst) oordeelTimer = setTimeout(() => { oordeelEl.textContent = ''; }, 500);
+  if (tekst) oordeelTimer = setTimeout(() => { oordeelEl.textContent = ''; }, ms || 500);
+}
+
+// ============================================================
+//  De rij met de vier graden
+// ============================================================
+
+const niveauKnoppen = [];
+
+function bouwNiveaus() {
+  if (!niveausEl) return;
+  NIVEAUS.forEach((niveau, i) => {
+    const knop = document.createElement('button');
+    knop.className = 'niveau';
+    knop.type = 'button';
+    knop.dataset.niveau = niveau.id;
+    knop.innerHTML =
+      '<span class="niveau-naam">' + niveau.naam + '</span>' +
+      '<span class="niveau-beste"></span>';
+    knop.addEventListener('click', () => kiesNiveau(i));
+    niveausEl.appendChild(knop);
+    niveauKnoppen.push(knop);
+  });
+}
+
+// Een plek waar de hele rij wordt bijgewerkt: welke graad aan staat, wat er open
+// is, en hoe hoog je er ooit kwam.
+function werkNiveausBij() {
+  if (!niveausEl) return;
+  const bezig = !!(spel && spel.loopt);
+
+  niveauKnoppen.forEach((knop, i) => {
+    const open = i < voortgang.vrij;
+    knop.classList.toggle('op-slot', !open);
+    knop.setAttribute('aria-pressed', String(i === niveauNr));
+    // Tijdens het spelen staat de rij vast, anders speel je met een misklik je
+    // eigen beurt weg.
+    knop.disabled = !open || bezig;
+    knop.querySelector('.niveau-beste').textContent =
+      open ? 'beste ' + voortgang.records[NIVEAUS[i].id] : 'op slot';
+  });
+
+  if (!niveauUitlegEl) return;
+  const nu = huidigNiveau();
+  const volgende = NIVEAUS[niveauNr + 1];
+  let tekst = nu.naam + ': ' + nu.toelichting + '.';
+  if (volgende && voortgang.vrij <= niveauNr + 1) {
+    tekst += ' Haal ' + VRIJSPEEL_NOTEN + ' noten zonder al je hartjes te verliezen,' +
+             ' dan gaat ' + volgende.naam + ' open.';
+  }
+  niveauUitlegEl.textContent = tekst;
+}
+
+function kiesNiveau(i) {
+  if (i >= voortgang.vrij || i === niveauNr) return;
+  niveauNr = i;
+  record = laadRecord();
+  werkNiveausBij();
+  werkBalkBij();
+  toonStartkaart();
+}
+
+function toonKaart(titel, tekst, knop) {
+  if (!kaartEl) return;
+  kaartEl.querySelector('h3').textContent = titel;
+  kaartEl.querySelector('p').innerHTML = tekst;
+  kaartEl.querySelector('button').textContent = knop;
+  kaartEl.hidden = false;
+}
+
+function toonStartkaart() {
+  toonKaart('Klaar?',
+    'Je speelt <b>' + huidigNiveau().naam + '</b>.<br>Je krijgt eerst vier tellen om mee te tellen.',
+    'Start');
 }
 
 // ============================================================
@@ -532,7 +722,10 @@ function toonOordeel(tekst) {
 
 if (spelEl) {
   bouwBanen();
+  bouwNiveaus();
+  werkNiveausBij();
   werkBalkBij();
+  toonStartkaart();
   kaartEl.querySelector('button').addEventListener('click', start);
 
   wisEl.addEventListener('click', () => {

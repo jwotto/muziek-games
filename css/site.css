@@ -377,6 +377,80 @@ input[type="range"]::-moz-range-thumb {
 
 .spel-uitleg { margin: 0; line-height: 1.5; }
 
+/* De vier moeilijkheidsgraden staan als een rij boven het veld. De graad waar je
+   op speelt is ingevuld, wat nog dicht zit staat gestippeld -- net als de lessen
+   op de voorpagina die nog niet af zijn. */
+.spel-niveaus {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.5rem;
+}
+
+/* Op een telefoon passen er geen vier naast elkaar zonder dat de laatste alleen
+   op een eigen regel belandt. Twee bij twee blijft een blok. */
+@media (max-width: 720px) {
+  .spel-niveaus { grid-template-columns: repeat(2, 1fr); }
+}
+
+.niveau {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.1rem;
+  padding: 0.45em 0.9em;
+  font-family: var(--font-kop);
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: var(--ink);
+  background: var(--wit);
+  border: 3px solid var(--ink);
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  transition: transform 0.15s var(--bounce);
+}
+
+.niveau-beste {
+  font-family: var(--font-tekst);
+  font-weight: 600;
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.niveau:hover:not(:disabled) { transform: translateY(-2px); }
+.niveau:focus-visible { outline: 4px solid var(--blauw); outline-offset: 3px; }
+
+/* Nog niet vrijgespeeld. Gestippeld en niet aan te klikken, maar wel gewoon
+   leesbaar: je moet kunnen zien wat er nog op je wacht. */
+.niveau.op-slot {
+  border-style: dotted;
+  border-color: var(--blauw);
+  cursor: not-allowed;
+}
+
+/* Tijdens het spelen staat de hele rij vast. De browser maakt een uitgeschakelde
+   knop uit zichzelf grijs, en dat is precies wat de huisstijl niet wil. */
+.niveau:disabled { color: var(--ink); cursor: default; }
+
+/* De graad waar je nu op speelt. Staat onderaan, want hij moet het van de
+   uitgeschakelde stand hierboven winnen. */
+.niveau[aria-pressed="true"],
+.niveau[aria-pressed="true"]:disabled {
+  color: var(--wit);
+  background: var(--blauw);
+  border-color: var(--ink);
+}
+
+.niveau-uitleg {
+  margin: 0;
+  line-height: 1.5;
+  font-size: 0.95rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .niveau { transition: none; }
+  .niveau:hover:not(:disabled) { transform: none; }
+}
+
 /* Het speelveld: een smal rechtop scherm in het midden, met de cijfers links en
    rechts ernaast in plaats van erboven. */
 .spel-veld {
@@ -591,6 +665,8 @@ input[type="range"]::-moz-range-thumb {
 .spel-oordeel[data-soort="net"] { color: var(--blauw); }
 .spel-oordeel[data-soort="mis"],
 .spel-oordeel[data-soort="naast"] { color: var(--koraal); }
+/* Een graad die opengaat blijft wat langer staan en krijgt zijn eigen kleur. */
+.spel-oordeel[data-soort="open"] { color: var(--blauw); }
 
 @media (prefers-reduced-motion: reduce) {
   .noot.raak svg { animation: none; }
