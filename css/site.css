@@ -1202,14 +1202,28 @@ input[type="range"]::-moz-range-thumb {
   width: var(--klap);
   height: var(--klap);
   margin: calc(var(--klap) / -2) 0 0 calc(var(--klap) / -2);
-  background: var(--koraal);
-  border: 4px solid var(--ink);
-  border-radius: 50%;
   will-change: transform;
 }
 
+.klap-noot svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+/* Rood ingekleurd met een zwarte lijn eromheen. De lijn staat buiten de vorm
+   getekend, vandaar de dubbele dikte: de helft valt binnen het rood weg. */
+.klap-noot path {
+  fill: var(--koraal);
+  stroke: var(--ink);
+  stroke-width: 22;
+  stroke-linejoin: round;
+  paint-order: stroke fill;
+}
+
 /* Precies nu. Even oplichten, zodat de klas ziet dat het moment er is. */
-.klap-noot.raak { background: var(--zon); }
+.klap-noot.raak path { fill: var(--zon); }
 
 .klap-aftellen {
   position: absolute;

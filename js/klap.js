@@ -17,17 +17,25 @@
 //  Wat er te kiezen valt
 // ============================================================
 
-// Zestien stappen is één maat van vier tellen. Een x is een klap.
-const KLAPPATRONEN = [
-  { id: 'een',   naam: '1 klap',   uitleg: 'alleen op de eerste tel',
-    patroon: 'x...............' },
-  { id: 'twee',  naam: '2 klappen', uitleg: 'op de eerste en de derde tel',
-    patroon: 'x.......x.......' },
-  { id: 'vier',  naam: '4 klappen', uitleg: 'op elke tel',
-    patroon: 'x...x...x...x...' },
-  { id: 'ritme', naam: 'Het ritme', uitleg: 'op elke tel, en dubbel op de vier',
-    patroon: 'x...x...x...x.x.' }
+// Hoeveel klappen er in één tel passen. De maat wordt per tel opgebouwd: elke
+// tel krijgt een van de aantallen hieronder, of een rust. Zo is geen maat
+// hetzelfde en blijft de tel toch altijd voelbaar.
+const KLAPNIVEAUS = [
+  { id: 'een',  naam: '1 klap per tel',
+    uitleg: 'op elke tel een klap, soms een rust', keuzes: [1] },
+  { id: 'twee', naam: '1 of 2 per tel',
+    uitleg: 'een klap of twee, soms een rust', keuzes: [1, 2] },
+  { id: 'vier', naam: '1, 2 of 4 per tel',
+    uitleg: 'een, twee of vier klappen, soms een rust', keuzes: [1, 2, 4] }
 ];
+
+// Hoe vaak een tel leeg blijft. De eerste tel van een maat nooit: daar hangt de
+// hele klas aan, en een gat op de een raak je met zijn dertigen niet meer terug.
+const KLAP_RUST_KANS = 0.18;
+
+// Zoveel maten eerst gewoon op de tel, ongeacht wat er is ingesteld. Even samen
+// in de maat komen voordat het gaat afwisselen.
+const KLAP_AANLOOPMATEN = 2;
 
 const KLAP_STAPPEN = 16;      // zestienden in één maat
 const KLAP_VOORUIT = 2.6;     // seconden dat een klapje van tevoren te zien is
@@ -35,10 +43,6 @@ const KLAP_AANLOOP = 4;       // tellen aftellen voordat de eerste maat begint
 // Waar de ring staat leest hij uit de css (--doel-x), zodat die maat maar op
 // een plek staat. Deze waarde is alleen het vangnet.
 const KLAP_DOEL = 96;
-
-// Vanaf de helft mag er af en toe een klapje bij. Nooit eentje weg: iets wat
-// wegvalt haalt een klas uit de maat, iets extra's hoor je gewoon aankomen.
-const KLAP_VARIATIE_KANS = 0.34;
 
 const KLAP_INSTELLINGEN = [
   { id: 'begin', label: 'Begintempo', min: 50, max: 140, step: 5, waarde: 80, achter: 'bpm' },
@@ -67,7 +71,7 @@ const klapKeuzeEl = klapEl && klapEl.querySelector('[data-klap-keuze]');
 
 const KLAP_SLEUTEL = 'wotto-muziekfles-klap';
 
-const klapStand = { patroon: 'ritme' };
+const klapStand = { patroon: 'twee' };
 KLAP_INSTELLINGEN.forEach((p) => { klapStand[p.id] = p.waarde; });
 
 // Elke waarde apart nakijken, net als bij de schuifjes van de drumles: opslag
@@ -85,7 +89,7 @@ function laadKlapStand() {
     const w = parseFloat(bewaard[p.id]);
     if (isFinite(w) && w >= p.min && w <= p.max) klapStand[p.id] = w;
   });
-  if (KLAPPATRONEN.some((k) => k.id === bewaard.patroon)) klapStand.patroon = bewaard.patroon;
+  if (KLAPNIVEAUS.some((k) => k.id === bewaard.patroon)) klapStand.patroon = bewaard.patroon;
 }
 
 function bewaarKlapStand() {
@@ -96,32 +100,61 @@ function bewaarKlapStand() {
   }
 }
 
-function patroonNu() {
-  return KLAPPATRONEN.find((k) => k.id === klapStand.patroon) || KLAPPATRONEN[3];
+function niveauNu() {
+  return KLAPNIVEAUS.find((k) => k.id === klapStand.patroon) || KLAPNIVEAUS[1];
 }
 
 // ============================================================
 //  Het klapgeluid
 // ============================================================
 
-// Een klap is een korte ruisstoot met de nadruk rond de anderhalve kilohertz.
-// De ruis loopt door en de envelope doet het aan- en uitzetten, precies zoals de
-// stemmen in de drumles: zo hoeft er tijdens het spelen nooit iets gestart te
-// worden.
+// Een handklap van één ruisstoot klinkt als een snare. Wat er een klap van
+// maakt is dat het er eigenlijk drie zijn: een handklap kaatst na, en de 909
+// bootst dat na met drie hele korte stootjes vlak achter elkaar en daarna een
+// langere staart. Dat ratelende begin is het hele verschil.
+//
+// Elk stootje krijgt zijn eigen envelope. Eén envelope drie keer achter elkaar
+// aanslaan binnen twintig milliseconden vraagt om gedoe; vier losse envelopes
+// zijn goedkoop en doen precies wat er staat.
+const KLAP_TIKKEN = [0, 0.009, 0.019];   // de naklappers, in seconden
+const KLAP_STAART = 0.027;
+
+// De metronoom uit polka.js staat in de drumles zacht onder de muziek. Hier is
+// hij het houvast voor de hele klas, dus die gaat flink omhoog. Dit raakt alleen
+// deze bladzijde: elke bladzijde bouwt zijn eigen stemmen op.
+tikVol.volume.value = -1;
+
 const klapVol = new Tone.Volume(-3).connect(master);
-const klapFilter = new Tone.Filter({ type: 'bandpass', frequency: 1600, Q: 1.1 }).connect(klapVol);
-const klapEnv = new Tone.AmplitudeEnvelope({
-  attack: 0.001, decay: 0.12, sustain: 0, release: 0.02
-}).connect(klapFilter);
+
+// Rond de 1100 hertz zit het lichaam van een klap; de hoogdoorlaat haalt het
+// gerommel eronder weg zodat hij droog blijft.
+const klapBand = new Tone.Filter({ type: 'bandpass', frequency: 1100, Q: 1.4 }).connect(klapVol);
+const klapHoog = new Tone.Filter({ type: 'highpass', frequency: 480, Q: 0.7 }).connect(klapBand);
+const klapMix = new Tone.Gain(0.5).connect(klapHoog);
+
 const klapRuis = new Tone.Noise('white');
-klapRuis.connect(klapEnv);
+
+const klapTikEnvs = KLAP_TIKKEN.map(() => {
+  const env = new Tone.AmplitudeEnvelope({
+    attack: 0.0004, decay: 0.009, sustain: 0, release: 0.005
+  }).connect(klapMix);
+  klapRuis.connect(env);
+  return env;
+});
+
+// De staart is langer en zachter: dat is de galm van je handen, niet de klap.
+const klapStaartEnv = new Tone.AmplitudeEnvelope({
+  attack: 0.001, decay: 0.16, sustain: 0, release: 0.02
+}).connect(new Tone.Gain(0.7).connect(klapMix));
+klapRuis.connect(klapStaartEnv);
 
 function startKlapRuis() {
   if (klapRuis.state !== 'started') klapRuis.start();
 }
 
 function klapNu(tijd) {
-  klapEnv.triggerAttack(tijd);
+  KLAP_TIKKEN.forEach((na, i) => klapTikEnvs[i].triggerAttack(tijd + na));
+  klapStaartEnv.triggerAttack(tijd + KLAP_STAART);
 }
 
 // ============================================================
@@ -139,19 +172,23 @@ function klapBpmVoor(maat) {
   return klapStand.begin + (klapStand.eind - klapStand.begin) * deel;
 }
 
-// Welke stappen in deze maat een klap krijgen. Vanaf de helft mag er af en toe
-// eentje bij, op een plek waar nog niets staat.
+// Een maat wordt tel voor tel opgebouwd. Elke tel krijgt een van de aantallen
+// van het gekozen niveau, verdeeld over de tel: één klap valt op de tel zelf,
+// twee klappen op de achtsten, vier op de zestienden.
 function klappenVoor(maat) {
-  const basis = patroonNu().patroon.split('');
-  if (maat < Math.ceil(klapStand.maten / 2)) return basis;
-  if (Math.random() > KLAP_VARIATIE_KANS) return basis;
+  const stappen = new Array(KLAP_STAPPEN).fill('.');
+  const keuzes = niveauNu().keuzes;
+  const rustig = maat < KLAP_AANLOOPMATEN;
 
-  const vrij = [];
-  for (let i = 0; i < KLAP_STAPPEN; i += 2) if (basis[i] === '.') vrij.push(i);
-  if (!vrij.length) return basis;
+  for (let tel = 0; tel < 4; tel++) {
+    // De eerste tel van de maat blijft altijd staan.
+    if (!rustig && tel > 0 && Math.random() < KLAP_RUST_KANS) continue;
 
-  basis[vrij[Math.floor(Math.random() * vrij.length)]] = 'x';
-  return basis;
+    const aantal = rustig ? 1 : keuzes[Math.floor(Math.random() * keuzes.length)];
+    const om = 4 / aantal;
+    for (let i = 0; i < aantal; i++) stappen[tel * 4 + i * om] = 'x';
+  }
+  return stappen;
 }
 
 function startKlap() {
@@ -162,7 +199,6 @@ function startKlap() {
     startGeluid().then(startKlap).catch(() => {});
     return;
   }
-  startRuis();
   startKlapRuis();
 
   klap = {
@@ -200,7 +236,8 @@ function stopKlap() {
 
   // Wat er nog vooruit gepland stond mag niet doorspelen over een gestopte
   // oefening heen.
-  klapEnv.cancel(Tone.now());
+  klapTikEnvs.forEach((env) => env.cancel(Tone.now()));
+  klapStaartEnv.cancel(Tone.now());
   basEnv.cancel(Tone.now());
   akkEnv.cancel(Tone.now());
   tikEnv.cancel(Tone.now());
@@ -243,10 +280,11 @@ function vulKlapAan(nu) {
       if (inMaat % 4 === 0) basNoot(klap.stapTijd, akkoord, 60 / bpm, inMaat / 4);
       if (inMaat % 4 === 2) akkoordStoot(klap.stapTijd, akkoord, 60 / bpm);
 
-      // En een simpele beat eronder, zodat de pols er stevig in zit.
-      if (inMaat === 0 || inMaat === 8) speel('kick', klap.stapTijd);
-      if (inMaat === 4 || inMaat === 12) speel('snare', klap.stapTijd);
-      if (inMaat % 4 === 0) speel('hihat', klap.stapTijd);
+      // De metronoom blijft doortikken, ook als het klappen begonnen is. Een
+      // drumbeat eronder maakt het gezellig maar niet duidelijker; een kale tik
+      // op elke tel is waar dertig kinderen zich aan vasthouden. De eerste tel
+      // van de maat krijgt de hoge tik, zodat je hoort waar de maat begint.
+      if (inMaat % 4 === 0) tik(klap.stapTijd, inMaat === 0);
 
       if (klap.klappen[inMaat] === 'x') {
         klapNu(klap.stapTijd);
@@ -272,9 +310,25 @@ function klapDoelX() {
   return isFinite(uit) ? uit : KLAP_DOEL;
 }
 
+// Dezelfde klaphanden als op de kaart van deze les op de voorpagina: de gevulde
+// vorm, rood ingekleurd met een zwarte lijn eromheen, net als alles op deze site.
+//
+// Niet de lijnversie eroverheen leggen: fill en bold zijn bij Phosphor twee
+// aparte tekeningen en niet dezelfde vorm in twee gewichten, dus die vallen niet
+// samen. Eén vorm met een fill en een stroke doet precies wat we willen.
+//
+// De vormen staan hier uitgeschreven in plaats van als icoon uit het
+// lettertype: dat komt van buiten, en een klapje dat niet laadt is een klapje
+// dat je niet ziet aankomen. Opgehaald uit @phosphor-icons/core.
+const KLAP_HANDEN =
+  '<svg viewBox="0 0 256 256" aria-hidden="true">' +
+  '<path d="M188.87,65A18,18,0,0,0,157.62,83L133.36,41a18,18,0,0,0-31.22,18L96.4,49A18,18,0,0,0,65.18,67l3.34,5.77A26,26,0,0,0,39.74,111l3,5.2A26,26,0,0,0,23.5,155l35.27,61a80.14,80.14,0,0,0,149.52-39.57A71.92,71.92,0,0,0,210,101.58Zm1.2,127.56A64.12,64.12,0,0,1,72.65,208L37.38,147a10,10,0,0,1,17.34-10L75,172a8,8,0,0,0,13.87-8L53.62,103A10,10,0,0,1,71,93l31.81,55a8,8,0,0,0,13.87-8l-26-45a10,10,0,0,1,17.35-10l36.5,63a8,8,0,0,0,13.87-8l-12.6-21.75A10,10,0,0,1,163.44,109l20.22,35A63.52,63.52,0,0,1,190.07,192.57ZM160.22,24V8a8,8,0,0,1,16,0V24a8,8,0,0,1-16,0Zm33.22,6,8-13.1a8,8,0,0,1,13.68,8.33l-8,13.11a8,8,0,0,1-6.84,3.83A8,8,0,0,1,193.44,30Zm45,33.66-15.05,4.85a8.15,8.15,0,0,1-2.46.39,8,8,0,0,1-2.46-15.62l15.06-4.85a8,8,0,1,1,4.91,15.23Z"/>' +
+  '</svg>';
+
 function maakKlapNoot(tijd) {
   const el = document.createElement('span');
   el.className = 'klap-noot';
+  el.innerHTML = KLAP_HANDEN;
   klapNotenEl.appendChild(el);
   return { tijd: tijd, el: el };
 }
@@ -368,7 +422,7 @@ function bouwKlapKnoppen() {
     </div>
   `).join('');
 
-  klapKeuzeEl.innerHTML = KLAPPATRONEN.map((k) => `
+  klapKeuzeEl.innerHTML = KLAPNIVEAUS.map((k) => `
     <button class="klap-keus" type="button" data-patroon="${k.id}">
       <span class="klap-keus-naam">${k.naam}</span>
       <span class="klap-keus-uitleg">${k.uitleg}</span>
