@@ -196,7 +196,7 @@ function bouwVierkantKnoppen() {
   if (!vkSchuifEl) return;
 
   vkSchuifEl.innerHTML = `
-    <button class="vierkant-play" type="button" data-vierkant-start aria-label="Speel het ritme af">
+    <button class="speelknop" type="button" data-vierkant-start aria-label="Speel het ritme af">
       ${VK_PLAY}
     </button>
   ` + VIERKANT_INSTELLINGEN.map((p) => `

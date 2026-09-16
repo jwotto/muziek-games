@@ -76,6 +76,27 @@ body {
   -webkit-box-decoration-break: clone;
 }
 
+/* Welke reeks en welk nummer: 'Ritme · les 2'. Als pilletje boven de titel
+   van de les, en bovenaan de kaart op de voorpagina. Wit met een inktrand,
+   want het is een etiket en geen knop. */
+.reeks {
+  display: block;
+  width: fit-content;
+  padding: 0.15em 0.8em;
+  font-family: var(--font-kop);
+  font-weight: 700;
+  font-size: var(--text-base);
+  line-height: 1.4;
+  letter-spacing: 0;
+  color: var(--ink);
+  background: var(--wit);
+  border: 3px solid var(--ink);
+  border-radius: var(--radius-pill);
+}
+
+.hero h1 .reeks { margin-bottom: var(--space-3); font-size: var(--text-md); }
+.les .reeks { font-size: var(--text-sm); }
+
 /* Het woordmerk staat als plaatje in de kop. De h1 blijft een h1, met de naam
    in de alt-tekst, dus voor een schermlezer verandert er niets. */
 .merkbeeld {
@@ -1108,9 +1129,10 @@ input[type="range"]::-moz-range-thumb {
 }
 
 .klap-schuif label b { font-variant-numeric: tabular-nums; }
-/* De schuifjes van de drumles krijgen hun knop als getekende vorm mee (--knop).
-   Die is er hier niet, dus deze krijgen een eigen ronde knop. */
-.klapspel input[type="range"]::-webkit-slider-thumb {
+/* De schuifjes van de kit krijgen hun knop als getekende vorm mee (--knop) en
+   zijn te herkennen aan hun data-param. Alle andere schuiven -- het tempo van
+   de klapoefening, het ritmebord en de sequencer -- krijgen een ronde blauwe. */
+input[type="range"]:not([data-param])::-webkit-slider-thumb {
   width: 30px;
   height: 30px;
   margin-top: -7px;
@@ -1119,7 +1141,7 @@ input[type="range"]::-moz-range-thumb {
   border-radius: 50%;
 }
 
-.klapspel input[type="range"]::-moz-range-thumb {
+input[type="range"]:not([data-param])::-moz-range-thumb {
   width: 30px;
   height: 30px;
   background: var(--blauw);
@@ -1384,7 +1406,7 @@ input[type="range"]::-moz-range-thumb {
   align-items: end;
 }
 
-.vierkant-play {
+.speelknop {
   display: grid;
   place-items: center;
   width: 56px;
@@ -1398,10 +1420,10 @@ input[type="range"]::-moz-range-thumb {
   transition: transform 0.15s var(--bounce);
 }
 
-.vierkant-play svg { width: 26px; height: 26px; fill: currentColor; }
-.vierkant-play:hover { transform: translateY(-2px); }
-.vierkant-play:focus-visible { outline: 4px solid var(--blauw); outline-offset: 3px; }
-.vierkant-play.loopt { background: var(--koraal); }
+.speelknop svg { width: 26px; height: 26px; fill: currentColor; }
+.speelknop:hover { transform: translateY(-2px); }
+.speelknop:focus-visible { outline: 4px solid var(--blauw); outline-offset: 3px; }
+.speelknop.loopt { background: var(--koraal); }
 
 /* De uitklapmenu's voor het ritme en de leesrichting. De eigen opmaak van de
    browser gaat eraf en er komt een getekend pijltje voor in de plaats, zodat hij
@@ -1433,12 +1455,12 @@ input[type="range"]::-moz-range-thumb {
 
 @media (max-width: 720px) {
   .vierkant-instellingen { grid-template-columns: auto 1fr; }
-  .vierkant-play { width: 48px; height: 48px; }
+  .speelknop { width: 48px; height: 48px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .vierkant-play { transition: none; }
-  .vierkant-play:hover { transform: none; }
+  .speelknop { transition: none; }
+  .speelknop:hover { transform: none; }
 }
 
 @media (max-width: 720px) {
@@ -1452,4 +1474,168 @@ input[type="range"]::-moz-range-thumb {
 @media (prefers-reduced-motion: reduce) {
   .klap-keus { transition: none; }
   .klap-keus:hover:not(:disabled) { transform: none; }
+}
+
+/* ============================================================
+   De sequencer (ritmeles 2)
+   ============================================================ */
+
+/* De kaart die op het bord staat. Geel, net als een beat die speelt in les 1;
+   het teken erachter zegt of hij ook loopt. */
+.beat.aan { background: var(--zon); }
+
+/* Afspeelknop, tempo en de leegmaakknop in een regel boven het bord, onderlangs
+   uitgelijnd, zodat de knoppen op dezelfde lijn liggen als de schuif met zijn
+   label erboven. Ze staan buiten het vak: dat is alleen het bord zelf. */
+.seq-knoppen {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-4);
+  margin-top: var(--space-5);
+}
+
+/* De schuif neemt alle ruimte die overblijft. */
+.seq-knoppen .klap-schuif { flex: 1; min-width: 0; }
+
+/* De vier kaarten staan klein in een zin onder het bord: het bord is waar het
+   om gaat, de kaarten zijn maar een zetje. Het zijn dezelfde knoppen als de
+   beats in les 1, alleen als pilletje in de regel. */
+.seq-keuze {
+  margin: var(--space-5) 0 0;
+  line-height: 2.2;
+}
+
+.seq-kaarten { display: inline; }
+
+.seq-kaarten .beat {
+  display: inline-flex;
+  vertical-align: middle;
+  gap: 0.35em;
+  margin: 0 0.15em;
+  padding: 0.1em 0.7em;
+  border-width: 3px;
+  border-radius: var(--radius-pill);
+}
+
+.seq-kaarten .beat:hover { transform: translateY(-2px); }
+.seq-kaarten .beat-naam { font-size: var(--text-base); }
+
+/* Het bord staat los op de bladzijde, zonder kader eromheen: de vakjes zijn
+   zelf al omlijnd, een lijn daar nog omheen maakt het alleen maar drukker. */
+.seq { margin-top: var(--space-4); }
+
+.seq-knoppen .knop.klein { align-self: flex-end; }
+
+/* Reset bord (bij een voorbeeld) of Bord leegmaken (bij Mijn beat) staat altijd
+   naast het tempo. Op een breed scherm met de woorden erop, op een telefoon
+   alleen als pijltje terug: dan blijft er ruimte voor de schuif. */
+.seq-leeg { display: inline-flex; align-items: center; gap: var(--space-2); white-space: nowrap; }
+.seq-leeg-teken { display: none; width: 1.4em; height: 1.4em; }
+
+/* Het bord past altijd in de breedte, ook op een telefoon: nooit een
+   schuifbalk. Op een klein scherm worden de vakjes en het naamknopje kleiner. */
+.seq-bord {
+  /* Verven met je vinger over de vakjes mag de bladzijde niet meeslepen. */
+  touch-action: none;
+  padding-bottom: var(--space-1);
+}
+
+/* Het hele bord is een raster: het naamknopje links, dan twee tellen van elk
+   vier vakjes. De eerste kolom is zo breed als de breedste naam, zodat alle
+   rijen dezelfde kolommen hebben en de vakjes recht onder elkaar staan. */
+.seq-raster {
+  display: grid;
+  grid-template-columns: auto repeat(2, minmax(0, 1fr));
+  gap: var(--space-2);
+  align-items: stretch;
+}
+
+/* Een rij is alleen een groepje in de opmaak; zijn kinderen staan zelf in het
+   raster hierboven. De kleur van het geluid erft er gewoon doorheen. */
+.seq-rij { display: contents; }
+
+/* Het naamknopje is even hoog als de vakjes ernaast, en heeft hun hoeken. */
+.seq-rij .deel-titel {
+  min-width: 0;
+  margin: 0;
+  padding-inline: 0.75em;
+  border-radius: var(--radius-sm);
+}
+
+.seq-tel {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-1);
+}
+
+/* Een vakje. Leeg is wit; aan krijgt het de kleur van zijn geluid en de vorm
+   die je ook op het pad ziet. */
+.stap {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  /* Vierkant zolang het scherm smal is, maar op een breed scherm niet hoger
+     dan zestig pixels: dan wordt het bord een liggende strook in plaats van
+     een blok dat het halve scherm vult. Daartussen groeit hij gewoon mee. */
+  aspect-ratio: 1;
+  max-height: clamp(28px, 8vw, 60px);
+  padding: 0;
+  background: var(--wit);
+  border: 3px solid var(--ink);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  will-change: transform;
+  transition: transform 0.12s var(--bounce);
+}
+
+.stap:hover { transform: scale(1.06); }
+.stap:focus-visible { outline: 4px solid var(--blauw); outline-offset: 3px; }
+
+/* De vorm past in het vakje, ook als dat breder is dan hoog: hij krijgt een vak
+   van zeventig procent en tekent zichzelf daar in het midden van. */
+.stap .vorm { display: none; width: 70%; height: 70%; aspect-ratio: auto; }
+.stap[aria-pressed="true"] { background: var(--kleur); }
+.stap[aria-pressed="true"] .vorm { display: block; }
+
+/* De afspeellijn: de kolom die nu klinkt wordt groen, lege en volle vakjes
+   allebei. Alleen de kleur verandert; een vol vakje veert daarbij even op
+   (zie sequencer.js), zodat je ziet welke noot er klinkt. */
+.stap.nu { background: var(--mint); }
+
+@media (max-width: 720px) {
+  .seq-leeg { padding: 0.45em 0.7em; }
+  .seq-leeg-teken { display: block; }
+  .seq-leeg-tekst { display: none; }
+  /* Alle ruimte die niet naar marge gaat, gaat naar de vakjes. */
+  .seq-raster { gap: var(--space-1); }
+  .seq-rij .deel-titel { padding-inline: 0.5em; font-size: var(--text-sm); border-width: 2px; }
+  .stap { border-width: 2px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stap { transition: none; }
+  .stap:hover { transform: none; }
+}
+
+/* De kit zonder de grote pads. In de tweede ritmeles is het bord al de plek
+   om te spelen, dus boven de schuifjes staat alleen nog de naam als pilletje
+   in de kleur van het geluid. Het is nog steeds het pad: erop tikken speelt
+   het geluid en het licht mee op als het bord het speelt. */
+.kit.compact .pad {
+  width: fit-content;
+  aspect-ratio: auto;
+  padding: 0.15em 0.9em;
+  border-width: 3px;
+  border-radius: var(--radius-pill);
+}
+
+.kit.compact .vorm,
+.kit.compact .pad-toets { display: none; }
+
+.kit.compact .pad-naam {
+  font-size: var(--text-base);
+  font-weight: 700;
+  line-height: 1.5;
 }

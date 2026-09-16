@@ -97,7 +97,6 @@ const recordEl = spelEl && spelEl.querySelector('[data-record]');
 const knoppenEl = spelEl && spelEl.querySelector('[data-knoppen]');
 const veldEl = spelEl && spelEl.querySelector('.spel-veld');
 const vrijEl = spelEl && spelEl.querySelector('[data-vrij]');
-const meldingEl = document.querySelector('[data-melding]');
 const spelblokEl = document.querySelector('[data-spelblok]');
 const kitblokEl = document.querySelector('[data-kitblok]');
 // De graadknoppen staan op twee plekken: boven het veld en op de kaart. Ze
@@ -573,28 +572,10 @@ function kijkVrijspelen() {
 // Groot in beeld, maar het spel loopt er gewoon onderdoor. Vandaar dat de melding
 // geen muisklikken vangt en boven in het veld hangt, waar nog geen noot geraakt
 // hoeft te worden: je hebt iets verdiend, je wordt niet onderbroken.
-let meldTimer = 0;
-
-// Groot midden in beeld, waar je ook op de bladzijde bent. Dat is nodig voor het
-// vrijspelen van de game zelf: dat gebeurt boven bij de schuifjes, terwijl het
-// slot beneden zit.
-function meld(kop, regel) {
-  if (!meldingEl) return;
-  meldingEl.innerHTML = '<b>' + kop + '<span>' + regel + '</span></b>';
-  clearTimeout(meldTimer);
-  meldTimer = setTimeout(() => { meldingEl.textContent = ''; }, 4200);
-
-  confetti(54, meldingEl);
-  const kaart = meldingEl.firstElementChild;
-  if (minderBeweging.matches || !kaart.animate) return;
-  kaart.animate([
-    { transform: 'scale(0.3) rotate(-14deg)', opacity: 0, easing: 'cubic-bezier(0.34, 1.56, 0.64, 1)' },
-    { transform: 'scale(1) rotate(-3deg)', opacity: 1, offset: 0.12, easing: 'linear' },
-    { transform: 'scale(1) rotate(-3deg)', opacity: 1, offset: 0.85, easing: 'ease-in' },
-    { transform: 'scale(1.15) rotate(-3deg)', opacity: 0 }
-  ], { duration: 4200 });
-}
-
+//
+// Dit is de kleine melding, in het veld zelf. De grote over de hele bladzijde
+// (meld) en de confetti staan in melding.js, want die deelt deze les met de
+// tweede ritmeles.
 let vrijTimer = 0;
 
 function vier(naam) {
@@ -603,7 +584,7 @@ function vier(naam) {
   clearTimeout(vrijTimer);
   vrijTimer = setTimeout(() => { vrijEl.textContent = ''; }, 2200);
 
-  confetti(44);
+  confetti(44, veldEl);
   const kaart = vrijEl.firstElementChild;
   if (minderBeweging.matches || !kaart.animate) return;
   // De bounce hoort alleen op het opkomen. Zet je hem over de hele animatie, dan
@@ -615,37 +596,6 @@ function vier(naam) {
     { transform: 'scale(1) rotate(-3deg)', opacity: 1, offset: 0.8, easing: 'ease-in' },
     { transform: 'scale(1.15) rotate(-3deg)', opacity: 0 }
   ], { duration: 2200 });
-}
-
-// Losse snippers die het veld uit vallen en zichzelf opruimen. Geen bibliotheek:
-// een handjevol spannetjes met elk een eigen val is precies genoeg.
-const SNIPPERKLEUREN = ['--koraal', '--zon', '--blauw', '--mint', '--bubblegum'];
-
-function confetti(aantal, laag) {
-  const waar = laag || veldEl;
-  if (!waar || minderBeweging.matches || !waar.animate) return;
-  const val = waar.clientHeight + 60;
-
-  for (let i = 0; i < aantal; i++) {
-    const snipper = document.createElement('span');
-    snipper.className = 'snipper';
-    snipper.style.background = 'var(' + SNIPPERKLEUREN[i % SNIPPERKLEUREN.length] + ')';
-    snipper.style.left = Math.round(Math.random() * 100) + '%';
-    if (i % 3 === 0) snipper.style.borderRadius = '50%';
-    waar.appendChild(snipper);
-
-    const beweging = snipper.animate([
-      { transform: 'translate3d(0, -30px, 0) rotate(0deg)' },
-      { transform: 'translate3d(' + Math.round((Math.random() - 0.5) * 200) + 'px, ' +
-                   val + 'px, 0) rotate(' + Math.round((Math.random() * 4 - 2) * 360) + 'deg)' }
-    ], {
-      duration: 1500 + Math.random() * 1100,
-      delay: Math.random() * 320,
-      easing: 'cubic-bezier(0.3, 0.2, 0.7, 1)',
-      fill: 'both'
-    });
-    beweging.onfinish = () => snipper.remove();
-  }
 }
 
 // ============================================================

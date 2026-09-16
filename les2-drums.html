@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Drumstel-ritme maken — online muziek maken | muziekfles.nl</title>
+<meta name="description" content="Leer wat een sequencer is en maak je eigen drumbeat: zet de kick, de snare en de hihat op het bord en hoor meteen wat er gebeurt. Gratis online muziekles, meteen in je browser.">
+<meta name="keywords" content="online muziek maken, sequencer, drumbeat maken, ritme leren, kick snare hihat, muzikale games, gratis online muziekles">
+<meta name="author" content="Studio Wotto">
+<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
+
+<link rel="canonical" href="https://muziekfles.nl/les2-drums.html">
+<link rel="author" href="https://studiowotto.com">
+
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://muziekfles.nl/les2-drums.html">
+<meta property="og:site_name" content="muziekfles.nl">
+<meta property="og:locale" content="nl_NL">
+<meta property="og:title" content="Drumstel-ritme maken — online muziek maken">
+<meta property="og:description" content="Leer wat een sequencer is en maak je eigen drumbeat: zet de kick, de snare en de hihat op het bord en hoor meteen wat er gebeurt. Gratis online muziekles, meteen in je browser.">
+<meta property="og:image" content="https://muziekfles.nl/img/deelkaart.png">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="muziekfles.nl">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Drumstel-ritme maken — online muziek maken">
+<meta name="twitter:description" content="Leer wat een sequencer is en maak je eigen drumbeat: zet de kick, de snare en de hihat op het bord en hoor meteen wat er gebeurt. Gratis online muziekles, meteen in je browser.">
+<meta name="twitter:image" content="https://muziekfles.nl/img/deelkaart.png">
+
+<link rel="icon" href="favicon.ico" sizes="32x32">
+<link rel="icon" href="img/favicon.png" type="image/png" sizes="512x512">
+<link rel="apple-touch-icon" href="img/favicon.png">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "LearningResource",
+      "@id": "https://muziekfles.nl/les2-drums.html#les",
+      "url": "https://muziekfles.nl/les2-drums.html",
+      "name": "Drumstel-ritme maken",
+      "description": "Leer wat een sequencer is en maak je eigen drumbeat: zet de kick, de snare en de hihat op het bord en hoor meteen wat er gebeurt. Gratis online muziekles, meteen in je browser.",
+      "inLanguage": "nl-NL",
+      "isAccessibleForFree": true,
+      "learningResourceType": "interactieve les",
+      "educationalLevel": "primair onderwijs",
+      "typicalAgeRange": "8-12",
+      "teaches": "ritme, maat, sequencer, beat maken, kick, snare, hihat",
+      "isPartOf": { "@id": "https://muziekfles.nl/#site" },
+      "publisher": { "@id": "https://muziekfles.nl/#studio" }
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "name": "Alle lessen", "item": "https://muziekfles.nl/" },
+        { "@type": "ListItem", "position": 2, "name": "Drumstel-ritme maken" }
+      ]
+    }
+  ]
+}
+</script>
+<link rel="stylesheet" href="css/wotto.css">
+<link rel="stylesheet" href="css/site.css">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.2/src/bold/style.css">
+</head>
+<body>
+
+<div class="wrap">
+
+  <header class="topbar">
+    <a class="terug" href="index.html">
+      <i class="ph-bold ph-arrow-left" aria-hidden="true"></i> Alle lessen
+    </a>
+    <button class="knop mini" type="button" data-wis-alles>Wis voortgang</button>
+  </header>
+
+  <div class="hero">
+    <h1><span class="reeks">Ritme · les 2</span> <em>Drumstel-ritme</em> maken</h1>
+
+    <div class="met-plaatje">
+      <img class="met-plaatje-beeld" src="img/sequencer.png" alt=""
+           width="1536" height="1024">
+      <div class="met-plaatje-tekst">
+        <h2>Wat is een sequencer?</h2>
+        <p class="lead">
+          Een <b>sequencer</b> is een machine die voor jou drumt. Jij zegt van
+          tevoren wanneer hij moet slaan, en hij doet precies wat je zegt. Steeds
+          opnieuw, en nooit te vroeg of te laat.
+        </p>
+        <p class="lead">
+          Hoe maak je dan een ritme? Door vakjes aan te klikken. Kijk naar het
+          bord hieronder. Elk onderdeel van het drumstel heeft een eigen rij: een
+          voor de <b>kick</b>, een voor de <b>snare</b> en een voor de
+          <b>hihat</b>. De tijd loopt van links naar rechts.
+        </p>
+      </div>
+    </div>
+
+    <div class="stippels" aria-hidden="true"></div>
+  </div>
+
+  <h2 class="kop">Maak je eigen beat</h2>
+
+  <p class="blok-uitleg">
+    Tik een vakje aan en druk op afspelen. De vakjes worden een voor een
+    afgespeeld, en het vakje dat klinkt wordt <b>groen</b>: dat is de
+    afspeellijn. Zet vakjes aan of uit en hoor meteen wat er gebeurt.
+  </p>
+
+  <!-- Afspelen, tempo en de terugzetknop staan boven het bord, niet erin. -->
+  <div class="seq-knoppen" data-seq-knoppen></div>
+
+  <section class="seq" id="seq">
+    <div class="seq-bord" data-seq-bord></div>
+  </section>
+
+  <!-- De vier kaarten, klein in een zin onder het bord. sequencer.js zet de
+       drie voorbeelden in het eerste vak en Mijn beat in het tweede. -->
+  <p class="seq-keuze">
+    Geen inspiratie? Begin dan eens met een bestaande beat:
+    <span class="seq-kaarten" data-seq-kaarten></span>
+    Of maak er helemaal een van jezelf:
+    <span class="seq-kaarten" data-seq-eigen></span>
+  </p>
+
+  <div class="kitblok">
+    <h2 class="kop kop-kit">Verander de geluiden van het drumstel</h2>
+    <p class="blok-uitleg">
+      Sleep aan de schuifjes en hoor wat er verandert. De beat op het bord
+      speelt gewoon door, dus je hoort meteen wat het met je ritme doet.
+    </p>
+    <main class="kit compact" id="kit"></main>
+  </div>
+
+  <footer class="voet">
+    muziekfles.nl · gemaakt door <a href="https://studiowotto.com">Studio Wotto</a>
+  </footer>
+
+</div>
+
+<script src="js/vendor/Tone.js"></script>
+<script src="js/drumkit.js"></script>
+<script src="js/beats.js"></script>
+<script src="js/sequencer.js"></script>
+
+</body>
+</html>

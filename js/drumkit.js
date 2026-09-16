@@ -633,10 +633,12 @@ document.addEventListener('click', (e) => {
   if (grootbeeld.open) grootbeeld.close();
 });
 
-// Schuifjes
+// Schuifjes. Alleen die van de kit: die hebben een data-param. Een tempo-schuif
+// van een andere les komt hier ook langs, en die heeft geen stand om in te
+// schrijven.
 document.addEventListener('input', (e) => {
   const el = e.target;
-  if (el.type !== 'range') return;
+  if (el.type !== 'range' || !el.dataset.param) return;
   stand[el.dataset.id][el.dataset.param] = parseFloat(el.value);
   pasToe(el.dataset.id);
   if (bijSchuifje) bijSchuifje(el.dataset.id, el.dataset.param);
@@ -646,7 +648,7 @@ document.addEventListener('input', (e) => {
 // hier en niet bij elke beweging tijdens het slepen: dan zou er tientallen keren
 // per seconde naar de opslag geschreven worden.
 document.addEventListener('change', (e) => {
-  if (e.target.type !== 'range') return;
+  if (e.target.type !== 'range' || !e.target.dataset.param) return;
   bewaarStand();
   raak(e.target.dataset.id);
 });
