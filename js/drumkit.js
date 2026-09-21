@@ -569,17 +569,107 @@ function raak(id) {
   if (bijAanslag) bijAanslag(id, wanneer);
 }
 
-// Pads: pointerdown speelt meteen, zonder te wachten op het loslaten.
-document.addEventListener('pointerdown', (e) => {
-  // Alleen de linkerknop. pointerdown vuurt ook bij rechts- en middenklik, en
-  // dan zou je een geluid krijgen mét een contextmenu erbij. Bij aanraken is
-  // button altijd 0, dus touch loopt hier gewoon doorheen -- en we filteren
-  // bewust niet op isPrimary, want een tweede vinger moet ook gewoon spelen.
-  if (e.button !== 0) return;
+// ------------------------------------------------------------
+//  Indrukken, op elk scherm
+// ------------------------------------------------------------
+// pointerdown is de gewone weg: meteen bij het neerkomen, en elke vinger apart.
+// Maar op een Prowise-bord kwam er niets binnen, terwijl knoppen die op click
+// luisteren het wel deden. Een digibord is geen telefoon: er zit een
+// infraroodraam omheen met een eigen driver, en soms een oude browser, en wat
+// daar als pointerdown uitkomt (of niet) heb je niet in de hand.
+//
+// Daarom drie vangnetten onder elkaar. Elk vangnet doet alleen iets als de weg
+// erboven voor deze aanraking niets heeft gedaan:
+//
+//   1. pointerdown   de gewone weg
+//   2. touchstart    komt pointerdown niet, dan komt deze wel
+//      mousedown     een bord dat zich als muis voordoet, of een oude browser
+//   3. click         het laatste redmiddel: later, maar hij komt altijd
+//
+// Dubbel afgaan mag niet, want dan kapt het geluid zichzelf af. Een browser
+// stuurt na een aanraking nog nagemaakte muis-events achteraan; die herken je
+// aan de tijd. De click die bij een neer hoort herken je niet aan de tijd, want
+// je kunt een pad ook drie tellen ingedrukt houden. Die strepen we weg tegen de
+// neer die eraan voorafging.
+//
+// bijNeer(wortel, zoek, neer) -- zoek(el) geeft het element terug waar het om
+// gaat, of null. neer(doel, e) doet het werk. Wie ook slepen wil volgen geeft
+// beweeg(x, y) en los() mee; zie sequencer.js.
+const NA_AANRAKING = 800; // zo lang kunnen nagemaakte muis-events nakomen
 
-  const pad = e.target.closest('.pad, .deel, .deel-titel');
-  if (!pad) return;
+function bijNeer(wortel, zoek, neer, beweeg, los) {
+  let laatsteNeer = -Infinity;      // wanneer er voor het laatst iets is afgegaan
+  let laatsteAanraking = -Infinity; // wanneer dat voor het laatst een vinger was
+  let aanraakPointers = false;      // komen vingers als pointerdown binnen?
+  let clickTegoed = false;          // er komt nog een click die al geteld is
 
+  function af(doel, e, vinger) {
+    const nu = performance.now();
+    laatsteNeer = nu;
+    clickTegoed = e.type !== 'click';
+    if (vinger) laatsteAanraking = nu;
+    neer(doel, e);
+  }
+
+  wortel.addEventListener('pointerdown', (e) => {
+    const muis = e.pointerType === 'mouse';
+    // Alleen de linkerknop van een muis: pointerdown vuurt ook bij rechts- en
+    // middenklik, en dan kreeg je een geluid met een contextmenu erbij. Bij een
+    // vinger of pen kijken we niet naar button. Hoort 0 te zijn, maar een bord
+    // dat daar iets anders in zet moet gewoon spelen. En bewust niet op
+    // isPrimary: een tweede vinger speelt ook.
+    if (muis && e.button !== 0) return;
+    if (!muis) aanraakPointers = true;
+    const doel = zoek(e.target);
+    if (doel) af(doel, e, !muis);
+  });
+
+  // passive: false, anders mag preventDefault hier niet en zoomt een oude
+  // browser in als je twee keer snel op een pad slaat.
+  wortel.addEventListener('touchstart', (e) => {
+    if (aanraakPointers) return; // de gewone weg werkt, dit is dubbel
+    for (let i = 0; i < e.changedTouches.length; i++) {
+      const doel = zoek(e.changedTouches[i].target);
+      if (doel) af(doel, e, true);
+    }
+  }, { passive: false });
+
+  wortel.addEventListener('mousedown', (e) => {
+    if (e.button !== 0) return;
+    const nu = performance.now();
+    if (nu - laatsteNeer < 50) return;                 // pointerdown had hem al
+    if (nu - laatsteAanraking < NA_AANRAKING) return;  // nagemaakt, na een vinger
+    const doel = zoek(e.target);
+    if (doel) af(doel, e, false);
+  });
+
+  // detail 0 is een click van het toetsenbord; die handelt de aanroeper zelf af.
+  wortel.addEventListener('click', (e) => {
+    if (e.detail === 0) return;
+    if (clickTegoed) { clickTegoed = false; return; }
+    const doel = zoek(e.target);
+    if (doel) af(doel, e, false);
+  });
+
+  if (!beweeg) return;
+
+  const opDoc = (soort, fn) => document.addEventListener(soort, fn, { passive: true });
+  opDoc('pointermove', (e) => beweeg(e.clientX, e.clientY));
+  opDoc('touchmove', (e) => {
+    if (aanraakPointers) return;
+    const t = e.changedTouches[0];
+    if (t) beweeg(t.clientX, t.clientY);
+  });
+  opDoc('mousemove', (e) => {
+    if (performance.now() - laatsteAanraking < NA_AANRAKING) return;
+    beweeg(e.clientX, e.clientY);
+  });
+  ['pointerup', 'pointercancel', 'touchend', 'touchcancel', 'mouseup']
+    .forEach((soort) => opDoc(soort, los));
+}
+
+// Pads: indrukken speelt meteen, zonder te wachten op het loslaten.
+bijNeer(document, (el) => (el && el.closest ? el.closest('.pad, .deel, .deel-titel') : null), (pad, e) => {
   // preventDefault houdt het slepen en selecteren tegen, maar neemt ook de focus
   // weg. Die zetten we er zelf op, zodat je na een klik gewoon de spatiebalk kunt
   // gebruiken. Zonder scrollen, anders springt de pagina op een klein scherm.
@@ -587,7 +677,12 @@ document.addEventListener('pointerdown', (e) => {
   // Alleen op de pads. Op de foto's boven aan de les hield je er anders een
   // blauwe rand aan over die je met de muis niet gevraagd hebt. Loop je er met
   // het toetsenbord langs, dan komt die rand er via :focus-visible gewoon bij.
-  e.preventDefault();
+  //
+  // Bij touchstart alleen op een pad: op een foto zou het ook het scrollen
+  // tegenhouden, en de foto's staan midden in de bladzijde.
+  if (e.type !== 'touchstart' || pad.classList.contains('pad')) {
+    if (e.cancelable) e.preventDefault();
+  }
   if (pad.classList.contains('pad')) pad.focus({ preventScroll: true });
 
   raak(pad.dataset.id);

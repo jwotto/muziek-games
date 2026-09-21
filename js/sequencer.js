@@ -542,30 +542,25 @@ if (seqEl && seqKnoppenEl && seqBordEl && seqKaartenEl) {
   bouwKaarten();
   werkKaartenBij();
 
-  seqBordEl.addEventListener('pointerdown', (e) => {
-    // Alleen de linkerknop; bij aanraken is button altijd 0.
-    if (e.button !== 0) return;
-    const cel = celVan(e.target);
-    if (!cel) return;
+  // Indrukken zet het vakje om, en wie doorsleept verft de vakjes waar hij
+  // overheen komt in dezelfde stand. bijNeer (drumkit.js) vangt op dat een
+  // digibord of een oude browser geen nette pointerdown stuurt.
+  bijNeer(seqBordEl, celVan, (cel, e) => {
     // Geen slepen en selecteren. De focus mag weg: met het toetsenbord kom je
     // er via Tab gewoon weer bij.
-    e.preventDefault();
+    if (e.cancelable) e.preventDefault();
     verf = !isAan(cel);
     schakel(cel, verf);
-  });
-
-  document.addEventListener('pointermove', (e) => {
+    // Een click heeft geen loslaten meer na zich, dus daar valt niets te slepen.
+    if (e.type === 'click') verf = null;
+  }, (x, y) => {
     if (verf === null) return;
-    const cel = celVan(document.elementFromPoint(e.clientX, e.clientY));
+    const cel = celVan(document.elementFromPoint(x, y));
     if (cel) schakel(cel, verf);
-  });
-
-  ['pointerup', 'pointercancel'].forEach((soort) => {
-    document.addEventListener(soort, () => { verf = null; });
-  });
+  }, () => { verf = null; });
 
   // Enter of spatie op een vakje. Zo'n klik komt zonder aanwijzer binnen
-  // (detail 0); een klik met de muis is hierboven al afgehandeld.
+  // (detail 0); een klik met aanwijzer is hierboven al afgehandeld.
   seqBordEl.addEventListener('click', (e) => {
     if (e.detail !== 0) return;
     const cel = celVan(e.target);
