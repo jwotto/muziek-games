@@ -6,7 +6,6 @@
 
 <title>Maak muziek met je lijf — body percussion | muziekfles.nl</title>
 <meta name="description" content="Body percussion voor groep 3 en 4: ritme maken met je lijf. Klap samen mee met de klapjes die voorbijkomen, en het gaat steeds een beetje sneller.">
-<meta name="keywords" content="body percussion, ritme maken, klappen, muziekles groep 3, muziekles groep 4, online muziekles">
 <meta name="author" content="Studio Wotto">
 <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
 
@@ -19,19 +18,19 @@
 <meta property="og:locale" content="nl_NL">
 <meta property="og:title" content="Maak muziek met je lijf — body percussion">
 <meta property="og:description" content="Body percussion voor groep 3 en 4: ritme maken met je lijf. Klap samen mee, en het gaat steeds een beetje sneller.">
-<meta property="og:image" content="https://muziekfles.nl/img/deelkaart.png">
+<meta property="og:image" content="https://muziekfles.nl/img/deelkaart-bodypercussion.png">
 <meta property="og:image:type" content="image/png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="muziekfles.nl">
+<meta property="og:image:alt" content="Maak muziek met je lijf: klappende handen op een groene kaart van muziekfles.nl">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Maak muziek met je lijf — body percussion">
 <meta name="twitter:description" content="Body percussion voor groep 3 en 4: ritme maken met je lijf. Klap samen mee, en het gaat steeds een beetje sneller.">
-<meta name="twitter:image" content="https://muziekfles.nl/img/deelkaart.png">
+<meta name="twitter:image" content="https://muziekfles.nl/img/deelkaart-bodypercussion.png">
 
 <link rel="icon" href="favicon.ico" sizes="32x32">
-<link rel="icon" href="img/favicon.png" type="image/png" sizes="512x512">
-<link rel="apple-touch-icon" href="img/favicon.png">
+<link rel="icon" href="img/favicon-192.png" type="image/png" sizes="192x192">
+<link rel="apple-touch-icon" href="img/favicon-192.png">
 
 <script type="application/ld+json">
 {
@@ -49,8 +48,12 @@
       "educationalLevel": "primair onderwijs",
       "typicalAgeRange": "6-8",
       "teaches": "ritme, maat, samen spelen, body percussion",
-      "isPartOf": { "@id": "https://muziekfles.nl/#site" },
-      "publisher": { "@id": "https://muziekfles.nl/#studio" }
+      "image": "https://muziekfles.nl/img/deelkaart-bodypercussion.png",
+      "audience": { "@type": "EducationalAudience", "educationalRole": "teacher" },
+      "educationalUse": "klassikale les op het digibord",
+      "interactivityType": "active",
+      "isPartOf": { "@type": "WebSite", "@id": "https://muziekfles.nl/#site", "url": "https://muziekfles.nl/", "name": "muziekfles.nl" },
+      "publisher": { "@type": "Organization", "@id": "https://muziekfles.nl/#studio", "name": "Studio Wotto", "url": "https://studiowotto.com" }
     },
     {
       "@type": "BreadcrumbList",
@@ -63,9 +66,11 @@
 }
 </script>
 
+<link rel="preload" href="fonts/fredoka.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/nunito.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="css/wotto.css">
 <link rel="stylesheet" href="css/site.css">
-<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.2/src/bold/style.css">
+<link rel="stylesheet" href="css/iconen.css">
 </head>
 <body>
 
@@ -81,8 +86,8 @@
     <h1><span class="reeks">Body percussion · les 1</span> Maak muziek met je <em>lijf</em></h1>
 
     <div class="met-plaatje">
-      <img class="met-plaatje-beeld" src="img/bodypercussion.png" alt=""
-           width="520" height="520">
+      <img class="met-plaatje-beeld" src="img/bodypercussion.webp" alt="Een vrolijk kind op een stoel dat met zijn hand en voet een ritme maakt, met muzieknoten eromheen."
+           width="480" height="480">
       <div class="met-plaatje-tekst">
         <h2>Wat is body percussion?</h2>
         <p class="lead">
@@ -131,7 +136,7 @@
   </section>
 
   <div class="met-plaatje kop-knieen">
-    <img class="met-plaatje-beeld" src="img/boem.png" alt="" width="320" height="320">
+    <img class="met-plaatje-beeld" src="img/boem.webp" alt="Een hand die op een knie slaat." loading="lazy" width="320" height="320">
     <div class="met-plaatje-tekst">
       <h2 class="kop">Tik op je knieën</h2>
       <p class="blok-uitleg">
@@ -161,17 +166,29 @@
 
   </section>
 
+  <nav class="verder" aria-labelledby="verder-kop">
+    <h2 class="kop" id="verder-kop">Nog een les doen?</h2>
+    <ul>
+      <li><a href="les1-drums.html" style="--kleur: var(--koraal)">Ritme · les 1: Ontdek het drumstel</a></li>
+      <li><a href="les2-drums.html" style="--kleur: var(--zon)">Ritme · les 2: Drumstel-ritme maken</a></li>
+      <li><a href="index.html">Alle lessen</a></li>
+    </ul>
+  </nav>
+
   <footer class="voet">
     muziekfles.nl · gemaakt door <a href="https://studiowotto.com">Studio Wotto</a>
   </footer>
 
 </div>
 
-<script src="js/vendor/Tone.js"></script>
-<script src="js/drumkit.js"></script>
-<script src="js/polka.js"></script>
-<script src="js/klap.js"></script>
-<script src="js/vierkant.js"></script>
+<script defer src="js/vendor/Tone.js"></script>
+<script defer src="js/drumkit.js"></script>
+<script defer src="js/polka.js"></script>
+<script defer src="js/klap.js"></script>
+<script defer src="js/vierkant.js"></script>
+
+<!-- Cloudflare Web Analytics: telt bezoeken zonder cookies. -->
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "5dab1e3a930548d8b2e3a0ba0880f787"}'></script>
 
 </body>
 </html>

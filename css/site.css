@@ -1076,6 +1076,51 @@ input[type="range"]::-moz-range-thumb {
   .noot.raak svg { animation: none; }
 }
 
+/* ---------- Over en verder ---------- */
+
+/* Het verhaal onder de lessen op de voorpagina. Smal gehouden: het is leestekst,
+   en over de volle breedte worden de regels te lang. */
+.over {
+  margin-top: var(--space-7);
+  max-width: 46rem;
+}
+
+.over p { margin: 0 0 var(--space-4); line-height: 1.6; }
+.over a { color: var(--blauw); font-weight: 600; }
+
+/* Onderaan een les: door naar de andere lessen. */
+.verder { margin-top: var(--space-7); }
+
+.verder ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.verder a {
+  display: block;
+  padding: 0.6em 1.1em;
+  border: 3px solid var(--ink);
+  border-radius: var(--radius-pill);
+  background: var(--kleur, var(--wit));
+  color: var(--ink);
+  font-family: var(--font-kop);
+  font-weight: 600;
+  text-decoration: none;
+  transition: transform 0.15s var(--bounce);
+}
+
+.verder a:hover { transform: translateY(-3px); }
+.verder a:focus-visible { outline: 4px solid var(--blauw); outline-offset: 4px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .verder a { transition: none; }
+  .verder a:hover { transform: none; }
+}
+
 /* ---------- Footer ---------- */
 
 .voet {

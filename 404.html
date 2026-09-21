@@ -14,8 +14,10 @@
      Een 404 kan op elk adres verschijnen, ook op muziekfles.nl/een/diepe/map/,
      en dan zou een pad zonder streep in die map gaan zoeken. -->
 <link rel="icon" href="/favicon.ico" sizes="32x32">
-<link rel="icon" href="/img/favicon.png" type="image/png" sizes="512x512">
-<link rel="apple-touch-icon" href="/img/favicon.png">
+<link rel="icon" href="/img/favicon-192.png" type="image/png" sizes="192x192">
+<link rel="apple-touch-icon" href="/img/favicon-192.png">
+<link rel="preload" href="/fonts/fredoka.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/nunito.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/css/wotto.css">
 <link rel="stylesheet" href="/css/site.css">
 </head>
@@ -25,7 +27,7 @@
 
   <div class="hero">
     <h1 class="merkbeeld">
-      <a href="/"><img src="/img/muziekfles.png" width="2172" height="724" alt="muziekfles.nl"></a>
+      <a href="/"><img src="/img/muziekfles.webp" width="1600" height="533" alt="muziekfles.nl"></a>
     </h1>
 
     <p class="lead">
@@ -45,6 +47,9 @@
   </footer>
 
 </div>
+
+<!-- Cloudflare Web Analytics: telt bezoeken zonder cookies. -->
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "5dab1e3a930548d8b2e3a0ba0880f787"}'></script>
 
 </body>
 </html>

@@ -60,5 +60,7 @@ jobs:
             README.md
             huisstijl.md
             stijl.md
+            img/bron/**
+            tools/**
             **/*.aiff
             **/*.aif

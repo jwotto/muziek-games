@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Ontdek het drumstel — online muziek maken | muziekfles.nl</title>
 <meta name="description" content="Leer wat een drumstel is, ontwerp je eigen kick, snare en hihat en speel mee met het ritmespel. Gratis online muziekles, meteen in je browser.">
-<meta name="keywords" content="online muziek maken, drumstel, ritme leren, kick snare hihat, muzikale games, gratis online muziekles">
 <meta name="author" content="Studio Wotto">
 <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
 
@@ -18,19 +17,19 @@
 <meta property="og:locale" content="nl_NL">
 <meta property="og:title" content="Ontdek het drumstel — online muziek maken">
 <meta property="og:description" content="Leer wat een drumstel is, ontwerp je eigen kick, snare en hihat en speel mee met het ritmespel. Gratis online muziekles, meteen in je browser.">
-<meta property="og:image" content="https://muziekfles.nl/img/deelkaart.png">
+<meta property="og:image" content="https://muziekfles.nl/img/deelkaart-les1-drums.png">
 <meta property="og:image:type" content="image/png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="muziekfles.nl">
+<meta property="og:image:alt" content="Ontdek het drumstel: een rood, geel en blauw drumstel op een koraalrode kaart van muziekfles.nl">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Ontdek het drumstel — online muziek maken">
 <meta name="twitter:description" content="Leer wat een drumstel is, ontwerp je eigen kick, snare en hihat en speel mee met het ritmespel. Gratis online muziekles, meteen in je browser.">
-<meta name="twitter:image" content="https://muziekfles.nl/img/deelkaart.png">
+<meta name="twitter:image" content="https://muziekfles.nl/img/deelkaart-les1-drums.png">
 
 <link rel="icon" href="favicon.ico" sizes="32x32">
-<link rel="icon" href="img/favicon.png" type="image/png" sizes="512x512">
-<link rel="apple-touch-icon" href="img/favicon.png">
+<link rel="icon" href="img/favicon-192.png" type="image/png" sizes="192x192">
+<link rel="apple-touch-icon" href="img/favicon-192.png">
 
 <script type="application/ld+json">
 {
@@ -48,8 +47,12 @@
       "educationalLevel": "primair onderwijs",
       "typicalAgeRange": "8-12",
       "teaches": "ritme, maat, drumstel, kick, snare, hihat",
-      "isPartOf": { "@id": "https://muziekfles.nl/#site" },
-      "publisher": { "@id": "https://muziekfles.nl/#studio" }
+      "image": "https://muziekfles.nl/img/deelkaart-les1-drums.png",
+      "audience": { "@type": "EducationalAudience", "educationalRole": "teacher" },
+      "educationalUse": "klassikale les op het digibord",
+      "interactivityType": "active",
+      "isPartOf": { "@type": "WebSite", "@id": "https://muziekfles.nl/#site", "url": "https://muziekfles.nl/", "name": "muziekfles.nl" },
+      "publisher": { "@type": "Organization", "@id": "https://muziekfles.nl/#studio", "name": "Studio Wotto", "url": "https://studiowotto.com" }
     },
     {
       "@type": "BreadcrumbList",
@@ -61,9 +64,11 @@
   ]
 }
 </script>
+<link rel="preload" href="fonts/fredoka.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/nunito.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="css/wotto.css">
 <link rel="stylesheet" href="css/site.css">
-<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.2/src/bold/style.css">
+<link rel="stylesheet" href="css/iconen.css">
 </head>
 <body>
 
@@ -87,7 +92,7 @@
 
     <figure class="drumstel-groot">
       <button class="vergroot" type="button" data-vergroot>
-        <img src="img/drumstel.png" width="1506" height="1044" alt="Een drumstel met drie onderdelen naast elkaar: een grote rode trommel op de grond, een gele trommel op een standaard en twee blauwe bekkens op een standaard.">
+        <img src="img/drumstel.webp" width="1506" height="1044" alt="Een drumstel met drie onderdelen naast elkaar: een grote rode trommel op de grond, een gele trommel op een standaard en twee blauwe bekkens op een standaard.">
       </button>
       <figcaption>
         Weet jij hoe alle onderdelen heten?
@@ -110,20 +115,20 @@
     <figure class="drumstel">
       <div class="onderdelen">
         <button class="deel" type="button" data-id="kick" style="--kleur: var(--koraal)">
-          <img class="puls" data-puls="1.12" src="img/kick.png" width="1434" height="1097"
+          <img class="puls" data-puls="1.12" src="img/kick.webp" width="915" height="700"
                alt="De kick: een grote rode trommel die op de grond staat.">
           <span class="deel-naam">Kick</span>
         </button>
 
         <button class="deel" type="button" data-id="snare" style="--kleur: var(--zon)">
-          <img class="puls" data-puls="1.12" src="img/snare.png" width="1442" height="1091"
+          <img class="puls" data-puls="1.12" src="img/snare.webp" width="925" height="700"
                alt="De snare: een gele trommel op een standaard.">
           <span class="deel-naam">Snare</span>
         </button>
 
         <button class="deel" type="button" data-id="hihat"
                 style="--kleur: var(--blauw); --op-kleur: var(--wit)">
-          <img class="puls" data-puls="1.12" src="img/hihat.png" width="1024" height="1536"
+          <img class="puls" data-puls="1.12" src="img/hihat.webp" width="467" height="700"
                alt="De hihat: twee blauwe bekkens boven elkaar op een standaard met een pedaal.">
           <span class="deel-naam">Hihat</span>
         </button>
@@ -138,7 +143,7 @@
   </div>
 
   <dialog class="grootbeeld" data-grootbeeld>
-    <img src="img/drumstel.png" width="1506" height="1044" alt="Een drumstel met drie onderdelen naast elkaar: een grote rode trommel op de grond, een gele trommel op een standaard en twee blauwe bekkens op een standaard.">
+    <img src="img/drumstel.webp" width="1506" height="1044" alt="Een drumstel met drie onderdelen naast elkaar: een grote rode trommel op de grond, een gele trommel op een standaard en twee blauwe bekkens op een standaard.">
   </dialog>
 
   <h2 class="kop">Luister naar drie beats</h2>
@@ -211,18 +216,30 @@
 
   <div class="melding" data-melding aria-live="polite"></div>
 
+  <nav class="verder" aria-labelledby="verder-kop">
+    <h2 class="kop" id="verder-kop">Nog een les doen?</h2>
+    <ul>
+      <li><a href="les2-drums.html" style="--kleur: var(--zon)">Ritme · les 2: Drumstel-ritme maken</a></li>
+      <li><a href="bodypercussion.html" style="--kleur: var(--mint)">Body percussion · les 1: Maak muziek met je lijf</a></li>
+      <li><a href="index.html">Alle lessen</a></li>
+    </ul>
+  </nav>
+
   <footer class="voet">
     muziekfles.nl · gemaakt door <a href="https://studiowotto.com">Studio Wotto</a>
   </footer>
 
 </div>
 
-<script src="js/vendor/Tone.js"></script>
-<script src="js/drumkit.js"></script>
-<script src="js/polka.js"></script>
-<script src="js/beats.js"></script>
-<script src="js/melding.js"></script>
-<script src="js/spel.js"></script>
+<script defer src="js/vendor/Tone.js"></script>
+<script defer src="js/drumkit.js"></script>
+<script defer src="js/polka.js"></script>
+<script defer src="js/beats.js"></script>
+<script defer src="js/melding.js"></script>
+<script defer src="js/spel.js"></script>
+
+<!-- Cloudflare Web Analytics: telt bezoeken zonder cookies. -->
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "5dab1e3a930548d8b2e3a0ba0880f787"}'></script>
 
 </body>
 </html>

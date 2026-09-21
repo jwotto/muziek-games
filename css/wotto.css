@@ -1,7 +1,24 @@
 /* Wotto huisstijl tokens
    Drop-in stylesheet voor Studio Wotto gamification webapps */
 
-@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400..700&family=Nunito:wght@400..900&display=swap');
+/* De twee lettertypes staan op de site zelf, niet bij Google: dat scheelt twee
+   omwegen bij het laden en er gaat niets van de bezoeker naar een ander. Het zijn
+   variabele fonts, dus een bestand per lettertype dekt alle diktes. */
+@font-face {
+  font-family: 'Fredoka';
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url('../fonts/fredoka.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Nunito';
+  font-style: normal;
+  font-weight: 400 900;
+  font-display: swap;
+  src: url('../fonts/nunito.woff2') format('woff2');
+}
 
 :root {
   /* Kleuren */

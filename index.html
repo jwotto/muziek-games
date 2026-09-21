@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Gratis online muziekles met muziekgames | muziekfles.nl</title>
 <meta name="description" content="Gratis online muziekles voor de basisschool. Speel muzikale games, maak online muziek en leer ritme met kick, snare en hihat. Zonder inloggen, meteen spelen.">
-<meta name="keywords" content="gratis online muziekles, muzikale games, online muziek maken, muziekgames, ritme leren, drumstel, muziekles basisschool">
 <meta name="author" content="Studio Wotto">
 <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
 
@@ -33,8 +32,8 @@
 <meta name="twitter:image" content="https://muziekfles.nl/img/deelkaart.png">
 
 <link rel="icon" href="favicon.ico" sizes="32x32">
-<link rel="icon" href="img/favicon.png" type="image/png" sizes="512x512">
-<link rel="apple-touch-icon" href="img/favicon.png">
+<link rel="icon" href="img/favicon-192.png" type="image/png" sizes="192x192">
+<link rel="apple-touch-icon" href="img/favicon-192.png">
 
 <script type="application/ld+json">
 {
@@ -62,14 +61,28 @@
       "name": "Gratis online muziekles met muziekgames",
       "isPartOf": { "@id": "https://muziekfles.nl/#site" },
       "inLanguage": "nl-NL",
-      "isAccessibleForFree": true
+      "isAccessibleForFree": true,
+      "audience": { "@type": "EducationalAudience", "educationalRole": "teacher" },
+      "mainEntity": { "@id": "https://muziekfles.nl/#lessen" }
+    },
+    {
+      "@type": "ItemList",
+      "@id": "https://muziekfles.nl/#lessen",
+      "name": "Gratis online muzieklessen",
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "name": "Ontdek het drumstel", "url": "https://muziekfles.nl/les1-drums.html" },
+        { "@type": "ListItem", "position": 2, "name": "Drumstel-ritme maken", "url": "https://muziekfles.nl/les2-drums.html" },
+        { "@type": "ListItem", "position": 3, "name": "Maak muziek met je lijf", "url": "https://muziekfles.nl/bodypercussion.html" }
+      ]
     }
   ]
 }
 </script>
+<link rel="preload" href="fonts/fredoka.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/nunito.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="css/wotto.css">
 <link rel="stylesheet" href="css/site.css">
-<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.2/src/bold/style.css">
+<link rel="stylesheet" href="css/iconen.css">
 </head>
 <body>
 
@@ -77,8 +90,8 @@
 
   <div class="hero">
     <h1 class="merkbeeld">
-      <img src="img/muziekfles.png" width="2172" height="724"
-           alt="muziekfles.nl"
+      <img src="img/muziekfles.webp" width="1600" height="533"
+           alt="muziekfles.nl: gratis online muziekles voor de basisschool"
            fetchpriority="high">
     </h1>
     <p class="lead"><b>Online muzieklessen voor in de klas.</b> Leer alles over muziek:
@@ -122,11 +135,41 @@
 
   </main>
 
+  <!-- Voor de leerkracht, en voor wie wil weten wie dit maakt. Bewust onder de
+       lessen: een kind dat wil spelen hoeft hier niet langs. -->
+  <section class="over" aria-labelledby="over-kop">
+    <h2 class="kop" id="over-kop">Muziekles die iedere leerkracht kan geven</h2>
+    <p>
+      Hoi, ik ben Jan-Willem. Ik maak muzieklessen en zet ze hier gratis online.
+      Dat doe ik omdat ik vind dat iedere leerkracht muziekles moet kunnen geven.
+      Ook als er op school geen vakdocent muziek is, en ook als je zelf geen noot
+      kunt lezen.
+    </p>
+    <p>
+      Daarom doet elke les het meeste werk zelf. Je zet hem op het digibord, de
+      uitleg staat erbij, en de klas doet mee: luisteren, meeklappen, een beat
+      bouwen of een muziekgame spelen. Voorbereiden hoeft bijna niet.
+    </p>
+    <p>
+      Je hebt er niets voor nodig. Geen account, geen app en geen instrumenten.
+      De lessen werken in de browser, op het digibord, een laptop of een tablet.
+      Er zijn lessen voor de hele basisschool: body percussion voor groep 3 en 4,
+      en het drumstel en zelf ritmes maken voor groep 5 tot en met 8.
+    </p>
+    <p>
+      Er komen steeds nieuwe lessen bij. Wil je weten wat ik nog meer maak? Kijk
+      dan op <a href="https://studiowotto.com">studiowotto.com</a>.
+    </p>
+  </section>
+
   <footer class="voet">
     muziekfles.nl · gemaakt door <a href="https://studiowotto.com">Studio Wotto</a>
   </footer>
 
 </div>
+
+<!-- Cloudflare Web Analytics: telt bezoeken zonder cookies. -->
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "5dab1e3a930548d8b2e3a0ba0880f787"}'></script>
 
 </body>
 </html>

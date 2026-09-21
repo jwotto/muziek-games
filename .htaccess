@@ -65,9 +65,17 @@ ErrorDocument 404 /404.html
   </FilesMatch>
 </IfModule>
 
+# Een oudere Apache kent webp en woff2 niet en stuurt ze dan als "onbekend
+# bestand". De browser toont zo'n plaatje dan soms niet.
+<IfModule mod_mime.c>
+  AddType image/webp .webp
+  AddType font/woff2 .woff2
+</IfModule>
+
 <IfModule mod_expires.c>
   ExpiresActive On
   ExpiresByType image/png              "access plus 6 months"
+  ExpiresByType image/webp             "access plus 6 months"
   ExpiresByType image/svg+xml          "access plus 6 months"
   ExpiresByType image/x-icon           "access plus 6 months"
   ExpiresByType font/woff2             "access plus 6 months"

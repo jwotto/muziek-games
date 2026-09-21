@@ -91,8 +91,8 @@ const VIERKANT_AANLOOP = 4;      // tellen aftellen voordat het eerste vakje kom
 const VIERKANT_VOORUIT = 1.2;    // seconden dat een tik van tevoren wordt gepland
 
 const VIERKANT_PLAATJES = {
-  boem: { bron: 'img/boem.png', naam: 'boem' },
-  klap: { bron: 'img/clap.png', naam: 'klap' }
+  boem: { bron: 'img/boem.webp', naam: 'boem' },
+  klap: { bron: 'img/clap.webp', naam: 'klap' }
 };
 
 const VIERKANT_INSTELLINGEN = [
