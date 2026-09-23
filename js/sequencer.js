@@ -309,6 +309,24 @@ function zetTempo(bpm) {
 }
 
 // ============================================================
+//  Meeluisteren
+// ============================================================
+
+// De game onderaan (beatspel.js) hangt hier zijn oren aan, net als het spel in
+// les 1 aan bijAanslag en bijSchuifje. Dit bestand weet niets van die game; het
+// zegt alleen wat er gebeurt.
+//
+// bijVakje(id, i): een vakje is aangetikt of er is overheen geverfd, aan of
+// uit maakt niet uit. bijBeatVerandert(): wat er klinkt is anders dan net, door
+// een vakje, een kaart, een reset of het tempo. bijWissen(): de knop Wis
+// voortgang is gebruikt.
+let bijVakje = null;
+let bijBeatVerandert = null;
+let bijWissen = null;
+
+function meldVerandering() { if (bijBeatVerandert) bijBeatVerandert(); }
+
+// ============================================================
 //  Het bord veranderen
 // ============================================================
 
@@ -319,6 +337,7 @@ function zetVakje(id, i, aan) {
   bord[id][i] = aan;
   bewaarSeqStand();
   toonVakje(id, i);
+  meldVerandering();
 
   // Staat het bord stil, dan hoor je meteen wat je neerzet. Loopt hij, dan komt
   // het vanzelf langs bij de volgende ronde -- er nu nog een klap tussendoor
@@ -337,6 +356,7 @@ function zetBordTerug() {
   });
   bewaarSeqStand();
   toonBord();
+  meldVerandering();
 }
 
 // Een kaart: zet dat bord voor. Staat het bord stil, dan blijft het stil; loopt
@@ -351,6 +371,7 @@ function tikKaart(id) {
   bewaarSeqStand();
   toonBord();
   werkKaartenBij();
+  meldVerandering();
 }
 
 // ============================================================
@@ -495,6 +516,7 @@ function wisAlles() {
 
   toonBord();
   werkKaartenBij();
+  if (bijWissen) bijWissen();
 }
 
 // Wissen vraagt eerst even door, net als in les 1: twee keer tikken, en geen
@@ -523,7 +545,9 @@ function celVan(el) {
 }
 
 function schakel(cel, aan) {
-  zetVakje(cel.dataset.rij, parseInt(cel.dataset.stap, 10), aan);
+  const i = parseInt(cel.dataset.stap, 10);
+  if (bijVakje) bijVakje(cel.dataset.rij, i);
+  zetVakje(cel.dataset.rij, i, aan);
 }
 
 function isAan(cel) {
@@ -578,6 +602,7 @@ if (seqEl && seqKnoppenEl && seqBordEl && seqKaartenEl) {
   seqKnoppenEl.addEventListener('input', (e) => {
     if (!e.target.matches('[data-seq-tempo]')) return;
     zetTempo(parseFloat(e.target.value));
+    meldVerandering();
   });
 
   // Loslaten: dan pas bewaren, niet tientallen keren per seconde.

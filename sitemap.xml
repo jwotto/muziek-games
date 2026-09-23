@@ -2,6 +2,7 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>https://muziekfles.nl/</loc><lastmod>2026-09-21</lastmod><priority>1.0</priority></url>
   <url><loc>https://muziekfles.nl/les1-drums.html</loc><lastmod>2026-09-21</lastmod><priority>0.8</priority></url>
-  <url><loc>https://muziekfles.nl/les2-drums.html</loc><lastmod>2026-09-21</lastmod><priority>0.8</priority></url>
-  <url><loc>https://muziekfles.nl/bodypercussion.html</loc><lastmod>2026-09-21</lastmod><priority>0.8</priority></url>
+  <url><loc>https://muziekfles.nl/les2-drums.html</loc><lastmod>2026-09-23</lastmod><priority>0.8</priority></url>
+  <url><loc>https://muziekfles.nl/bodypercussion.html</loc><lastmod>2026-09-23</lastmod><priority>0.8</priority></url>
+  <url><loc>https://muziekfles.nl/bodypercussion2.html</loc><lastmod>2026-09-23</lastmod><priority>0.8</priority></url>
 </urlset>

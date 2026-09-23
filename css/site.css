@@ -796,6 +796,18 @@ input[type="range"]::-moz-range-thumb {
   line-height: 1;
 }
 
+/* Kies je zelf veel hartjes (in de tweede ritmeles kan dat tot tien), dan
+   worden ze kleiner en gaan ze in twee rijtjes: tien onder elkaar is hoger dan
+   het veld. */
+.spel-hartjes.veel {
+  display: grid;
+  grid-template-columns: repeat(2, auto);
+  font-size: calc(var(--noot) * 0.6);
+}
+
+/* Hoeveel hartjes je wilt staat boven het veld, net als de graden in les 1. */
+.spel-levens { max-width: 420px; margin: 0 auto var(--space-4); }
+
 .spel-hartjes .heel { color: var(--koraal); }
 .spel-hartjes .kwijt { color: var(--ink); }
 
@@ -851,6 +863,7 @@ input[type="range"]::-moz-range-thumb {
   }
   .spel-zij,
   .spel-hartjes { flex-direction: row; align-items: center; }
+  .spel-hartjes.veel { display: flex; flex-wrap: wrap; justify-content: center; }
   .spel-zij { gap: var(--space-3); }
   .spel-zij.links, .spel-zij.rechts { justify-self: center; }
   .spel-groot { font-size: var(--text-2xl); }
@@ -1657,4 +1670,214 @@ input[type="range"]:not([data-param])::-moz-range-thumb {
   font-size: var(--text-base);
   font-weight: 700;
   line-height: 1.5;
+}
+
+/* ============================================================
+   Ontwerp je eigen ritme (body percussion les 2)
+   ============================================================ */
+
+/* Afspelen, tempo en leegmaken in een regel, net als boven de sequencer. */
+.ontwerp-knoppen {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-4);
+}
+
+.ontwerp-knoppen .klap-schuif { flex: 1; min-width: 0; }
+
+/* Nu de knoppen om te slepen boven het vak staan, komt het bord meteen onder
+   het tempo; een beetje lucht ertussen. */
+.ontwerp .vierkant-bord { margin-top: var(--space-4); }
+
+/* De plaatjes om te slepen, in een rij boven het bord, met een regel uitleg
+   erboven. Even hoog als de gewone knoppen (Deel je ritme, Laad): het zijn
+   knoppen, en het bord is waar het om gaat. */
+.ow-tegels-uitleg {
+  margin: 0 0 var(--space-2);
+  font-family: var(--font-kop);
+  font-weight: 600;
+  text-align: center;
+}
+
+/* Over de hele breedte, net zo breed als het vak eronder: vijf gelijke kolommen
+   die meegroeien met het scherm. */
+.ow-tegels {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+
+.ow-tegel,
+.ow-spook {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2%;
+  aspect-ratio: 1.5;
+  padding: 6px;
+  color: var(--ink);
+  background: var(--wit);
+  border: 3px solid var(--ink);
+  border-radius: var(--radius-md);
+}
+
+/* Op een telefoon zo hoog als een gewone knop, op een groot scherm groeit hij
+   mee, tot hij het bord eronder niet meer overschreeuwt. */
+.ow-tegel {
+  width: 100%;
+  height: clamp(44px, 6.5vw, 84px);
+  aspect-ratio: auto;
+  cursor: grab;
+  /* Slepen met je vinger mag de bladzijde niet laten scrollen. */
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  transition: transform 0.15s var(--bounce);
+}
+
+.ow-tegel:hover { transform: translateY(-2px); }
+.ow-tegel:focus-visible { outline: 4px solid var(--blauw); outline-offset: 3px; }
+
+/* De tegel die je met tikken hebt opgepakt. */
+.ow-tegel.gekozen { background: var(--zon); transform: translateY(-3px); }
+
+.ow-tegel img,
+.ow-spook img {
+  display: block;
+  width: auto;
+  height: 100%;
+  max-width: 100%;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+.ow-tegel.dubbel img,
+.ow-spook.dubbel img { max-width: 48%; }
+
+
+/* Wat je vasthoudt, onder je vinger. Hij hangt met zijn midden aan de vinger
+   (de translate komt uit ontwerp.js) en vangt zelf geen aanrakingen, anders
+   ziet het loslaten het vakje eronder niet. */
+.ow-spook {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 70;
+  width: 120px;
+  margin: -40px 0 0 -60px;
+  pointer-events: none;
+  opacity: 0.9;
+}
+
+/* De vakjes zijn knoppen: je kunt erop tikken en erop neerleggen. */
+.ow-vak {
+  font: inherit;
+  color: var(--ink);
+  cursor: pointer;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.ow-vak:focus-visible { outline: 4px solid var(--blauw); outline-offset: 3px; }
+
+/* Het vakje waar je boven hangt met wat je sleept, en de vakjes als je een
+   tegel hebt opgepakt: daar kun je hem neerleggen. */
+.ow-vak.boven { background: var(--zon); }
+.ow-raster.kiezen .ow-vak:hover { background: var(--zon); }
+
+/* Het vakje dat je aan het verslepen bent is even leeg. */
+.ow-vak.weg img { opacity: 0.25; }
+
+/* Het vakje dat klinkt. */
+.ow-vak.aan { background: var(--zon); }
+
+/* Het bord knikt mee op elke tel (owKnik hier, knikVierkant in les 1). Vooraf
+   een eigen laag, zodat dat op een traag digibord niet elke tel opnieuw een
+   laag hoeft te maken. */
+.vierkant-raster { will-change: transform; }
+
+.ontwerp-na { margin-top: var(--space-5); }
+
+/* Delen, onder het vak met het bord: je eigen code, en een code invullen. */
+.ow-deel {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-4);
+  margin-top: var(--space-5);
+}
+
+.ow-deel-maken,
+.ow-deel-laden {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+/* De code zelf: groot, zodat je hem van achter in de klas kunt overschrijven. */
+.ow-code {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin: 0;
+  font-family: var(--font-kop);
+  font-weight: 600;
+  font-size: var(--text-base);
+}
+
+.ow-code[hidden] { display: none; }
+
+.ow-code b {
+  padding: 0.05em 0.4em;
+  font-size: var(--text-3xl);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: 0.12em;
+  background: var(--zon);
+  border: 3px solid var(--ink);
+  border-radius: var(--radius-md);
+}
+
+.ow-deel-laden label {
+  font-family: var(--font-kop);
+  font-weight: 600;
+}
+
+.ow-deel-laden input {
+  width: 6.5em;
+  padding: 0.3em 0.5em;
+  font-family: var(--font-kop);
+  font-weight: 700;
+  font-size: var(--text-lg);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink);
+  background: var(--wit);
+  border: 3px solid var(--ink);
+  border-radius: var(--radius-md);
+}
+
+.ow-deel-laden input:focus-visible { outline: 4px solid var(--blauw); outline-offset: 3px; }
+
+.ow-laadmelding {
+  flex-basis: 100%;
+  min-height: 1.5em;
+  margin: 0;
+  font-weight: 600;
+}
+
+@media (max-width: 720px) {
+  .ow-spook { width: 96px; margin: -32px 0 0 -48px; }
+  /* Op een telefoon passen vijf knoppen van 98 breed niet naast elkaar, en
+     worden ze groter dan de vakjes zelf. Iets smaller, dan blijft het een rij. */
+  .ow-tegels { gap: var(--space-1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ow-tegel { transition: none; }
+  .ow-tegel:hover, .ow-tegel.gekozen { transform: none; }
 }

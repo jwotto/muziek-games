@@ -4,7 +4,7 @@ Gratis online muzieklessen met muziekgames voor de basisschool. Gewone html, css
 en javascript: geen bouwstap, wat in deze map staat is de site.
 
 - `index.html` — de voorpagina met alle lessen
-- `les1-drums.html`, `les2-drums.html`, `bodypercussion.html` — de lessen
+- `les1-drums.html`, `les2-drums.html`, `bodypercussion.html`, `bodypercussion2.html` — de lessen
 - `css/wotto.css` — de huisstijl-tokens en de lettertypes, `css/site.css` — de rest
 - `css/iconen.css` — de paar Phosphor-iconen die de site gebruikt
 - `img/` — de plaatjes zoals de site ze laadt, `img/bron/` — de originelen

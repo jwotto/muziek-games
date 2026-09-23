@@ -754,6 +754,9 @@ KIT.forEach((inst) => { toetsen[inst.toets] = inst.id; });
 
 window.addEventListener('keydown', (e) => {
   if (e.repeat || e.ctrlKey || e.metaKey || e.altKey) return;
+  // Wie in een tekstvak typt (de deelcode bij body percussion) wil letters
+  // zien, geen drums horen. Een schuifje telt niet: daar mag je gewoon spelen.
+  if (e.target.matches && e.target.matches('input[type="text"], textarea')) return;
   const id = toetsen[e.key.toLowerCase()];
   if (!id) return;
   e.preventDefault();

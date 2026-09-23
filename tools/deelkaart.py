@@ -73,3 +73,5 @@ kaart('deelkaart-les2-drums.png', ZON, 'Ritme · les 2',
       ['Drumstel-', 'ritme maken'], 'sequencer.png')
 kaart('deelkaart-bodypercussion.png', MINT, 'Body percussion · les 1',
       ['Maak muziek', 'met je lijf'], 'bodypercussion.png')
+kaart('deelkaart-bodypercussion2.png', BUBBLEGUM, 'Body percussion · les 2',
+      ['Ontwerp je', 'eigen ritme'], 'clap.png')

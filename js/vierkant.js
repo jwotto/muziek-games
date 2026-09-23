@@ -5,11 +5,15 @@
    rechts en dan de volgende regel, net als bij lezen. De klas doet wat er in
    het vakje staat.
 
-   Er klinkt niets behalve de metronoom, en die kan uit. Het geluid maakt de
-   klas zelf -- dat is het hele punt van body percussion. Met de metronoom uit
-   moeten ze het tempo samen vasthouden, en dat is de volgende stap.
+   Het bord speelt het ritme ook voor: bij boem hoor je een doffe klap op je
+   knieen, bij klap een klap. Zo hoor je hoe het moet klinken en kan de klas
+   meedoen. Het plaatje dat klinkt wordt even groter -- staan er twee in een
+   vakje, dan het tweede een halve tel later -- en het hele bord knikt mee op
+   elke tel, ook tijdens het aftellen. Hetzelfde als bij het ritmevierkant dat
+   je zelf maakt in les 2.
 
-   Laden na Tone.js, drumkit.js en polka.js: de tik komt uit polka. */
+   Laden na Tone.js, drumkit.js, polka.js en lijfgeluid.js: de tik komt uit
+   polka, boem en klap uit lijfgeluid. */
 
 // ============================================================
 //  De vier vierkanten
@@ -88,7 +92,13 @@ function leesVolgorde(id) {
 
 const VIERKANT_VAKJES = 16;
 const VIERKANT_AANLOOP = 4;      // tellen aftellen voordat het eerste vakje komt
-const VIERKANT_VOORUIT = 1.2;    // seconden dat een tik van tevoren wordt gepland
+// Seconden dat een tel van tevoren wordt gepland. Kort, want nu klinken ook
+// boem en klap: wat er al gepland staat speelt anders nog door als je stopt.
+const VIERKANT_VOORUIT = 0.15;
+
+// De tik gaat zachter zodra het eerste vakje klinkt: dan is het ritme de muziek
+// en houdt de tik alleen nog de maat vast.
+const VIERKANT_TIK_SPELEN = -16;
 
 const VIERKANT_PLAATJES = {
   boem: { bron: 'img/boem.webp', naam: 'boem' },
@@ -276,6 +286,7 @@ function startVierkant() {
     startGeluid().then(startVierkant).catch(() => {});
     return;
   }
+  startLijfRuis();
 
   vierkant = {
     loopt: true,
@@ -288,7 +299,9 @@ function startVierkant() {
     aftelGetal: 0,
     aftelKlaar: false,
     eersteVak: 0,
-    einde: 0
+    einde: 0,
+    momenten: [],     // wat er op een bepaald moment moet bewegen: { tijd, doe }
+    tikWas: tikVol.volume.value
   };
 
   toonVierkantPlay(true);
@@ -306,8 +319,10 @@ function stopVierkant() {
   cancelAnimationFrame(vierkantLus);
 
   // Wat er nog vooruit gepland stond mag niet doortikken over een gestopte
-  // oefening heen.
+  // oefening heen. De tik weer zo hard als hij op deze bladzijde hoort.
   tikEnv.cancel(Tone.now());
+  tikVol.volume.cancelScheduledValues(Tone.now());
+  tikVol.volume.value = vierkant.tikWas;
 
   wisVierkantVak();
   toonVierkantAftellen(0);
@@ -327,16 +342,31 @@ function vulVierkantAan(nu) {
 
     // Hoog op de laatste tel van het aftellen en daarna op elke eerste tel van
     // een regel: dan hoor je waar een nieuwe regel begint.
-    tik(vierkant.telTijd, inAanloop ? tel === VIERKANT_AANLOOP - 1 : nr % 4 === 0);
+    const hoog = inAanloop ? tel === VIERKANT_AANLOOP - 1 : nr % 4 === 0;
+    tik(vierkant.telTijd, hoog);
+    vierkantOpMoment(vierkant.telTijd, () => knikVierkant(hoog));
 
+    const telDuur = 60 / vkStand.bpm;
     if (inAanloop) {
       vierkant.aanloop.push(vierkant.telTijd);
     } else {
-      if (!vierkant.eersteVak) vierkant.eersteVak = vierkant.telTijd;
+      if (!vierkant.eersteVak) {
+        vierkant.eersteVak = vierkant.telTijd;
+        tikVol.volume.setValueAtTime(VIERKANT_TIK_SPELEN, vierkant.telTijd - 0.01);
+      }
       vierkant.tellen.push({ nr: nr, tijd: vierkant.telTijd });
+
+      // Wat er in het vakje staat, klinkt ook. Twee in een vakje: de tweede een
+      // halve tel later.
+      const vak = vierkant.volgorde[nr];
+      vierkantNu().vakjes[vak].split('+').forEach((soort, k) => {
+        const wanneer = vierkant.telTijd + k * telDuur / 2;
+        lijfGeluid(soort, wanneer);
+        vierkantOpMoment(wanneer, () => groeiVierkant(vak, k, telDuur));
+      });
     }
 
-    vierkant.telTijd += 60 / vkStand.bpm;
+    vierkant.telTijd += telDuur;
     vierkant.telNr += 1;
 
     // Het laatste vakje mag zijn hele tel uitzitten voordat het bord uitgaat.
@@ -351,6 +381,15 @@ function vierkantStap() {
   vulVierkantAan(nu);
   werkVierkantAftellenBij(nu);
   werkVierkantVakBij(nu);
+
+  // Wat er nu moet bewegen. Is een moment al lang voorbij (de tab was even
+  // weg), dan slaan we hem over: alles tegelijk inhalen helpt niemand.
+  const later = [];
+  vierkant.momenten.forEach((m) => {
+    if (nu < m.tijd) later.push(m);
+    else if (nu - m.tijd < 0.15) m.doe();
+  });
+  vierkant.momenten = later;
 
   if (vierkant.einde && nu >= vierkant.einde) {
     stopVierkant();
@@ -378,19 +417,41 @@ function werkVierkantVakBij(nu) {
   vierkant.tellen = vierkant.tellen.filter((t) => t.tijd > nu - 0.5);
 }
 
+// Het vakje dat aan de beurt is wordt geel. Het opveren zit niet meer op het
+// vakje maar op het bord en op de plaatjes, zie hieronder.
 function toonVierkantVak(nr) {
   vkVakken.forEach((vak, i) => vak.classList.toggle('aan', i === nr));
+}
 
-  const vak = vkVakken[nr];
-  if (!vak || !vak.animate || minderBeweging.matches) return;
-  // De veer alleen op het eerste stuk: over het geheel schiet hij bij het eerste
-  // beeldje al door zijn eindstand heen en zie je er niets van. Alleen transform,
-  // want dat draait op de grafische kaart.
-  vak.animate([
+// Bewegen hoort bij het geluid en niet bij het plannen: de planner kijkt een
+// stukje vooruit, dus wat er moet bewegen wacht tot de audioklok zover is.
+function vierkantOpMoment(tijd, doe) {
+  vierkant.momenten.push({ tijd: tijd, doe: doe });
+}
+
+// De veer alleen op het eerste stuk: over het geheel schiet hij bij het eerste
+// beeldje al door zijn eindstand heen en zie je er niets van. Alleen transform,
+// want dat draait op de grafische kaart.
+function veerVierkant(el, groei, duur) {
+  if (!el || !el.animate || minderBeweging.matches) return;
+  el.animate([
     { transform: 'scale(1)', easing: 'cubic-bezier(0.34, 1.56, 0.64, 1)' },
-    { transform: 'scale(1.06)', offset: 0.35, easing: 'ease-out' },
+    { transform: 'scale(' + groei + ')', offset: 0.35, easing: 'ease-out' },
     { transform: 'scale(1)' }
-  ], { duration: 220 });
+  ], { duration: duur });
+}
+
+// Het hele bord knikt mee op elke tel, ook bij het aftellen. Op de eerste tel
+// van een regel (en de laatste van het aftellen) iets harder.
+function knikVierkant(sterk) {
+  veerVierkant(vkRasterEl, sterk ? 1.035 : 1.018, 220);
+}
+
+// Het plaatje dat klinkt wordt even groter. De groei past in een halve tel,
+// anders loopt hij op een hoog tempo door de volgende heen.
+function groeiVierkant(vak, k, telDuur) {
+  const img = vkVakken[vak] && vkVakken[vak].querySelectorAll('img')[k];
+  veerVierkant(img, 1.35, Math.min(280, telDuur * 500 * 0.9));
 }
 
 function wisVierkantVak() {

@@ -135,9 +135,65 @@
     <p class="blok-uitleg">
       Sleep aan de schuifjes en hoor wat er verandert. De beat op het bord
       speelt gewoon door, dus je hoort meteen wat het met je ritme doet.
+      Heb je elk vakje op het bord en elk schuifje hier een keer aangeraakt?
+      Dan gaat er onderaan iets open.
     </p>
     <main class="kit compact" id="kit"></main>
   </div>
+
+  <!-- Staat er pas als je elk vakje op het bord en elk schuifje van de
+       geluiden een keer hebt aangeraakt. Zie beatspel.js. -->
+  <div class="spelblok" data-spelblok hidden>
+
+  <h2 class="kop kop-spel">Speel je eigen beat</h2>
+
+  <p class="spel-uitleg">
+    Nu speel jij de beat die je net hebt gemaakt, vier maten lang. Raak de
+    vormen als ze op de lege vorm onderaan staan, met <b>A</b>, <b>S</b> en
+    <b>D</b> of door op de knoppen te tikken. Elke noot die je raakt is een
+    punt. Verander je de beat, dan begint je beste score weer bij nul.
+  </p>
+
+  <section class="paneel spel" id="beatspel">
+    <div class="klap-schuif spel-levens">
+      <label for="spel-levens">Hoeveel hartjes wil je?<b data-levens-getal></b></label>
+      <input type="range" id="spel-levens" data-levens min="1" max="10" step="1">
+    </div>
+
+    <div class="spel-veld">
+      <div class="spel-zij links">
+        <span class="spel-hartjes" data-hartjes></span>
+      </div>
+
+      <div class="spel-midden">
+        <div class="spel-banen" data-banen></div>
+        <div class="spel-knoppen" data-knoppen></div>
+      </div>
+
+      <div class="spel-zij rechts">
+        <span class="spel-label">raak</span>
+        <b class="spel-groot" data-score>0</b>
+        <span class="spel-label">van de <b data-totaal>0</b></span>
+        <span class="spel-label"><b data-bpm>96</b> bpm</span>
+        <span class="spel-label spel-record">beste <b data-record>0</b></span>
+      </div>
+
+      <div class="spel-aftellen" data-aftellen aria-hidden="true"></div>
+
+      <div class="spel-kaart" data-kaart>
+        <h3>Klaar?</h3>
+        <div class="kaart-cijfers" data-kaart-cijfers></div>
+        <p data-kaart-tekst></p>
+        <button class="knop groot" type="button" data-kaart-knop>Start</button>
+      </div>
+    </div>
+
+    <p class="spel-oordeel" data-oordeel aria-live="polite"></p>
+  </section>
+
+  </div>
+
+  <div class="melding" data-melding aria-live="polite"></div>
 
   <footer class="voet">
     muziekfles.nl · gemaakt door <a href="https://studiowotto.com">Studio Wotto</a>
@@ -147,8 +203,11 @@
 
 <script defer src="js/vendor/Tone.js"></script>
 <script defer src="js/drumkit.js"></script>
+<script defer src="js/polka.js"></script>
 <script defer src="js/beats.js"></script>
+<script defer src="js/melding.js"></script>
 <script defer src="js/sequencer.js"></script>
+<script defer src="js/beatspel.js"></script>
 
 <!-- Cloudflare Web Analytics: telt bezoeken zonder cookies. -->
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "5dab1e3a930548d8b2e3a0ba0880f787"}'></script>
