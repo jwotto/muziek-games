@@ -3,9 +3,12 @@
     python tools/sprites.py
 
 Leest img/bron/renner-sprites.png: AANTAL figuurtjes in rijen, van links naar
-rechts en van boven naar onder gelezen, op een doorzichtige achtergrond. Nu
-zijn dat er vijf, op een skateboard: rijden, rijden door de knieën, springen,
-bukken en klappen. Welk beeldje waarvoor is staat in renner.js (RN_BEELDJES).
+rechts en van boven naar onder gelezen. Nu zijn dat er zes, op een skateboard:
+twee keer rijden, springen, bukken, klappen en klappen met sterretjes. Welk
+beeldje waarvoor is staat in renner.js (RN_BEELDJES).
+
+De achtergrond mag doorzichtig zijn of wit. Is hij wit, dan knipt het script
+hem zelf weg (zie wit_weg).
 
 Staan er rasterlijnen omheen, dan gumt het script die eerst weg: een rechte
 lijn die bijna het hele plaatje over loopt is geen figuurtje. Daarna zoekt het
@@ -29,9 +32,76 @@ HIER = os.path.dirname(os.path.abspath(__file__))
 IMG = os.path.join(HIER, '..', 'img')
 HOOGTE = 300          # hoe hoog elk vakje in de strook wordt, in pixels
 KLEIN = 2             # zoeken op de helft van de maat, dat is snel genoeg
-AANTAL = 5            # hoeveel figuurtjes er op de sheet staan
+AANTAL = 6            # hoeveel figuurtjes er op de sheet staan
 
-im = Image.open(os.path.join(IMG, 'bron', 'renner-sprites.png')).convert('RGBA')
+im = Image.open(os.path.join(IMG, 'bron', 'renner-sprites.png'))
+
+
+# Een sheet met een witte achtergrond in plaats van een doorzichtige. Eerst de
+# donkere rasterlijnen wit maken, dan al het wit dat vanaf de rand bereikbaar
+# is doorzichtig. Wit dat helemaal door haar is ingesloten blijft staan (sokken,
+# zolen, strepen), behalve als het hoog en breed is: dat is een gat, tussen
+# haar benen of onder het board.
+def wit_weg(im):
+    im = im.convert('RGB')
+    W, H = im.size
+    px = im.load()
+    # Met een paar pixels marge, want de zachte grijze rand van een lijn is niet
+    # donker genoeg om mee te tellen maar houdt het wit wel tegen.
+    donker = lambda p: max(p) < 90
+    kolommen = [x for x in range(W) if sum(1 for y in range(H) if donker(px[x, y])) > H * 0.95]
+    rijen = [y for y in range(H) if sum(1 for x in range(W) if donker(px[x, y])) > W * 0.95]
+    for x in kolommen:
+        for dx in range(-4, 5):
+            if 0 <= x + dx < W:
+                for y in range(H):
+                    px[x + dx, y] = (255, 255, 255)
+    for y in rijen:
+        for dy in range(-4, 5):
+            if 0 <= y + dy < H:
+                for x in range(W):
+                    px[x, y + dy] = (255, 255, 255)
+
+    wit = lambda p: min(p) > 225
+    weg = bytearray(W * H)
+    gezien = bytearray(W * H)
+    for y0 in range(H):
+        for x0 in range(W):
+            if gezien[y0 * W + x0] or not wit(px[x0, y0]):
+                continue
+            q = deque([(x0, y0)])
+            gezien[y0 * W + x0] = 1
+            leden = []
+            rand = False
+            bb = [x0, y0, x0, y0]
+            while q:
+                cx, cy = q.popleft()
+                leden.append(cy * W + cx)
+                if cx in (0, W - 1) or cy in (0, H - 1):
+                    rand = True
+                bb = [min(bb[0], cx), min(bb[1], cy), max(bb[2], cx), max(bb[3], cy)]
+                for nx, ny in ((cx + 1, cy), (cx - 1, cy), (cx, cy + 1), (cx, cy - 1)):
+                    if 0 <= nx < W and 0 <= ny < H and not gezien[ny * W + nx] and wit(px[nx, ny]):
+                        gezien[ny * W + nx] = 1
+                        q.append((nx, ny))
+            gat = bb[3] - bb[1] >= 50 and bb[2] - bb[0] >= 40
+            if rand or gat:
+                for i in leden:
+                    weg[i] = 1
+
+    uit = im.convert('RGBA')
+    up = uit.load()
+    for y in range(H):
+        for x in range(W):
+            if weg[y * W + x]:
+                up[x, y] = (255, 255, 255, 0)
+    return uit
+
+
+if im.mode != 'RGBA' or im.getpixel((im.width // 2, im.height // 2))[3] == 255:
+    print('witte achtergrond: wordt doorzichtig gemaakt')
+    im = wit_weg(im)
+im = im.convert('RGBA')
 
 # Rasterlijnen weggummen: kolommen en rijen die over (bijna) de hele breedte of
 # hoogte dekkend zijn, met een paar pixels marge voor hun zachte rand.

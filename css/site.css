@@ -1911,7 +1911,7 @@ input[type="range"]:not([data-param])::-moz-range-thumb {
 }
 
 /* Het vak: van opzij, zoals het dinospelletje. Een wit vlak met onderin de
-   grond, het meisje links, en alles komt van rechts. Via padding en niet via
+   grond, de skater links, en alles komt van rechts. Via padding en niet via
    aspect-ratio, want een ouder digibord kent die niet. */
 .rn-baan {
   position: relative;
@@ -2012,7 +2012,7 @@ input[type="range"]:not([data-param])::-moz-range-thumb {
 .rn-spring.raak .rn-vorm,
 .rn-buk.raak .rn-vorm { background: var(--mint); }
 
-/* Het meisje: één strook van vijf beeldjes als achtergrond. Javascript
+/* De skater: één strook van zes beeldjes als achtergrond. Javascript
    schuift hem op naar het beeldje dat nu hoort (zie renner.js). */
 .rn-pop {
   position: absolute;
@@ -2027,7 +2027,7 @@ input[type="range"]:not([data-param])::-moz-range-thumb {
 .rn-pop-beeld {
   width: 100%;
   height: 100%;
-  background: url("../img/renner-sprites.webp") 0 0 / 500% 100% no-repeat;
+  background: url("../img/renner-sprites.webp") 0 0 / 600% 100% no-repeat;
   transform-origin: 50% 100%;
   will-change: transform;
 }

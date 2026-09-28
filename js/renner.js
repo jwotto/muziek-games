@@ -1,9 +1,9 @@
 /* Ritme skater — een extra les
 
-   Op het digibord, voor de hele klas tegelijk. Een meisje skatet van links naar
-   rechts, en van rechts komt van alles op haar af: een blok op de grond
-   (springen), een balk op hoofdhoogte (bukken) en klaphanden. Op de tel is het bij het
-   meisje, en dan doet zij het voor en de klas doet mee. Er wordt niets
+   Op het digibord, voor de hele klas tegelijk. Een skater rijdt van links naar
+   rechts, en van rechts komt van alles op de skater af: een blok op de grond
+   (springen), een balk op hoofdhoogte (bukken) en klaphanden. Op de tel is het
+   bij de skater, die het voordoet, en de klas doet mee. Er wordt niets
    gemeten: het gaat erom dat je het samen op de maat doet.
 
    De juf kiest bovenaan wat er langs komt en hoe druk, en zet
@@ -59,35 +59,35 @@ const RN_AFTELLEN = 4;     // tellen aftellen voordat de eerste maat begint
 //  Het beeld
 // ============================================================
 
-// Het meisje staat links, de grond ligt onderin. Alles in delen van het vak.
-const RN_POP_X = 0.18;     // waar het meisje staat, als deel van de breedte
+// De skater staat links, de grond ligt onderin. Alles in delen van het vak.
+const RN_POP_X = 0.18;     // waar de skater staat, als deel van de breedte
 const RN_GROND = 0.84;     // waar de grond ligt, als deel van de hoogte
-const RN_POP_H = 0.52;     // hoe groot het meisje is, als deel van de hoogte
+const RN_POP_H = 0.52;     // hoe groot de skater is, als deel van de hoogte
 
-// Wat er langs komt, in honderdsten van het vakje van het meisje: breedte,
+// Wat er langs komt, in honderdsten van het vakje van de skater: breedte,
 // hoogte, en hoe hoog de onderkant boven de grond hangt. Het blok haalt ze met
-// springen makkelijk (ze komt 58 hoog). Rijdend is ze 90 tot 95 hoog en
-// gebukt 82 (zie tools/sprites.py), dus de balk op 88 raakt haar alleen als ze
-// niet bukt. De handen komen vlak boven haar hoofd langs: daar hangt niets voor,
+// springen makkelijk (ze komt 58 hoog). Rijdend is ze 100 hoog en gebukt 82
+// (zie tools/sprites.py), dus de balk op 90 raakt haar alleen als ze niet
+// bukt. De handen komen vlak boven haar hoofd langs: daar hangt niets voor,
 // dus je ziet ze al van ver aankomen, en je ziet haar eronder klappen.
 const RN_MATEN = {
   spring: { b: 22, h: 30, boven: 0 },
-  buk:    { b: 40, h: 12, boven: 88 },
-  klap:   { b: 28, h: 28, boven: 102 }
+  buk:    { b: 40, h: 12, boven: 90 },
+  klap:   { b: 28, h: 28, boven: 104 }
 };
 
-// Het meisje staat op een skateboard. Ze komt uit een sprite sheet: vijf
+// De skater staat op een skateboard. Ze komt uit een sprite sheet: zes
 // beeldjes naast elkaar in img/renner-sprites.webp, gemaakt met
 // tools/sprites.py. Welk beeldje waar staat:
 const RN_BEELDJES = {
-  rijden: [0, 1],           // rechtop en iets door de knieën, om en om
-  spring: [1, 2],           // door de knieën afzetten, in de lucht
-  buk: 3,
-  klap: 4,
+  rijden: [0, 1],           // twee houdingen, om en om
+  spring: [2, 3],           // omhoog met de neus van het board op, omlaag met de neus neer
+  buk: 4,
+  klap: 5,
   staan: 0                  // als het spel niet loopt
 };
-const RN_AANTAL_BEELDJES = 5;
-const RN_VAK = 0.853;      // een vakje is 256 bij 300
+const RN_AANTAL_BEELDJES = 6;
+const RN_VAK = 0.85;       // een vakje is 255 bij 300
 
 // ============================================================
 //  Het scherm
@@ -173,8 +173,8 @@ function zelfdeLengte(voortgang) {
 }
 
 // Vanaf hier mogen er klappen tussen het springen en bukken door, op de twee
-// en de vier.
-const RN_KLAP_TUSSENDOOR = 0.7;
+// en de vier: vanaf de helft van het liedje.
+const RN_KLAP_TUSSENDOOR = 0.5;
 const RN_KLAP_TUSSENDOOR_KANS = 0.5;
 
 // Een greep uit de lijst, met een duw naar iets anders dan de vorige keer. Een
@@ -414,7 +414,7 @@ function vulRnAan(nu) {
 // ============================================================
 
 // De maten van het vak zoals het nu op het scherm staat, en hoeveel pixels een
-// honderdste van het vakje van het meisje is.
+// honderdste van het vakje van de skater is.
 function rnBaanMaat() {
   const b = rnBaanEl ? rnBaanEl.clientWidth : 900;
   const h = rnBaanEl ? rnBaanEl.clientHeight : 360;
@@ -446,7 +446,7 @@ function maakRnDing(soort, tijd, aantal) {
   return { soort: soort, tijd: tijd, el: el, vorm: vorm, maat: m, eenheid: eenheid, gezwollen: false };
 }
 
-// Bij het meisje zwelt het even op. Op de vorm erbinnen, want het ding zelf
+// Bij de skater zwelt het even op. Op de vorm erbinnen, want het ding zelf
 // schuift elk beeld op met een transform en die twee zouden elkaar
 // overschrijven.
 function zwelRnOp(ding) {
@@ -460,7 +460,7 @@ function zwelRnOp(ding) {
   ], { duration: 300 });
 }
 
-// Van rechts naar links. Op zijn moment staat het midden bij het meisje;
+// Van rechts naar links. Op zijn moment staat het midden bij de skater;
 // RN_VOORUIT seconden daarvoor komt hij net rechts het beeld in.
 function zetRnDingen(nu, m) {
   const afstand = m.b - m.popX + 40 * m.eenheid;
@@ -550,7 +550,7 @@ function sterretjesRn(el) {
 }
 
 // ============================================================
-//  Het meisje
+//  De skater
 // ============================================================
 
 let rnBeeldje = -1;
@@ -579,7 +579,7 @@ function beeldjeBij(reeks, deel, grenzen) {
   return reeks[i];
 }
 
-// Wat het meisje nu doet. Ze kijkt naar het ding dat het dichtst bij zijn
+// Wat de skater nu doet. Ze kijkt naar het ding dat het dichtst bij zijn
 // moment is. Een sprong begint net voor de tel en is op de tel het hoogst, zodat
 // ze precies boven het blok hangt als het onder haar door gaat. Bukken duurt
 // net zo lang; een klap is kort.
@@ -602,10 +602,10 @@ function werkRnPopBij(nu) {
 
   const deel = bezig ? bezig.dt / bezig.breed : 0;
   if (bezig && bezig.ding.soort === 'spring') {
-    // Door de knieën afzetten, met board en al de lucht in over het blok heen,
-    // en door de knieën weer landen.
+    // Met board en al de lucht in over het blok heen: op weg omhoog de neus van
+    // het board op, na het hoogste punt de neus neer om te landen.
     const sp = RN_BEELDJES.spring;
-    zetRnPop(beeldjeBij([sp[0], sp[1], sp[0]], deel, [-0.3, 0.6]), RN_SPRONG * (1 - deel * deel));
+    zetRnPop(beeldjeBij(sp, deel, [0]), RN_SPRONG * (1 - deel * deel));
     return;
   }
   if (bezig && bezig.ding.soort === 'buk') {
@@ -617,8 +617,8 @@ function werkRnPopBij(nu) {
     return;
   }
 
-  // Anders rijdt ze, en veert ze mee op de achtsten: rechtop, door de knieën,
-  // rechtop. Zo gaat ze mee op de beat, ook tijdens het aftellen.
+  // Anders rijdt ze, en wisselt ze op de achtsten van houding. Zo gaat ze mee
+  // op de beat, ook tijdens het aftellen.
   rn.renFase += (nu - rn.vorigNu) * rn.bpm / 30;
   zetRnPop(RN_BEELDJES.rijden[Math.floor(rn.renFase) % 2], 0);
 }
@@ -814,7 +814,7 @@ if (rnEl) {
   zetRnPop(RN_BEELDJES.staan, 0);
   werkRnBalkBij();
 
-  // Wordt het venster groter of kleiner, dan moet het meisje mee.
+  // Wordt het venster groter of kleiner, dan moet de skater mee.
   window.addEventListener('resize', () => {
     if (!rn || !rn.loopt) zetRnPop(RN_BEELDJES.staan, 0);
   });
