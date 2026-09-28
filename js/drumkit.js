@@ -139,6 +139,19 @@ function maakToonStem(golf, toon, lengte, niveau, uitgang) {
   return { oscillator, envelope, gain };
 }
 
+// Stoppen midden in een noot. Alleen cancel() is niet genoeg: dat haalt alles
+// weg wat vanaf nu gepland staat, en ook het laatste stukje van een noot die
+// op dat moment uitsterft. Tone laat een noot namelijk in drie stappen wegzakken
+// (snel omlaag, even vasthouden, dan pas naar nul) en valt je stop tussen die
+// laatste twee, dan blijft het volume op een kiertje staan. De oscillators
+// draaien altijd door, dus dan hoor je een zacht toontje of piepje dat nooit
+// meer weggaat. Daarom na het wissen de noot zelf nog netjes laten uitklinken.
+function stilNu(env) {
+  const nu = Tone.now();
+  env.cancel(nu);
+  env.triggerRelease(nu);
+}
+
 // Een val in toonhoogte: begin een stuk hoger en zak in een paar honderdste naar
 // de grondtoon. Dat is wat van een noot een klap maakt.
 function valToon(stem, van, naar, tijd, duur) {
@@ -494,7 +507,34 @@ function probeerStarten() {
   }).catch(() => { /* volgende gebaar probeert het opnieuw */ });
 }
 
-STARTGEBAREN.forEach((soort) => window.addEventListener(soort, probeerStarten, { capture: true }));
+function wachtOpGebaar() {
+  STARTGEBAREN.forEach((soort) => window.addEventListener(soort, probeerStarten, { capture: true }));
+}
+
+wachtOpGebaar();
+
+// Klik je de bladzijde weg, dan tekent de browser niets meer, maar de
+// audioklok loopt door. De spellen plannen hun noten bij elk beeldje; kwam je
+// terug, dan liepen ze seconden achter en haalden ze alles tegelijk in, en dat
+// klonk als een lawine. Daarom zetten we de klok zelf stil zolang de bladzijde
+// weg is: bij terugkomen gaat alles verder waar het was, alsof het op pauze
+// stond. Mag hij niet meteen weer aan, dan doet de volgende aanraking het.
+let klokGepauzeerd = false;
+
+document.addEventListener('visibilitychange', () => {
+  const klok = Tone.getContext().rawContext;
+  if (document.hidden) {
+    if (klok.state !== 'running') return;
+    klokGepauzeerd = true;
+    klok.suspend().catch(() => {});
+    return;
+  }
+  if (!klokGepauzeerd) return;
+  klokGepauzeerd = false;
+  klok.resume().then(() => {
+    if (klok.state !== 'running') wachtOpGebaar();
+  }).catch(wachtOpGebaar);
+});
 
 // ============================================================
 //  8. Klikken, tikken en toetsen

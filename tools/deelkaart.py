@@ -23,6 +23,7 @@ KORAAL = (255, 87, 87)
 ZON = (255, 240, 105)
 MINT = (56, 199, 137)
 BUBBLEGUM = (249, 179, 213)
+BLAUW = (0, 97, 224)
 
 
 def font(grootte, dikte=600):
@@ -31,9 +32,10 @@ def font(grootte, dikte=600):
     return f
 
 
-def kaart(uit, kleur, reeks, regels, beeld):
+def kaart(uit, kleur, reeks, regels, beeld, tekst=INK):
     """uit: bestandsnaam in img/. regels: de titel, zelf in tweeen geknipt zodat
-    hij links van het plaatje past. beeld: bestandsnaam in img/bron/."""
+    hij links van het plaatje past. beeld: bestandsnaam in img/bron/. tekst: de
+    kleur van de titel; wit op blauw, want ink haalt daar te weinig contrast."""
     b, h = 1200, 630
     im = Image.new('RGB', (b, h), kleur)
     d = ImageDraw.Draw(im)
@@ -55,7 +57,7 @@ def kaart(uit, kleur, reeks, regels, beeld):
     fk = font(84, 700)
     y = 175
     for regel in regels:
-        d.text((60, y), regel, font=fk, fill=INK)
+        d.text((60, y), regel, font=fk, fill=tekst)
         y += 96
 
     logo = Image.open(os.path.join(IMG, 'bron', 'muziekfles.png')).convert('RGBA')
@@ -75,3 +77,5 @@ kaart('deelkaart-bodypercussion.png', MINT, 'Body percussion · les 1',
       ['Maak muziek', 'met je lijf'], 'bodypercussion.png')
 kaart('deelkaart-bodypercussion2.png', BUBBLEGUM, 'Body percussion · les 2',
       ['Ontwerp je', 'eigen ritme'], 'clap.png')
+kaart('deelkaart-ritmeskater.png', BLAUW, 'Extra',
+      ['Ritme', 'skater'], 'ritmeskater.png', WIT)

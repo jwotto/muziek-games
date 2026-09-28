@@ -447,6 +447,11 @@ body {
 .les.klaar .icoon { background: var(--wit); border: 3px solid var(--ink); color: var(--ink); }
 .les.binnenkort .icoon { background: var(--kleur); color: var(--ink); }
 
+/* Een blauwe kaart: ink haalt op blauw te weinig contrast, dus de tekst wordt
+   wit. De blauwe speelknop zou erin wegvallen, die wordt wit met ink. */
+.les.op-blauw { color: var(--wit); }
+.les.op-blauw .badge.spelen { background: var(--wit); color: var(--ink); }
+
 .les h2 { margin: 0; font-size: var(--text-xl); line-height: 1.15; }
 .les p.tekst { margin: 0; line-height: 1.5; flex: 1; }
 
@@ -1880,4 +1885,169 @@ input[type="range"]:not([data-param])::-moz-range-thumb {
 @media (prefers-reduced-motion: reduce) {
   .ow-tegel { transition: none; }
   .ow-tegel:hover, .ow-tegel.gekozen { transform: none; }
+}
+
+/* ============================================================
+   Ritme skater (extra les)
+   ============================================================ */
+
+/* De knoppen van de juf: dezelfde als bij klap mee, maar alles op één regel,
+   zodat het spel zelf zo hoog mogelijk op het scherm staat. Is het scherm te
+   smal, dan gaan de keuzes onder de schuifjes. */
+.rn-knoppen {
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: flex-end;
+}
+
+.rn-knoppen .klap-schuifjes {
+  flex: 2 1 400px;
+  grid-template-columns: repeat(2, minmax(150px, 1fr));
+}
+
+.rn-knoppen .klap-keuzes {
+  flex: 1 1 330px;
+  grid-template-columns: repeat(3, 1fr);
+}
+
+/* Het vak: van opzij, zoals het dinospelletje. Een wit vlak met onderin de
+   grond, het meisje links, en alles komt van rechts. Via padding en niet via
+   aspect-ratio, want een ouder digibord kent die niet. */
+.rn-baan {
+  position: relative;
+  overflow: hidden;
+  /* Vooraf een eigen laag, want dit hele vak ademt mee op elke tel. */
+  will-change: transform;
+  height: 0;
+  padding-top: 36%;
+  background: var(--wit);
+  border: 4px solid var(--ink);
+  border-radius: var(--radius);
+}
+
+/* De grond: een dikke inktlijn, met daaronder een vlak in de kleur van de les. */
+.rn-baan::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 84%;
+  bottom: 0;
+  background: var(--blauw);
+  border-top: 5px solid var(--ink);
+}
+
+.rn-dingen {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+.rn-baan .klap-aftellen { z-index: 3; }
+
+/* Alles wat aankomt. De maat zet javascript erop, het schuiven gaat met een
+   transform vanaf de linkerbovenhoek. */
+.rn-ding {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform-origin: 0 0;
+  will-change: transform;
+}
+
+.rn-vorm {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+/* Het blok op de grond: springen. */
+.rn-spring .rn-vorm {
+  background: var(--koraal);
+  border: 4px solid var(--ink);
+  border-radius: 8px 8px 0 0;
+}
+
+/* De balk op hoofdhoogte: bukken. Hij hangt aan een touw van boven, zodat je
+   ziet dat je er niet overheen kunt. */
+.rn-buk .rn-vorm {
+  background: var(--zon);
+  border: 4px solid var(--ink);
+  border-radius: 8px;
+}
+
+.rn-buk .rn-vorm::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 100%;
+  width: 4px;
+  height: 2000px;
+  margin-left: -2px;
+  background: var(--ink);
+}
+
+/* De klaphanden, dezelfde als bij klap mee. */
+.rn-ding svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.rn-ding .vlak { fill: var(--blauw); }
+.rn-ding .lijn { fill: var(--ink); }
+
+/* De kleur zegt hoeveel klappen er in die ene tel zitten, net als bij klap mee:
+   blauw is een, groen twee, rood vier. */
+.rn-ding.aantal-2 .vlak { fill: var(--mint); }
+.rn-ding.aantal-4 .vlak { fill: var(--koraal); }
+
+/* Precies nu. Onderaan, want dit moet het van de kleuren hierboven winnen. */
+.rn-ding.raak .vlak { fill: var(--zon); }
+.rn-spring.raak .rn-vorm,
+.rn-buk.raak .rn-vorm { background: var(--mint); }
+
+/* Het meisje: één strook van vijf beeldjes als achtergrond. Javascript
+   schuift hem op naar het beeldje dat nu hoort (zie renner.js). */
+.rn-pop {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 2;
+  will-change: transform;
+}
+
+/* Het beeldje zelf zit een laag dieper: het buitenste vak schuift en springt,
+   dit veert op de tel door de knieën, vanuit het board. */
+.rn-pop-beeld {
+  width: 100%;
+  height: 100%;
+  background: url("../img/renner-sprites.webp") 0 0 / 500% 100% no-repeat;
+  transform-origin: 50% 100%;
+  will-change: transform;
+}
+
+/* De sterretjes die uit een klap wegspringen. Ze draaien om het midden van de
+   handen, en schieten dan naar buiten. */
+.rn-ster {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 8%;
+  height: 30%;
+  margin: -15% 0 0 -4%;
+  background: var(--zon);
+  border: 2px solid var(--ink);
+  border-radius: 999px;
+  transform-origin: 50% 150%;
+}
+
+/* Op een telefoon rechtop is het vak anders een streepje. */
+@media (max-width: 720px) {
+  .rn-baan { padding-top: 62%; }
 }

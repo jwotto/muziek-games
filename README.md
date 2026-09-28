@@ -4,11 +4,17 @@ Gratis online muzieklessen met muziekgames voor de basisschool. Gewone html, css
 en javascript: geen bouwstap, wat in deze map staat is de site.
 
 - `index.html` — de voorpagina met alle lessen
-- `les1-drums.html`, `les2-drums.html`, `bodypercussion.html`, `bodypercussion2.html` — de lessen
+- `les1-drums.html`, `les2-drums.html`, `bodypercussion.html`, `bodypercussion2.html`,
+  `ritmeskater.html` — de lessen
+- `js/drumkit.js` — de drumgeluiden en alles wat de lessen delen: `master`,
+  `bijNeer`, `animeer`, `stilNu`. Staat op elke lespagina.
+- `js/polka.js` — de polka onder de ritmespellen, `js/hiphop.js` — de hiphopbeat
+  onder de ritme skater, `js/lijfgeluid.js` — boem, klap en de klaphanden
 - `css/wotto.css` — de huisstijl-tokens en de lettertypes, `css/site.css` — de rest
 - `css/iconen.css` — de paar Phosphor-iconen die de site gebruikt
 - `img/` — de plaatjes zoals de site ze laadt, `img/bron/` — de originelen
-- `tools/` — scripts voor plaatjes en deelkaartjes (Python met Pillow)
+- `tools/` — scripts voor plaatjes en deelkaartjes (Python met Pillow); `tools/sprites.py` zet de
+  sprite sheet van de ritme skater om naar `img/renner-sprites.webp`
 - `stijl.md` — de stijlgids
 
 ## Een nieuwe les: doe dit voordat hij online gaat
@@ -46,7 +52,7 @@ eruit als een kale grijze balk.
 
 De lessen worden gegeven op een Prowise-bord, en dat is geen grote telefoon. Er
 zit een infraroodraam omheen met een eigen driver, vaak een beheerde Windows of
-een oudere Android-browser erachter. Twee dingen die we daar hebben geleerd:
+een oudere Android-browser erachter. Wat we daar hebben geleerd:
 
 **Aanraken kwam niet aan.** Knoppen die op `click` luisteren deden het, maar de
 pads, de drumfoto's en de sequencervakjes niet: die luisterden alleen naar
@@ -91,9 +97,25 @@ volume even open. Bij stoppen werd alles wat vooruit gepland stond gewist met
 stop precies tussen de laatste twee, dan werd ook die laatste stap naar nul
 gewist en bleef het volume op een kiertje staan (rond de -42 dB).
 
-- Stoppen gaat daarom via `stilNu(env)` in `js/polka.js`: eerst wissen, dan de
+- Stoppen gaat daarom via `stilNu(env)` in `js/drumkit.js`: eerst wissen, dan de
   noot netjes laten uitklinken met `triggerRelease`. **Gebruik nooit een losse
   `env.cancel()`** om te stoppen; gebruik `stilNu`.
+
+**Na wegklikken en terugkomen deed de muziek gek.** De spellen zetten hun noten
+een paar seconden vooruit klaar en plannen de rest bij elk beeldje dat de
+browser tekent (`requestAnimationFrame`). Klik je de bladzijde weg, dan tekent
+de browser niets meer, maar de audioklok loopt door. Bij terugkomen liep het
+spel seconden achter en haalde het alles in één keer in: alle gemiste noten
+tegelijk.
+
+- Daarom zet `js/drumkit.js` de audioklok stil zodra de bladzijde onzichtbaar
+  wordt (`visibilitychange`) en laat hem weer lopen bij terugkomen. Alles gaat
+  dan verder waar het was, alsof het op pauze stond. Dat geldt vanzelf voor
+  elke bladzijde die `drumkit.js` laadt.
+- **Plan in een nieuw spel altijd op de audioklok** (`Tone.now()`), niet op
+  `Date.now()` of `performance.now()`, en laad `drumkit.js`. Dan pauzeert het
+  vanzelf mee. Een eigen klok loopt door terwijl de muziek stilstaat, en dan
+  heb je hetzelfde probleem terug.
 
 Nakijken zonder bord: in Chrome DevTools de apparaatbalk aan voor aanraken, en
 onder Rendering "Emulate CSS media feature prefers-reduced-motion". Hoe een oude
