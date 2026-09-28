@@ -343,7 +343,7 @@ function ebStop(uitkomst) {
   ebLevensEl.disabled = false;
 
   // De tikken staan al vooruit gepland; die zouden anders doorlopen.
-  tikEnv.cancel(Tone.now());
+  stilNu(tikEnv);
   tikVol.volume.cancelScheduledValues(Tone.now());
   tikVol.volume.value = EB_TIK_AFTELLEN;
 
@@ -420,8 +420,8 @@ function ebWerkAftellenBij(nu) {
 function ebToonAftellen(getal) {
   if (!ebAftelEl) return;
   ebAftelEl.textContent = getal ? String(getal) : '';
-  if (!getal || minderBeweging.matches || !ebAftelEl.animate) return;
-  ebAftelEl.animate(
+  if (!getal || minderBeweging.matches) return;
+  animeer(ebAftelEl,
     [{ transform: 'scale(0.6)' }, { transform: 'scale(1)' }],
     { duration: 240, easing: 'cubic-bezier(0.34, 1.56, 0.64, 1)' }
   );

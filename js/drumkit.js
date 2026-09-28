@@ -503,6 +503,146 @@ STARTGEBAREN.forEach((soort) => window.addEventListener(soort, probeerStarten, {
 const flitsers = {};
 const minderBeweging = window.matchMedia('(prefers-reduced-motion: reduce)');
 
+// Alle veren, pulsen en snippers lopen via animeer() in plaats van rechtstreeks
+// via el.animate(). Oudere browsers, zoals die op sommige digiborden, kennen die
+// animatie-API niet of maar half; daar zou dan alleen het harde verspringen van
+// de classes overblijven. Dan doen we dezelfde beweging zelf, beeldje voor
+// beeldje. Het geeft hetzelfde terug als animate(), in elk geval onfinish.
+function animeer(el, frames, opties) {
+  if (!el) return null;
+  if (el.animate) {
+    try { return el.animate(frames, opties); } catch (e) { /* half ondersteund: zelf doen */ }
+  }
+  return animeerZelf(el, frames, typeof opties === 'number' ? { duration: opties } : opties || {});
+}
+
+// Per element maar één tegelijk: een nieuwe puls midden in de vorige begint
+// gewoon opnieuw, net als bij animate().
+const zelfBewegingen = new WeakMap();
+
+function animeerZelf(el, frames, opties) {
+  if (frames.length < 2) return null;
+  const vorige = zelfBewegingen.get(el);
+  if (vorige) vorige.cancel();
+
+  const duur = opties.duration || 0;
+  const wacht = opties.delay || 0;
+  const geheel = versnelling(opties.easing);
+  const vooraf = opties.fill === 'both' || opties.fill === 'backwards';
+  const blijf = opties.fill === 'both' || opties.fill === 'forwards';
+  const stops = verdeelFrames(frames);
+  const soorten = ['transform', 'opacity'].filter((s) => frames.some((f) => s in f));
+  // Na afloop terug naar wat er stond, zodat de css het weer overneemt.
+  const was = {};
+  soorten.forEach((s) => { was[s] = el.style[s]; });
+
+  const start = performance.now();
+  let lus = 0;
+  const beweging = { onfinish: null, cancel: stop };
+
+  function zet(t) {
+    const p = geheel(t);
+    let i = 0;
+    while (i < stops.length - 2 && p > stops[i + 1].offset) i++;
+    const a = stops[i], b = stops[i + 1];
+    const stuk = b.offset > a.offset ? (p - a.offset) / (b.offset - a.offset) : 1;
+    const q = a.easing(stuk);
+    soorten.forEach((s) => { el.style[s] = mengWaarde(a.frame[s], b.frame[s], q); });
+  }
+
+  function herstel() {
+    soorten.forEach((s) => { el.style[s] = was[s]; });
+  }
+
+  function stop() {
+    cancelAnimationFrame(lus);
+    if (zelfBewegingen.get(el) === beweging) zelfBewegingen.delete(el);
+    herstel();
+  }
+
+  function stap() {
+    const t = duur ? (performance.now() - start - wacht) / duur : 1;
+    if (t >= 1) {
+      zelfBewegingen.delete(el);
+      if (blijf) zet(1); else herstel();
+      if (beweging.onfinish) beweging.onfinish();
+      return;
+    }
+    if (t >= 0) zet(t);
+    lus = requestAnimationFrame(stap);
+  }
+
+  if (vooraf) zet(0);
+  zelfBewegingen.set(el, beweging);
+  lus = requestAnimationFrame(stap);
+  return beweging;
+}
+
+// Keyframes zonder offset verdelen zich gelijk tussen hun buren, net als bij
+// animate(): de eerste op 0, de laatste op 1.
+function verdeelFrames(frames) {
+  const offsets = frames.map((f, i) =>
+    f.offset != null ? f.offset : i === 0 ? 0 : i === frames.length - 1 ? 1 : null);
+  for (let i = 1; i < offsets.length - 1; i++) {
+    if (offsets[i] !== null) continue;
+    let j = i;
+    while (offsets[j] === null) j++;
+    const van = offsets[i - 1];
+    const afstand = (offsets[j] - van) / (j - i + 1);
+    for (let k = i; k < j; k++) offsets[k] = van + afstand * (k - i + 1);
+  }
+  return frames.map((f, i) => ({ frame: f, offset: offsets[i], easing: versnelling(f.easing) }));
+}
+
+const VASTE_CURVES = {
+  ease: [0.25, 0.1, 0.25, 1],
+  'ease-in': [0.42, 0, 1, 1],
+  'ease-out': [0, 0, 0.58, 1],
+  'ease-in-out': [0.42, 0, 0.58, 1]
+};
+
+function versnelling(naam) {
+  if (!naam || naam === 'linear') return (t) => t;
+  const m = /cubic-bezier\(([^)]+)\)/.exec(naam);
+  const p = m ? m[1].split(',').map(Number) : VASTE_CURVES[naam];
+  return p ? bezierCurve(p[0], p[1], p[2], p[3]) : (t) => t;
+}
+
+// Bij een tijd x zoeken we de plek t op de curve (door te halveren) en geven de
+// hoogte daar. Een y boven 1 is de overshoot waar de veer van komt.
+function bezierCurve(x1, y1, x2, y2) {
+  const as = (t, a, b) => 3 * a * t * (1 - t) * (1 - t) + 3 * b * t * t * (1 - t) + t * t * t;
+  return (x) => {
+    if (x <= 0 || x >= 1) return x;
+    let laag = 0, hoog = 1, t = x;
+    for (let i = 0; i < 24; i++) {
+      const v = as(t, x1, x2);
+      if (Math.abs(v - x) < 1e-5) break;
+      if (v < x) laag = t; else hoog = t;
+      t = (laag + hoog) / 2;
+    }
+    return as(t, y1, y2);
+  };
+}
+
+// Tussen 'scale(1) rotate(-3deg)' en 'scale(1.15) rotate(-3deg)' in: elk getal
+// schuift op, de rest van de tekst blijft staan. Alle keyframes hier hebben
+// dezelfde opbouw; is dat een keer niet zo, dan springt hij halverwege om.
+const GETAL = /-?\d*\.?\d+(?:e[-+]?\d+)?/gi;
+
+function mengWaarde(a, b, q) {
+  if (a === undefined) return String(b);
+  if (b === undefined) return String(a);
+  if (typeof a === 'number' || typeof b === 'number') return String(Number(a) + (Number(b) - Number(a)) * q);
+  const naar = String(b).match(GETAL) || [];
+  if ((String(a).match(GETAL) || []).length !== naar.length) return q < 0.5 ? a : b;
+  let i = 0;
+  return String(a).replace(GETAL, (g) => {
+    const x = parseFloat(g);
+    return String(+(x + (parseFloat(naar[i++]) - x) * q).toFixed(4));
+  });
+}
+
 function flits(id) {
   const lijst = pads[id];
   if (!lijst) return;
@@ -516,7 +656,7 @@ function flits(id) {
   // Via de animatie-API en niet via een class, want dan begint de puls opnieuw
   // ook als je hem midden in een vorige aanslag weer raakt.
   vormen[id].forEach((vorm) => {
-    if (!vorm || !vorm.animate) return;
+    if (!vorm) return;
     // Hoe ver hij uitzet mag per element verschillen. Een vorm op een pad is
     // klein en heeft ruimte om zich heen; een foto van driehonderd pixels breed
     // staat tegen de rand van de bladzijde aan en zou er met 32% overheen
@@ -527,7 +667,7 @@ function flits(id) {
     // De bounce hoort op het uitzetten, niet over de hele animatie. Stond hij op
     // het geheel, dan schoot de overshoot al voorbij de laatste keyframe en was
     // de puls na een goede honderd milliseconden alweer voorbij.
-    vorm.animate([
+    animeer(vorm, [
       { transform: 'scale(1)', easing: 'cubic-bezier(0.34, 1.56, 0.64, 1)' },
       { transform: 'scale(' + groei + ')', offset: 0.35, easing: 'ease-out' },
       { transform: 'scale(1)' }

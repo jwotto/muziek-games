@@ -364,9 +364,9 @@ function stop() {
   toonAftellen(0);
   // De begeleiding staat al een paar tellen vooruit gepland; die zou anders
   // doorspelen terwijl je game over in beeld staat.
-  basEnv.cancel(Tone.now());
-  akkEnv.cancel(Tone.now());
-  tikEnv.cancel(Tone.now());
+  stilNu(basEnv);
+  stilNu(akkEnv);
+  stilNu(tikEnv);
 
   bewaarRecord();
 
@@ -496,8 +496,8 @@ function werkAftellenBij(nu) {
 function toonAftellen(getal) {
   if (!aftelEl) return;
   aftelEl.textContent = getal ? String(getal) : '';
-  if (!getal || minderBeweging.matches || !aftelEl.animate) return;
-  aftelEl.animate(
+  if (!getal || minderBeweging.matches) return;
+  animeer(aftelEl,
     [{ transform: 'scale(0.6)' }, { transform: 'scale(1)' }],
     { duration: 240, easing: 'cubic-bezier(0.34, 1.56, 0.64, 1)' }
   );
@@ -586,11 +586,11 @@ function vier(naam) {
 
   confetti(44, veldEl);
   const kaart = vrijEl.firstElementChild;
-  if (minderBeweging.matches || !kaart.animate) return;
+  if (minderBeweging.matches) return;
   // De bounce hoort alleen op het opkomen. Zet je hem over de hele animatie, dan
   // schiet de overshoot voorbij de laatste keyframes en fadet het kaartje al weg
   // terwijl het nog groot in beeld hoort te staan.
-  kaart.animate([
+  animeer(kaart, [
     { transform: 'scale(0.3) rotate(-14deg)', opacity: 0, easing: 'cubic-bezier(0.34, 1.56, 0.64, 1)' },
     { transform: 'scale(1) rotate(-3deg)', opacity: 1, offset: 0.18, easing: 'linear' },
     { transform: 'scale(1) rotate(-3deg)', opacity: 1, offset: 0.8, easing: 'ease-in' },

@@ -489,8 +489,8 @@ function wisLampje() {
 // Via de animatie-API en niet via een class, want dan begint de puls opnieuw
 // ook als de vorige nog bezig is. De bounce zit alleen op het uitzetten.
 function puls(el, groei) {
-  if (!el || !el.animate || minderBeweging.matches) return;
-  el.animate([
+  if (!el || minderBeweging.matches) return;
+  animeer(el, [
     { transform: 'scale(1)', easing: 'cubic-bezier(0.34, 1.56, 0.64, 1)' },
     { transform: 'scale(' + groei + ')', offset: 0.35, easing: 'ease-out' },
     { transform: 'scale(1)' }

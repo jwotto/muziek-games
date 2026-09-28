@@ -98,3 +98,16 @@ function akkoordStoot(tijd, akkoord, tellengte) {
   akkEnv.decay = Math.min(0.14, tellengte * 0.3);
   akkEnv.triggerAttack(tijd);
 }
+
+// Stoppen midden in een noot. Alleen cancel() is niet genoeg: dat haalt alles
+// weg wat vanaf nu gepland staat, en ook het laatste stukje van een noot die
+// op dat moment uitsterft. Tone laat een noot namelijk in drie stappen wegzakken
+// (snel omlaag, even vasthouden, dan pas naar nul) en valt je stop tussen die
+// laatste twee, dan blijft het volume op een kiertje staan. De oscillators
+// draaien altijd door, dus dan hoor je een zacht toontje of piepje dat nooit
+// meer weggaat. Daarom na het wissen de noot zelf nog netjes laten uitklinken.
+function stilNu(env) {
+  const nu = Tone.now();
+  env.cancel(nu);
+  env.triggerRelease(nu);
+}

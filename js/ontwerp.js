@@ -373,8 +373,8 @@ function owTik(doel) {
 }
 
 function owVeer(el, groei) {
-  if (!el || !el.animate || minderBeweging.matches) return;
-  el.animate([
+  if (!el || minderBeweging.matches) return;
+  animeer(el, [
     { transform: 'scale(1)', easing: 'cubic-bezier(0.34, 1.56, 0.64, 1)' },
     { transform: 'scale(' + groei + ')', offset: 0.35, easing: 'ease-out' },
     { transform: 'scale(1)' }
@@ -515,7 +515,7 @@ function owStop() {
   if (!owSpel) return;
   owSpel = null;
   cancelAnimationFrame(owLus);
-  tikEnv.cancel(Tone.now());
+  stilNu(tikEnv);
   tikVol.volume.cancelScheduledValues(Tone.now());
   tikVol.volume.value = OW_TIK_AFTELLEN;
   owVakken.forEach((vak) => vak.classList.remove('aan'));
@@ -583,8 +583,8 @@ function owKnik(sterk) {
 // volgende heen.
 function owGroei(vak, k, tel) {
   const img = owVakken[vak].querySelectorAll('img')[k];
-  if (!img || !img.animate || minderBeweging.matches) return;
-  img.animate([
+  if (!img || minderBeweging.matches) return;
+  animeer(img, [
     { transform: 'scale(1)', easing: 'cubic-bezier(0.34, 1.56, 0.64, 1)' },
     { transform: 'scale(1.35)', offset: 0.35, easing: 'ease-out' },
     { transform: 'scale(1)' }
@@ -641,8 +641,8 @@ function owWerkAftellenBij(nu) {
 function owToonAftellen(getal) {
   if (!owAftelEl) return;
   owAftelEl.textContent = getal ? String(getal) : '';
-  if (!getal || minderBeweging.matches || !owAftelEl.animate) return;
-  owAftelEl.animate(
+  if (!getal || minderBeweging.matches) return;
+  animeer(owAftelEl,
     [{ transform: 'scale(0.6)' }, { transform: 'scale(1)' }],
     { duration: 240, easing: 'cubic-bezier(0.34, 1.56, 0.64, 1)' }
   );

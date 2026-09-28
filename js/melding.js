@@ -7,7 +7,7 @@
 
    Los bestand omdat twee lessen hem gebruiken: in de eerste ritmeles gaan er
    de geluiden en de game mee open, in de tweede de geluiden. Laden na
-   drumkit.js, want minderBeweging komt daarvandaan. */
+   drumkit.js, want minderBeweging en animeer() komen daarvandaan. */
 
 const meldingEl = document.querySelector('[data-melding]');
 let meldTimer = 0;
@@ -23,11 +23,11 @@ function meld(kop, regel) {
 
   confetti(54, meldingEl);
   const kaart = meldingEl.firstElementChild;
-  if (minderBeweging.matches || !kaart.animate) return;
+  if (minderBeweging.matches) return;
   // De bounce hoort alleen op het opkomen. Zet je hem over de hele animatie, dan
   // schiet de overshoot voorbij de laatste keyframes en fadet het kaartje al weg
   // terwijl het nog groot in beeld hoort te staan.
-  kaart.animate([
+  animeer(kaart, [
     { transform: 'scale(0.3) rotate(-14deg)', opacity: 0, easing: 'cubic-bezier(0.34, 1.56, 0.64, 1)' },
     { transform: 'scale(1) rotate(-3deg)', opacity: 1, offset: 0.12, easing: 'linear' },
     { transform: 'scale(1) rotate(-3deg)', opacity: 1, offset: 0.85, easing: 'ease-in' },
@@ -41,7 +41,7 @@ function meld(kop, regel) {
 const SNIPPERKLEUREN = ['--koraal', '--zon', '--blauw', '--mint', '--bubblegum'];
 
 function confetti(aantal, laag) {
-  if (!laag || minderBeweging.matches || !laag.animate) return;
+  if (!laag || minderBeweging.matches) return;
   const val = laag.clientHeight + 60;
 
   for (let i = 0; i < aantal; i++) {
@@ -52,7 +52,7 @@ function confetti(aantal, laag) {
     if (i % 3 === 0) snipper.style.borderRadius = '50%';
     laag.appendChild(snipper);
 
-    const beweging = snipper.animate([
+    const beweging = animeer(snipper, [
       { transform: 'translate3d(0, -30px, 0) rotate(0deg)' },
       { transform: 'translate3d(' + Math.round((Math.random() - 0.5) * 200) + 'px, ' +
                    val + 'px, 0) rotate(' + Math.round((Math.random() * 4 - 2) * 360) + 'deg)' }

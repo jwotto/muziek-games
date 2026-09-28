@@ -257,11 +257,11 @@ function stopKlap() {
   // Wat er nog vooruit gepland stond mag niet doorspelen over een gestopte
   // oefening heen.
   klapSpelers.forEach((speler) => speler.stop(Tone.now()));
-  klapTikEnvs.forEach((env) => env.cancel(Tone.now()));
-  klapStaartEnv.cancel(Tone.now());
-  basEnv.cancel(Tone.now());
-  akkEnv.cancel(Tone.now());
-  tikEnv.cancel(Tone.now());
+  klapTikEnvs.forEach(stilNu);
+  stilNu(klapStaartEnv);
+  stilNu(basEnv);
+  stilNu(akkEnv);
+  stilNu(tikEnv);
 
   wisKlapTellen();
   toonKlapAftellen(0);
@@ -375,8 +375,8 @@ function bouwKlapTellen() {
 // tussen een puls en een hik. De veer zit alleen op het eerste stuk: over het
 // geheel schiet hij bij het eerste beeldje al door zijn eindstand heen.
 function pulseerKlap(el, groei) {
-  if (!el || !el.animate || minderBeweging.matches) return;
-  el.animate([
+  if (!el || minderBeweging.matches) return;
+  animeer(el, [
     { transform: 'scale(1)', easing: 'cubic-bezier(0.34, 1.56, 0.64, 1)' },
     { transform: 'scale(' + groei + ')', offset: 0.35, easing: 'ease-out' },
     { transform: 'scale(1)' }
@@ -474,8 +474,8 @@ function zwelKlapOp(noot) {
   if (minderBeweging.matches) return;
 
   const vorm = noot.el.querySelector('svg');
-  if (!vorm || !vorm.animate) return;
-  vorm.animate([
+  if (!vorm) return;
+  animeer(vorm, [
     { transform: 'scale(1)', easing: 'cubic-bezier(0.34, 1.56, 0.64, 1)' },
     { transform: 'scale(1.5)', offset: 0.3, easing: 'ease-out' },
     { transform: 'scale(1)' }
@@ -553,8 +553,8 @@ function werkKlapAftellenBij(nu) {
 function toonKlapAftellen(getal) {
   if (!klapAftelEl) return;
   klapAftelEl.textContent = getal ? String(getal) : '';
-  if (!getal || minderBeweging.matches || !klapAftelEl.animate) return;
-  klapAftelEl.animate(
+  if (!getal || minderBeweging.matches) return;
+  animeer(klapAftelEl,
     [{ transform: 'scale(0.6)' }, { transform: 'scale(1)' }],
     { duration: 240, easing: 'cubic-bezier(0.34, 1.56, 0.64, 1)' }
   );

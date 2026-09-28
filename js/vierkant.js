@@ -320,7 +320,7 @@ function stopVierkant() {
 
   // Wat er nog vooruit gepland stond mag niet doortikken over een gestopte
   // oefening heen. De tik weer zo hard als hij op deze bladzijde hoort.
-  tikEnv.cancel(Tone.now());
+  stilNu(tikEnv);
   tikVol.volume.cancelScheduledValues(Tone.now());
   tikVol.volume.value = vierkant.tikWas;
 
@@ -433,8 +433,8 @@ function vierkantOpMoment(tijd, doe) {
 // beeldje al door zijn eindstand heen en zie je er niets van. Alleen transform,
 // want dat draait op de grafische kaart.
 function veerVierkant(el, groei, duur) {
-  if (!el || !el.animate || minderBeweging.matches) return;
-  el.animate([
+  if (!el || minderBeweging.matches) return;
+  animeer(el, [
     { transform: 'scale(1)', easing: 'cubic-bezier(0.34, 1.56, 0.64, 1)' },
     { transform: 'scale(' + groei + ')', offset: 0.35, easing: 'ease-out' },
     { transform: 'scale(1)' }
@@ -479,8 +479,8 @@ function werkVierkantAftellenBij(nu) {
 function toonVierkantAftellen(getal) {
   if (!vkAftelEl) return;
   vkAftelEl.textContent = getal ? String(getal) : '';
-  if (!getal || minderBeweging.matches || !vkAftelEl.animate) return;
-  vkAftelEl.animate(
+  if (!getal || minderBeweging.matches) return;
+  animeer(vkAftelEl,
     [{ transform: 'scale(0.6)' }, { transform: 'scale(1)' }],
     { duration: 240, easing: 'cubic-bezier(0.34, 1.56, 0.64, 1)' }
   );

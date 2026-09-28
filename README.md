@@ -66,15 +66,40 @@ Learning Music werkten er wel, want die luisteren op de oude manier.
   andere nieuwe syntax. Eén regel die hij niet kent en het hele script doet
   niets meer, terwijl de bladzijde er gewoon goed uitziet.
 
-**Animaties sprongen in plaats van te veren.** Dat is waarschijnlijk geen fout
-maar de instelling "minder beweging": staat in Windows "Animatie-effecten" uit
-(beheerde schoolcomputers hebben dat vaak), of op Android "Animaties
-verwijderen" aan, dan geeft de browser `prefers-reduced-motion` door en kiest de
-site bewust een sprong in plaats van een veer (zie `stijl.md`). Nog niet op het
-bord zelf nagekeken; een traag bord dat beeldjes overslaat geeft hetzelfde beeld.
+**Animaties sprongen in plaats van te veren.** Op het bord werden de drumstellen
+in één klap groter en kleiner, en de klapjes en de knikkende rand van het
+ritmevierkant bewogen helemaal niet. Alle veren en pulsen liepen via
+`el.animate()`, en een oudere browser kent die niet (of maar half). Dan werd de
+animatie overgeslagen en bleef alleen het harde verspringen van de classes over.
+
+- Alles wat beweegt loopt daarom via `animeer()` in `js/drumkit.js`. Kent de
+  browser `animate()`, dan gebruikt hij die; zo niet (of gooit hij een fout),
+  dan doet `animeer()` dezelfde beweging zelf, beeldje voor beeldje met
+  `requestAnimationFrame`. Hij kan transform en opacity, offsets, easing per
+  keyframe, `delay`, `fill` en `onfinish`. **Roep nooit zelf `el.animate()`
+  aan**; gebruik `animeer`, ook in een nieuwe les.
+- Een tweede mogelijke oorzaak blijft de instelling "minder beweging": staat in
+  Windows "Animatie-effecten" uit (beheerde schoolcomputers hebben dat vaak), of
+  op Android "Animaties verwijderen" aan, dan geeft de browser
+  `prefers-reduced-motion` door en kiest de site bewust een sprong in plaats van
+  een veer (zie `stijl.md`). Dat is dan geen fout.
+
+**Na stoppen bleef er zacht een toon of piepje hangen.** De bas, het akkoord en
+de tik zijn oscillators die altijd aan staan; een envelope zet per noot het
+volume even open. Bij stoppen werd alles wat vooruit gepland stond gewist met
+`env.cancel()`. Maar Tone laat een noot in drie stappen wegzakken, en viel je
+stop precies tussen de laatste twee, dan werd ook die laatste stap naar nul
+gewist en bleef het volume op een kiertje staan (rond de -42 dB).
+
+- Stoppen gaat daarom via `stilNu(env)` in `js/polka.js`: eerst wissen, dan de
+  noot netjes laten uitklinken met `triggerRelease`. **Gebruik nooit een losse
+  `env.cancel()`** om te stoppen; gebruik `stilNu`.
 
 Nakijken zonder bord: in Chrome DevTools de apparaatbalk aan voor aanraken, en
-onder Rendering "Emulate CSS media feature prefers-reduced-motion". Maar het
+onder Rendering "Emulate CSS media feature prefers-reduced-motion". Hoe een oude
+browser het doet zie je door in de console `Element.prototype.animate =
+undefined` te typen en daarna iets te laten bewegen: dan loopt alles via de
+reserve van `animeer()`. Maar het
 echte bord blijft de enige echte toets, dus probeer een nieuwe les daar voordat
 je hem in de klas gebruikt.
 
