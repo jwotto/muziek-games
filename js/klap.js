@@ -20,18 +20,16 @@
 // Hoeveel klappen er in één tel passen. De maat wordt per tel opgebouwd: elke
 // tel krijgt een van de aantallen hieronder, of een rust. Zo is geen maat
 // hetzelfde en blijft de tel toch altijd voelbaar.
-// De keuzes staan van makkelijk naar moeilijk. Hoe vaak een tel leeg blijft
-// verschilt per niveau: bij één klap per tel is de rust de enige afwisseling die
-// er is, dus daar mag hij vaker vallen. Zodra er ook twee of vier klappen in een
-// tel kunnen, zit de afwisseling in het aantal en hoeft de rust niet zo hard te
-// werken.
+// De keuzes staan van makkelijk naar moeilijk, en heten net als bij de skater:
+// rustig is één klap per tel, normaal één of twee, druk één, twee of vier.
+// Hoe vaak een tel leeg blijft verschilt per niveau: bij één klap per tel is de
+// rust de enige afwisseling die er is, dus daar mag hij vaker vallen. Zodra er
+// ook twee of vier klappen in een tel kunnen, zit de afwisseling in het aantal
+// en hoeft de rust niet zo hard te werken.
 const KLAPNIVEAUS = [
-  { id: 'een',  naam: '1 klap per tel',
-    uitleg: 'op elke tel een klap, soms een rust', keuzes: [1], rust: 0.28 },
-  { id: 'twee', naam: '1 of 2 per tel',
-    uitleg: 'een klap of twee, soms een rust', keuzes: [1, 2], rust: 0.16 },
-  { id: 'vier', naam: '1, 2 of 4 per tel',
-    uitleg: 'een, twee of vier klappen, soms een rust', keuzes: [1, 2, 4], rust: 0.14 }
+  { id: 'een',  naam: 'Rustig',  keuzes: [1],       rust: 0.28 },
+  { id: 'twee', naam: 'Normaal', keuzes: [1, 2],    rust: 0.16 },
+  { id: 'vier', naam: 'Druk',    keuzes: [1, 2, 4], rust: 0.14 }
 ];
 
 // De eerste tel van een maat blijft altijd staan: daar hangt de hele klas aan,
@@ -61,7 +59,7 @@ const KLAP_DOEL = 96;
 const KLAP_INSTELLINGEN = [
   { id: 'begin', label: 'Begintempo', min: 50, max: 140, step: 5, waarde: 80, achter: 'bpm' },
   { id: 'eind',  label: 'Eindtempo',  min: 60, max: 200, step: 5, waarde: 130, achter: 'bpm' },
-  { id: 'maten', label: 'Aantal maten', min: 4, max: 32, step: 2, waarde: 16, achter: 'maten' }
+  { id: 'maten', label: 'Maten', min: 4, max: 32, step: 2, waarde: 16, achter: 'maten' }
 ];
 
 // ============================================================
@@ -116,8 +114,17 @@ function bewaarKlapStand() {
   }
 }
 
+// Wat er nu geldt. Klassikaal is dat wat de juf heeft gezet; alleen speel je
+// altijd op 90 bpm en 16 maten, met het patroon van je level (zie alleen.js).
+function klapInst() {
+  if (klapAlleen && klapAlleen.aan()) {
+    return { begin: ALLEEN_BPM, eind: ALLEEN_BPM, maten: ALLEEN_MATEN, patroon: klapAlleen.niveau().id };
+  }
+  return klapStand;
+}
+
 function niveauNu() {
-  return KLAPNIVEAUS.find((k) => k.id === klapStand.patroon) || KLAPNIVEAUS[1];
+  return KLAPNIVEAUS.find((k) => k.id === klapInst().patroon) || KLAPNIVEAUS[1];
 }
 
 // ============================================================
@@ -138,9 +145,26 @@ function niveauNu() {
 // De bas komt niet verder dan nul: een driehoeksgolf staat dan al tegen het
 // plafond, en een bas die de begrenzer in loopt gaat brommen. Bij het akkoord en
 // de tik is er meer ruimte, die kunnen verder omhoog.
-basVol.volume.value = 0;    // was -4
-akkVol.volume.value = -2;   // was -10
-tikVol.volume.value = -1;   // was -9
+//
+// Behalve als je alleen speelt: dan klinkt de muziek zoals in de drumles, en
+// ook je eigen klap zachter. Samen met de muziek hier kwam hij anders ver over de
+// begrenzer uit drumkit.js heen, en die drukt dan alles plat wat op dat moment
+// klinkt: de synth klonk bij elke klap alsof er een filter dichtging. In de
+// drumles gebeurt dat niet, dus daar nemen we de balans van over.
+const KLAP_MIX = {
+  klas:   { bas: 0,  akk: -2,  tik: -1, klap: KLAP_LUID },
+  alleen: { bas: -4, akk: -10, tik: -9, klap: -5 }
+};
+
+function zetKlapMix(alleen) {
+  const mix = alleen ? KLAP_MIX.alleen : KLAP_MIX.klas;
+  basVol.volume.value = mix.bas;
+  akkVol.volume.value = mix.akk;
+  tikVol.volume.value = mix.tik;
+  klapVol.volume.value = mix.klap;
+}
+
+zetKlapMix(false);
 
 // ============================================================
 //  De oefening
@@ -152,9 +176,10 @@ let klapLus = 0;
 // Het tempo loopt in rechte lijn van het begin- naar het eindtempo, verdeeld
 // over het aantal maten. Bij één maat is er niets te verdelen.
 function klapBpmVoor(maat) {
-  const totaal = Math.max(1, klapStand.maten - 1);
+  const inst = klapInst();
+  const totaal = Math.max(1, inst.maten - 1);
   const deel = Math.min(1, Math.max(0, maat) / totaal);
-  return klapStand.begin + (klapStand.eind - klapStand.begin) * deel;
+  return inst.begin + (inst.eind - inst.begin) * deel;
 }
 
 // Wat er op de vorige tel stond, zodat de volgende daarop kan reageren. Loopt
@@ -220,9 +245,10 @@ function startKlap() {
 
   klap = {
     loopt: true,
+    alleen: !!(klapAlleen && klapAlleen.aan()),   // vast voor deze beurt
     stapNr: 0,                       // zestienden vanaf het allereerste begin
     stapTijd: Tone.now() + 0.6,
-    bpm: klapStand.begin,
+    bpm: klapInst().begin,
     maat: 0,
     klappen: klappenVoor(0),
     noten: [],
@@ -235,8 +261,17 @@ function startKlap() {
     einde: 0
   };
 
+  // Alleen: de muziek en je klap zoals in de drumles (zie KLAP_MIX).
+  zetKlapMix(klap.alleen);
+
   klapKnopEl.textContent = 'Stop';
   klapZetKnoppen(true);
+  if (klapAlleen) klapAlleen.zetBezig(true);
+  if (klap.alleen) {
+    klapAlleen.nieuweBeurt();
+    // Anders staat de focus nog op Start, en dan stopt de spatie het spel.
+    if (document.activeElement) document.activeElement.blur();
+  }
   wisKlapTellen();
   toonKlapAftellen(0);
   werkKlapBalkBij();
@@ -253,6 +288,7 @@ function stopKlap() {
   cancelAnimationFrame(klapLus);
   klap.noten.forEach((n) => n.el.remove());
   klap.noten = [];
+  if (klapDoelEl) klapDoelEl.classList.remove('raak');
 
   // Wat er nog vooruit gepland stond mag niet doorspelen over een gestopte
   // oefening heen.
@@ -265,8 +301,11 @@ function stopKlap() {
 
   wisKlapTellen();
   toonKlapAftellen(0);
+  // Weer de klassikale balans, ook voor de ritmevierkanten verderop.
+  zetKlapMix(false);
   klapKnopEl.textContent = 'Start';
   klapZetKnoppen(false);
+  if (klapAlleen) klapAlleen.zetBezig(false);
   werkKlapBalkBij();
 }
 
@@ -280,7 +319,8 @@ function vulKlapAan(nu) {
     const maat = Math.floor((stap - KLAP_AANLOOP_STAPPEN) / KLAP_STAPPEN);
     const inMaat = ((stap - KLAP_AANLOOP_STAPPEN) % KLAP_STAPPEN + KLAP_STAPPEN) % KLAP_STAPPEN;
 
-    const bpm = inAanloop ? klapStand.begin : klapBpmVoor(maat);
+    const maten = klapInst().maten;
+    const bpm = inAanloop ? klapInst().begin : klapBpmVoor(maat);
     const stapDuur = 15 / bpm;             // 60 / bpm / 4 zestienden
     const tel = Math.floor(stap / 4);
 
@@ -301,7 +341,7 @@ function vulKlapAan(nu) {
     const tellengte = 60 / bpm;
     if (stap % 4 === 0) klap.tellen.push({ nr: tel, tijd: klap.stapTijd });
 
-    if (stap % 4 === 0 && (inAanloop || maat < klapStand.maten)) {
+    if (stap % 4 === 0 && (inAanloop || maat < maten)) {
       const akkoord = akkoordVoor(tel);
       basNoot(klap.stapTijd, akkoord, tellengte, tel % 4);
       akkoordStoot(klap.stapTijd + tellengte / 2, akkoord, tellengte);
@@ -313,7 +353,7 @@ function vulKlapAan(nu) {
         tik(klap.stapTijd, stap === KLAP_AANLOOP_STAPPEN - 4);
         klap.aanloop.push(klap.stapTijd);
       }
-    } else if (maat < klapStand.maten) {
+    } else if (maat < maten) {
       // De metronoom blijft doortikken, ook als het klappen begonnen is. In de
       // drumles houdt hij na het aftellen op, want daar neemt de beat het over.
       // Hier is er geen beat: een kale tik op elke tel is waar dertig kinderen
@@ -322,7 +362,8 @@ function vulKlapAan(nu) {
       if (inMaat % 4 === 0) tik(klap.stapTijd, inMaat === 0);
 
       if (klap.klappen[inMaat] === 'x') {
-        klapNu(klap.stapTijd);
+        // Alleen maak je de klap zelf, met de spatie.
+        if (!klap.alleen) klapNu(klap.stapTijd);
         klap.noten.push(maakKlapNoot(klap.stapTijd, klappenInTel(klap.klappen, inMaat)));
         if (!klap.eersteKlap) klap.eersteKlap = klap.stapTijd;
       }
@@ -333,7 +374,7 @@ function vulKlapAan(nu) {
     klap.stapNr += 1;
 
     // Klaar? Nog even laten uitklinken, dan stoppen.
-    if (!inAanloop && maat >= klapStand.maten && !klap.einde) {
+    if (!inAanloop && maat >= maten && !klap.einde) {
       klap.einde = klap.stapTijd + 0.4;
     }
   }
@@ -445,25 +486,68 @@ function klappenInTel(stappen, inMaat) {
   return aantal;
 }
 
-// Bij de ring zwelt het klapje even op. De span zelf schuift elk beeld op met
-// een transform, dus de puls gaat op de tekening erbinnen: anders overschrijven
-// die twee elkaar en staat het klapje stil.
-//
-// De veer zit alleen op het eerste stuk van de animatie. Zet je hem over het
-// geheel, dan schiet hij al bij het eerste beeldje door zijn eindstand heen en
-// is de puls voorbij voordat je hem ziet.
-function zwelKlapOp(noot) {
-  if (noot.gezwollen) return;
-  noot.gezwollen = true;
+// Bij de ring flitst de ring in de kleur van het klapje. Het klapje zelf zwelt
+// niet op: het komt op zijn gewone maat aan, en de gele kopie groeit vanaf
+// precies die maat (zie ruimKlapOp).
+function raakKlap(noot) {
+  if (noot.geraakt) return;
+  noot.geraakt = true;
+  flitsKlapDoel(noot.aantal);
+}
+
+// Op de tel groeien de handen en vervagen in de ring, met een paar gele
+// sterretjes. Meteen, net als bij de ritme skater, zodat het klapje en de klap
+// samenvallen; de ring flitst dan al.
+const KLAP_WEG_NA = 0;       // seconden na de tel
+const KLAP_HANGEN = 220;     // milliseconden dat de gele klap blijft hangen
+const KLAP_STERREN = [-70, -35, 0, 35, 70];
+
+function ruimKlapOp(noot) {
+  if (noot.weg) return;
+  noot.weg = true;
   if (minderBeweging.matches) return;
 
   const vorm = noot.el.querySelector('svg');
   if (!vorm) return;
-  animeer(vorm, [
-    { transform: 'scale(1)', easing: 'cubic-bezier(0.34, 1.56, 0.64, 1)' },
-    { transform: 'scale(1.5)', offset: 0.3, easing: 'ease-out' },
-    { transform: 'scale(1)' }
-  ], { duration: 300 });
+  // Het klapje zelf is op de tel weg; een gele kopie blijft in de ring hangen,
+  // zwelt nog wat op en vervaagt daar. De kopie staat waar het klapje op de tel
+  // stond, want de transform gaat mee. De sterretjes springen eruit.
+  const kopie = noot.el.cloneNode(true);
+  kopie.classList.add('raak');
+  klapNotenEl.appendChild(kopie);
+  animeer(kopie.querySelector('svg'), [
+    { transform: 'scale(1)', opacity: 1, easing: 'ease-out' },
+    { transform: 'scale(1.7)', opacity: 0 }
+  ], { duration: KLAP_HANGEN, fill: 'forwards' });
+  setTimeout(() => kopie.remove(), KLAP_HANGEN + 50);
+  vorm.style.visibility = 'hidden';
+
+  KLAP_STERREN.forEach((hoek) => {
+    const ster = document.createElement('span');
+    ster.className = 'klap-ster';
+    kopie.appendChild(ster);
+    const beweging = animeer(ster, [
+      { transform: 'rotate(' + hoek + 'deg) translateY(0) scaleY(0.4)', opacity: 1, easing: 'ease-out' },
+      { transform: 'rotate(' + hoek + 'deg) translateY(-160%) scaleY(1)', opacity: 0 }
+    ], { duration: 380, fill: 'forwards' });
+    if (beweging) beweging.onfinish = () => ster.remove();
+    else ster.remove();
+  });
+}
+
+// Op de klap krijgt de rand van de ring even de kleur van het klapje. Elke
+// klap apart, dus bij twee of vier klappen in een tel flitst hij twee of vier
+// keer. Daarom duurt een flits een halve klap lang, anders lopen ze bij een
+// hoog tempo in elkaar over.
+let klapFlitsKlok = 0;
+
+function flitsKlapDoel(aantal) {
+  if (!klapDoelEl) return;
+  clearTimeout(klapFlitsKlok);
+  klapDoelEl.classList.remove('aantal-1', 'aantal-2', 'aantal-4');
+  klapDoelEl.classList.add('raak', 'aantal-' + aantal);
+  const duur = 60 / (klap ? klap.bpm : klapInst().begin) / aantal / 2 * 1000;
+  klapFlitsKlok = setTimeout(() => klapDoelEl.classList.remove('raak'), duur);
 }
 
 function maakKlapNoot(tijd, aantal) {
@@ -471,8 +555,66 @@ function maakKlapNoot(tijd, aantal) {
   el.className = 'klap-noot aantal-' + aantal;
   el.innerHTML = KLAP_HANDEN;
   klapNotenEl.appendChild(el);
-  return { tijd: tijd, el: el };
+  return { soort: 'klap', tijd: tijd, aantal: aantal, el: el };
 }
+
+// ============================================================
+//  Alleen: zelf klappen
+// ============================================================
+
+function mistKlap(noot) {
+  noot.gemist = true;
+  noot.el.classList.add('gemist');
+  klapAlleen.mis();
+}
+
+// Met de spatie, of met een tik op de baan. Je hoort meteen je klap; hoeveel
+// punten hij oplevert hangt af van hoe dicht hij bij een klapje zat. Klap je
+// ernaast, dan kost dat punten: anders kon je gewoon elke zestiende op de spatie
+// blijven rammen.
+function klapZelf() {
+  if (!klap || !klap.loopt || !klap.alleen) return;
+  const nu = Tone.now();
+  // Met de voorsprong uit drumkit.js: plan je korter vooruit dan één audioblok,
+  // dan begint de opname in het verleden en valt de knal van de klap weg. Dan
+  // klinkt hij dof en zacht.
+  klapNu(nu + VOORSPRONG);
+
+  const wanneer = nu - geluidVertraging();
+  const gevonden = zoekDoel(klap.noten, 'klap', wanneer);
+  const noot = gevonden && gevonden.doel;
+  if (noot && klapAlleen.raak(gevonden.afstand, alleenSchaal(klap.bpm, noot.aantal))) {
+    noot.gehaald = true;
+    raakKlap(noot);
+    ruimKlapOp(noot);
+    return;
+  }
+  klapAlleen.fout();
+  schudKlapDoel();
+}
+
+// Ernaast: de ring schudt even nee.
+function schudKlapDoel() {
+  if (!klapDoelEl || minderBeweging.matches) return;
+  animeer(klapDoelEl, [
+    { transform: 'translateX(0)' },
+    { transform: 'translateX(-5px)', offset: 0.25 },
+    { transform: 'translateX(5px)', offset: 0.6 },
+    { transform: 'translateX(0)' }
+  ], { duration: 180 });
+}
+
+// De spatie klapt, maar alleen als er alleen gespeeld wordt. Ook de keyup
+// tegenhouden: staat de focus op een knop, dan drukt de spatie die anders in.
+document.addEventListener('keydown', (e) => {
+  if (e.code !== 'Space' || !klap || !klap.loopt || !klap.alleen) return;
+  e.preventDefault();
+  if (!e.repeat) klapZelf();
+});
+
+document.addEventListener('keyup', (e) => {
+  if (e.code === 'Space' && klap && klap.loopt && klap.alleen) e.preventDefault();
+});
 
 // ============================================================
 //  Het beeld
@@ -481,10 +623,13 @@ function maakKlapNoot(tijd, aantal) {
 function klapStap() {
   if (!klap || !klap.loopt) return;
   const nu = Tone.now();
-
   vulKlapAan(nu);
-  werkKlapAftellenBij(nu);
-  werkKlapTelBij(nu);
+
+  // Het beeld loopt net zoveel achter als het geluid, zodat je ziet wat je
+  // hoort (zie instellingen.js). Plannen gaat gewoon op de audioklok.
+  const beeld = nu - geluidVertraging();
+  werkKlapAftellenBij(beeld);
+  werkKlapTelBij(beeld);
 
   // Van rechts naar links. Op zijn moment staat een klapje op het doelvak;
   // KLAP_VOORUIT seconden daarvoor staat hij tegen de rechterrand.
@@ -493,25 +638,40 @@ function klapStap() {
   const over = [];
 
   klap.noten.forEach((noot) => {
-    const deel = (noot.tijd - nu) / KLAP_VOORUIT;
+    const deel = (noot.tijd - beeld) / KLAP_VOORUIT;
     const x = doelX + deel * (breedte - doelX);
 
-    // Voorbij het doel mag hij nog even doorlopen, dan is hij weg.
-    if (x < -60) {
+    // Voorbij het doel mag hij nog even doorlopen, dan is hij weg. Klassikaal
+    // is hij na zijn gele klap in de ring meteen klaar.
+    const klaar = !klap.alleen && beeld - noot.tijd > KLAP_WEG_NA + KLAP_HANGEN / 1000;
+    if (x < -60 || klaar) {
       noot.el.remove();
       return;
     }
     noot.el.style.transform = 'translateX(' + x + 'px)';
-    const raak = Math.abs(noot.tijd - nu) < 0.08;
-    noot.el.classList.toggle('raak', raak);
-    if (raak) zwelKlapOp(noot);
+
+    if (klap.alleen) {
+      // Alleen: wat je niet op tijd raakt, schuift grijs door.
+      const venster = ALLEEN_VENSTER * alleenSchaal(klap.bpm, noot.aantal);
+      if (!noot.gehaald && !noot.gemist && beeld - noot.tijd > venster) mistKlap(noot);
+    } else {
+      const raak = Math.abs(noot.tijd - beeld) < 0.08;
+      noot.el.classList.toggle('raak', raak);
+      if (raak) raakKlap(noot);
+      if (beeld - noot.tijd > KLAP_WEG_NA) ruimKlapOp(noot);
+    }
     over.push(noot);
   });
 
   klap.noten = over;
   werkKlapBalkBij();
 
-  if (klap.einde && nu > klap.einde) {
+  if (klap.einde && beeld > klap.einde) {
+    // Helemaal uitgespeeld: alleen krijg je dan je uitslag.
+    if (klap.alleen) {
+      klap.noten.forEach((noot) => { if (!noot.gehaald && !noot.gemist) mistKlap(noot); });
+      klapAlleen.klaar();
+    }
     stopKlap();
     return;
   }
@@ -546,9 +706,10 @@ function toonKlapAftellen(getal) {
 
 function werkKlapBalkBij() {
   if (!klapEl) return;
-  klapBpmEl.textContent = Math.round(klap ? klap.bpm : klapStand.begin);
-  klapMaatEl.textContent = klap ? Math.min(klapStand.maten, klap.maat + 1) : 0;
-  klapTotaalEl.textContent = klapStand.maten;
+  const inst = klapInst();
+  klapBpmEl.textContent = Math.round(klap ? klap.bpm : inst.begin);
+  klapMaatEl.textContent = klap ? Math.min(inst.maten, klap.maat + 1) : 0;
+  klapTotaalEl.textContent = inst.maten;
 }
 
 // ============================================================
@@ -560,7 +721,7 @@ function bouwKlapKnoppen() {
 
   klapSchuifEl.innerHTML = KLAP_INSTELLINGEN.map((p) => `
     <div class="klap-schuif">
-      <label for="klap-${p.id}">${p.label}<b data-toon="${p.id}"></b></label>
+      <label for="klap-${p.id}"><span class="klap-schuif-naam">${p.label}</span><b data-toon="${p.id}"></b></label>
       <input type="range" id="klap-${p.id}" data-klap="${p.id}"
              min="${p.min}" max="${p.max}" step="${p.step}">
     </div>
@@ -569,7 +730,6 @@ function bouwKlapKnoppen() {
   klapKeuzeEl.innerHTML = KLAPNIVEAUS.map((k) => `
     <button class="klap-keus" type="button" data-patroon="${k.id}">
       <span class="klap-keus-naam">${k.naam}</span>
-      <span class="klap-keus-uitleg">${k.uitleg}</span>
     </button>
   `).join('');
 
@@ -582,7 +742,8 @@ function bouwKlapKnoppen() {
 function werkKlapKnoppenBij() {
   KLAP_INSTELLINGEN.forEach((p) => {
     const toon = klapSchuifEl.querySelector('[data-toon="' + p.id + '"]');
-    if (toon) toon.textContent = klapStand[p.id] + ' ' + p.achter;
+    // De eenheid apart, zodat een telefoon hem kan weglaten (zie site.css).
+    if (toon) toon.innerHTML = klapStand[p.id] + '<span class="eenheid"> ' + p.achter + '</span>';
   });
   klapKeuzeEl.querySelectorAll('.klap-keus').forEach((knop) => {
     knop.setAttribute('aria-pressed', String(knop.dataset.patroon === klapStand.patroon));
@@ -601,6 +762,20 @@ function klapZetKnoppen(bezig) {
 //  Aanzetten
 // ============================================================
 
+// Klassikaal of alleen (zie alleen.js). Moet er zijn voordat de knoppen gebouwd
+// worden, want de balk vraagt al wat er geldt.
+const klapAlleen = klapEl ? maakAlleen(klapEl, {
+  sleutel: 'wotto-muziekfles-klap-alleen',
+  niveaus: [
+    { id: 'een',  uitleg: 'één klap per tel' },
+    { id: 'twee', uitleg: 'één of twee klappen per tel' },
+    { id: 'vier', uitleg: 'één, twee of vier klappen per tel' }
+  ],
+  toetsen: 'Druk op de spatie als een klapje in de ring staat, of tik op de baan.',
+  bijWissel: () => werkKlapBalkBij(),
+  bijNiveau: () => werkKlapBalkBij()
+}) : null;
+
 if (klapEl) {
   laadKlapStand();
   bouwKlapKnoppen();
@@ -610,6 +785,39 @@ if (klapEl) {
   klapKnopEl.addEventListener('click', () => {
     if (klap && klap.loopt) stopKlap();
     else startKlap();
+  });
+
+  // Wis voortgang, rechtsboven: de levels en hiscores van het alleen spelen.
+  // Eerst even doorvragen, net als in de drumles: per ongeluk je hiscores
+  // kwijtraken is zuur, en een venster van de browser legt de audio stil.
+  const wisEl = document.querySelector('[data-wis-alles]');
+  let wisTimer = 0;
+  const ontwapen = () => {
+    clearTimeout(wisTimer);
+    wisTimer = 0;
+    wisEl.textContent = 'Wis voortgang';
+  };
+  if (wisEl) {
+    wisEl.addEventListener('click', () => {
+      if (!wisTimer) {
+        wisEl.textContent = 'Zeker?';
+        wisTimer = setTimeout(ontwapen, 3000);
+        return;
+      }
+      ontwapen();
+      // Loopt er een beurt, dan die eerst stoppen: anders schrijft hij zijn
+      // score er aan het eind alsnog in.
+      if (klap && klap.loopt) stopKlap();
+      klapAlleen.wis();
+      werkKlapBalkBij();
+    });
+  }
+
+  // Op een tablet tik je op de baan in plaats van de spatie.
+  klapBaanEl.addEventListener('pointerdown', (e) => {
+    if (!klap || !klap.loopt || !klap.alleen) return;
+    e.preventDefault();
+    klapZelf();
   });
 
   klapSchuifEl.addEventListener('input', (e) => {

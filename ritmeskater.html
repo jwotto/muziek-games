@@ -103,12 +103,13 @@
   <section class="paneel klapspel" id="renner">
 
     <!-- Voor de juf: hoe druk, het tempo en hoe lang. Zie renner.js. -->
-    <div class="klap-knoppen rn-knoppen">
+    <div class="klap-knoppen op-een-regel">
       <div class="klap-schuifjes" data-rn-schuifjes></div>
       <div class="klap-keuzes" data-rn-keuze="druk" role="group" aria-label="Hoe druk"></div>
     </div>
 
     <div class="rn-baan" data-rn-baan>
+      <span class="rn-doel" data-rn-doel aria-hidden="true"></span>
       <div class="rn-dingen" data-rn-dingen></div>
       <div class="rn-pop" data-rn-pop aria-hidden="true"><div class="rn-pop-beeld" data-rn-pop-beeld></div></div>
       <div class="klap-aftellen" data-rn-aftellen aria-hidden="true"></div>
@@ -132,6 +133,7 @@
 </div>
 
 <script defer src="js/vendor/Tone.js"></script>
+<script defer src="js/instellingen.js"></script>
 <script defer src="js/drumkit.js"></script>
 <script defer src="js/lijfgeluid.js"></script>
 <script defer src="js/hiphop.js"></script>

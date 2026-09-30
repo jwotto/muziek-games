@@ -377,21 +377,24 @@ function vulVierkantAan(nu) {
 function vierkantStap() {
   if (!vierkant || !vierkant.loopt) return;
   const nu = Tone.now();
-
   vulVierkantAan(nu);
-  werkVierkantAftellenBij(nu);
-  werkVierkantVakBij(nu);
+
+  // Het beeld loopt net zoveel achter als het geluid, zodat je ziet wat je
+  // hoort (zie instellingen.js). Plannen gaat gewoon op de audioklok.
+  const beeld = nu - geluidVertraging();
+  werkVierkantAftellenBij(beeld);
+  werkVierkantVakBij(beeld);
 
   // Wat er nu moet bewegen. Is een moment al lang voorbij (de tab was even
   // weg), dan slaan we hem over: alles tegelijk inhalen helpt niemand.
   const later = [];
   vierkant.momenten.forEach((m) => {
-    if (nu < m.tijd) later.push(m);
-    else if (nu - m.tijd < 0.15) m.doe();
+    if (beeld < m.tijd) later.push(m);
+    else if (beeld - m.tijd < 0.15) m.doe();
   });
   vierkant.momenten = later;
 
-  if (vierkant.einde && nu >= vierkant.einde) {
+  if (vierkant.einde && beeld >= vierkant.einde) {
     stopVierkant();
     return;
   }

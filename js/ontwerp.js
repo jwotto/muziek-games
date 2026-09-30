@@ -594,15 +594,18 @@ function owGroei(vak, k, tel) {
 function owStap() {
   if (!owSpel) return;
   const nu = Tone.now();
-
   owVulAan(nu);
-  owWerkAftellenBij(nu);
+
+  // Het beeld loopt net zoveel achter als het geluid, zodat je ziet wat je
+  // hoort (zie instellingen.js). Plannen gaat gewoon op de audioklok.
+  const beeld = nu - geluidVertraging();
+  owWerkAftellenBij(beeld);
 
   // Het vakje dat nu klinkt: de nieuwste tel die al geweest is, zodat hij na een
   // haperend beeldje meteen weer goed staat.
   let nieuw = null;
-  owSpel.tellen.forEach((t) => { if (nu >= t.tijd && (!nieuw || t.tijd > nieuw.tijd)) nieuw = t; });
-  owSpel.tellen = owSpel.tellen.filter((t) => t.tijd > nu - 0.5);
+  owSpel.tellen.forEach((t) => { if (beeld >= t.tijd && (!nieuw || t.tijd > nieuw.tijd)) nieuw = t; });
+  owSpel.tellen = owSpel.tellen.filter((t) => t.tijd > beeld - 0.5);
   if (nieuw && nieuw.tijd !== owSpel.vakAan) {
     owSpel.vakAan = nieuw.tijd;
     owVakken.forEach((vak, i) => vak.classList.toggle('aan', i === nieuw.vak));
@@ -613,12 +616,12 @@ function owStap() {
   // niemand de tel te vinden.
   const later = [];
   owSpel.momenten.forEach((m) => {
-    if (nu < m.tijd) later.push(m);
-    else if (nu - m.tijd < 0.15) m.doe();
+    if (beeld < m.tijd) later.push(m);
+    else if (beeld - m.tijd < 0.15) m.doe();
   });
   owSpel.momenten = later;
 
-  if (owSpel.einde && nu >= owSpel.einde) {
+  if (owSpel.einde && beeld >= owSpel.einde) {
     owStop();
     return;
   }

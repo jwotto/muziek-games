@@ -80,6 +80,7 @@
     <a class="terug" href="index.html">
       <i class="ph-bold ph-arrow-left" aria-hidden="true"></i> Alle lessen
     </a>
+    <button class="knop mini" type="button" data-wis-alles>Wis voortgang</button>
   </header>
 
   <div class="hero">
@@ -114,26 +115,43 @@
 
   <section class="paneel klapspel" id="klapspel">
 
-    <!-- Voor de juf: tempo, lengte en hoeveel klappen er per maat komen. -->
-    <div class="klap-knoppen">
-      <div class="klap-schuifjes" data-klap-schuifjes></div>
-      <div class="klap-keuzes" data-klap-keuze role="group" aria-label="Hoeveel klappen per maat"></div>
+    <!-- Voor de juf: tempo, lengte en hoeveel klappen er per maat komen. In de
+         stand 'alleen' staan hier de levels. Zie klap.js en alleen.js. -->
+    <div class="klap-knoppen op-een-regel">
+      <div class="klap-schuifjes" data-klap-schuifjes data-alleen-klas style="--schuiven: 3"></div>
+      <div class="klap-keuzes" data-klap-keuze data-alleen-klas role="group" aria-label="Hoe druk"></div>
+      <div class="spel-niveaus alleen-niveaus" data-alleen-niveaus role="group" aria-label="Level" hidden></div>
     </div>
+    <p class="niveau-uitleg" data-alleen-uitleg hidden></p>
 
     <div class="klap-baan" data-klap-baan>
       <span class="klap-doel" aria-hidden="true"></span>
       <div class="klap-noten" data-klap-noten></div>
       <div class="klap-aftellen" data-klap-aftellen aria-hidden="true"></div>
+      <p class="spel-oordeel alleen-oordeel" data-alleen-oordeel aria-live="polite"></p>
+      <div class="alleen-uitslag" data-alleen-uitslag hidden></div>
+      <div class="spel-vrij" data-alleen-vrij aria-live="polite"></div>
     </div>
 
     <div class="klap-balk">
       <div class="klap-tellen" data-klap-tellen aria-hidden="true"></div>
-      <span class="klap-label"><b data-klap-bpm>80</b> bpm</span>
+      <span class="klap-label" data-alleen-klas><b data-klap-bpm>80</b> bpm</span>
       <span class="klap-label">maat <b data-klap-maat>0</b> van <b data-klap-totaal>16</b></span>
+      <span class="klap-label" data-alleen-teller hidden>score <b>0</b></span>
       <button class="knop groot" type="button" data-klap-start>Start</button>
     </div>
 
   </section>
+
+  <!-- Klassikaal of alleen spelen, klein rechts onder het vak. Zie alleen.js. -->
+  <div class="schakel-rij">
+    <label class="schakel">
+      <span>Klas</span>
+      <input type="checkbox" role="switch" data-alleen-schakel="klapspel" aria-label="Alleen spelen">
+      <span class="schakel-baan" aria-hidden="true"></span>
+      <span>Alleen</span>
+    </label>
+  </div>
 
   <div class="met-plaatje kop-knieen">
     <img class="met-plaatje-beeld" src="img/boem.webp" alt="Een hand die op een knie slaat." loading="lazy" width="320" height="320">
@@ -175,9 +193,12 @@
 </div>
 
 <script defer src="js/vendor/Tone.js"></script>
+<script defer src="js/instellingen.js"></script>
 <script defer src="js/drumkit.js"></script>
 <script defer src="js/polka.js"></script>
 <script defer src="js/lijfgeluid.js"></script>
+<script defer src="js/melding.js"></script>
+<script defer src="js/alleen.js"></script>
 <script defer src="js/klap.js"></script>
 <script defer src="js/vierkant.js"></script>
 

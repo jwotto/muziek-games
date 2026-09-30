@@ -506,9 +506,12 @@ function toonAftellen(getal) {
 function stap() {
   if (!spel || !spel.loopt) return;
   const nu = Tone.now();
-
   vulAan(nu);
-  werkAftellenBij(nu);
+
+  // Het beeld loopt net zoveel achter als het geluid, zodat je ziet wat je
+  // hoort (zie instellingen.js). Plannen gaat gewoon op de audioklok.
+  const beeld = nu - geluidVertraging();
+  werkAftellenBij(beeld);
 
   // De noten vallen van boven naar beneden. Op het moment dat een noot aan de
   // beurt is staat hij op de doelvorm; VOORUIT seconden daarvoor staat hij
@@ -519,12 +522,12 @@ function stap() {
   const over = [];
 
   spel.noten.forEach((noot) => {
-    if (noot.tijd + grens < nu) {
+    if (noot.tijd + grens < beeld) {
       noot.el.remove();
       misNoot(noot.betaald);
       return;
     }
-    const deel = (noot.tijd - nu) / VOORUIT;
+    const deel = (noot.tijd - beeld) / VOORUIT;
     noot.el.style.transform = 'translateY(' + (doelY - deel * doelY) + 'px)';
     over.push(noot);
   });
@@ -623,6 +626,10 @@ function dichtstbij(id, wanneer) {
 
 function beoordeel(id, wanneer) {
   if (!spel || !spel.loopt) return null;
+
+  // Loopt het geluid achter, dan tik je mee met wat je later hoort. Tel je tik
+  // daarom terug naar het moment waarop die noot gepland stond.
+  wanneer -= geluidVertraging();
 
   // Tijdens het aftellen speel je nog niet mee. Daar mag je vrij op de pads
   // tikken zonder dat het je meteen een hartje kost.

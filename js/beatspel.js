@@ -430,11 +430,14 @@ function ebToonAftellen(getal) {
 function ebStap() {
   if (!ebSpel || !ebSpel.loopt) return;
   const nu = Tone.now();
-
   ebPlanTikken(nu);
-  ebWerkAftellenBij(nu);
 
-  while (ebSpel.volgende < ebSpel.plan.length && ebSpel.plan[ebSpel.volgende].tijd < nu + ebSpel.vooruit) {
+  // Het beeld loopt net zoveel achter als het geluid, zodat je ziet wat je
+  // hoort (zie instellingen.js). Plannen gaat gewoon op de audioklok.
+  const beeld = nu - geluidVertraging();
+  ebWerkAftellenBij(beeld);
+
+  while (ebSpel.volgende < ebSpel.plan.length && ebSpel.plan[ebSpel.volgende].tijd < beeld + ebSpel.vooruit) {
     ebSpel.noten.push(ebMaakNoot(ebSpel.plan[ebSpel.volgende]));
     ebSpel.volgende += 1;
   }
@@ -447,19 +450,19 @@ function ebStap() {
 
   ebSpel.noten.forEach((noot) => {
     if (!ebSpel.loopt) return;
-    if (noot.tijd + noot.grens < nu) {
+    if (noot.tijd + noot.grens < beeld) {
       noot.el.remove();
       ebMis(noot.betaald);
       return;
     }
-    const deel = (noot.tijd - nu) / ebSpel.vooruit;
+    const deel = (noot.tijd - beeld) / ebSpel.vooruit;
     noot.el.style.transform = 'translateY(' + (doelY - deel * doelY) + 'px)';
     over.push(noot);
   });
   if (!ebSpel.loopt) return;
   ebSpel.noten = over;
 
-  if (nu >= ebSpel.eind && ebSpel.volgende >= ebSpel.plan.length && !ebSpel.noten.length) {
+  if (beeld >= ebSpel.eind && ebSpel.volgende >= ebSpel.plan.length && !ebSpel.noten.length) {
     ebStop('klaar');
     return;
   }
@@ -492,6 +495,10 @@ function ebDichtstbij(id, wanneer) {
 
 function ebBeoordeel(id, wanneer) {
   if (!ebSpel || !ebSpel.loopt) return null;
+
+  // Loopt het geluid achter, dan tik je mee met wat je later hoort. Tel je tik
+  // daarom terug naar het moment waarop die noot gepland stond.
+  wanneer -= geluidVertraging();
 
   // Tijdens het aftellen mag je vrij op de pads tikken.
   if (wanneer < ebSpel.eersteNoot - EB_MIS_NA) return null;

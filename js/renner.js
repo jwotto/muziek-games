@@ -24,9 +24,9 @@
 // bukken op de een en de drie, zonder rust, en minstens twee maten lang: vier
 // keer achter elkaar. Korter is te kort om in te komen.
 const RN_DRUKTE = [
-  { id: 'rustig', naam: 'Rustig', keuzes: [1],       rust: 0.28, reeks: [2] },
-  { id: 'gewoon', naam: 'Gewoon', keuzes: [1, 2],    rust: 0.16, reeks: [2, 3] },
-  { id: 'druk',   naam: 'Druk',   keuzes: [1, 2, 4], rust: 0.14, reeks: [2, 3, 4] }
+  { id: 'rustig', naam: 'Rustig',  keuzes: [1],       rust: 0.28, reeks: [2] },
+  { id: 'gewoon', naam: 'Normaal', keuzes: [1, 2],    rust: 0.16, reeks: [2, 3] },
+  { id: 'druk',   naam: 'Druk',    keuzes: [1, 2, 4], rust: 0.14, reeks: [2, 3, 4] }
 ];
 
 // Na een tel met veel klappen vaker een makkelijke, net als bij klap mee: vier
@@ -39,8 +39,8 @@ const RN_BIJKOM_KANS = 0.5;
 const RN_KLAP_MAAT = { 1: 1.15, 2: 1, 4: 0.85 };
 
 const RN_INSTELLINGEN = [
-  { id: 'tempo', label: 'Tempo', min: 60, max: 140, step: 5, waarde: 90, achter: 'bpm' },
-  { id: 'maten', label: 'Aantal maten', min: 4, max: 32, step: 2, waarde: 16, achter: 'maten' }
+  { id: 'tempo', label: 'Tempo', min: 60, max: 160, step: 5, waarde: 90, achter: 'bpm' },
+  { id: 'maten', label: 'Maten', min: 4, max: 32, step: 2, waarde: 16, achter: 'maten' }
 ];
 
 // Hoe vaak het volgende iets anders wordt dan het vorige. Een halve duw: je
@@ -97,6 +97,7 @@ const rnEl = document.getElementById('renner');
 const rnBaanEl = rnEl && rnEl.querySelector('[data-rn-baan]');
 const rnDingenEl = rnEl && rnEl.querySelector('[data-rn-dingen]');
 const rnPopEl = rnEl && rnEl.querySelector('[data-rn-pop]');
+const rnDoelEl = rnEl && rnEl.querySelector('[data-rn-doel]');
 const rnPopBeeldEl = rnPopEl && rnPopEl.querySelector('[data-rn-pop-beeld]');
 const rnAftelEl = rnEl && rnEl.querySelector('[data-rn-aftellen]');
 const rnTellenEl = rnEl && rnEl.querySelector('[data-rn-tellen]');
@@ -315,7 +316,7 @@ function startRenner() {
     eerste: 0,
     einde: 0,
     renFase: 0,                     // hoe ver de benen zijn, in achtsten
-    vorigNu: nu
+    vorigNu: nu - geluidVertraging()
   };
 
   rnKnopEl.textContent = 'Stop';
@@ -336,6 +337,7 @@ function stopRenner(uitklinken) {
   cancelAnimationFrame(rnLus);
   rn.beeld.forEach((ding) => ding.el.remove());
   rn.beeld = [];
+  if (rnDoelEl) rnDoelEl.classList.remove('aan', 'raak');
 
   if (!uitklinken) {
     stopHiphop();
@@ -443,7 +445,7 @@ function maakRnDing(soort, tijd, aantal) {
   el.style.height = (m.h * eenheid) + 'px';
   rnDingenEl.appendChild(el);
 
-  return { soort: soort, tijd: tijd, el: el, vorm: vorm, maat: m, eenheid: eenheid, gezwollen: false };
+  return { soort: soort, tijd: tijd, aantal: aantal, el: el, vorm: vorm, maat: m, eenheid: eenheid, gezwollen: false };
 }
 
 // Bij de skater zwelt het even op. Op de vorm erbinnen, want het ding zelf
@@ -452,12 +454,33 @@ function maakRnDing(soort, tijd, aantal) {
 function zwelRnOp(ding) {
   if (ding.gezwollen) return;
   ding.gezwollen = true;
+  // Een klap zwelt niet op: hij komt op zijn gewone maat aan, en de gele kopie
+  // groeit vanaf precies die maat (zie laatKlapHangen).
+  if (ding.soort === 'klap') {
+    flitsRnDoel(ding.aantal);
+    return;
+  }
   if (minderBeweging.matches) return;
   animeer(ding.vorm, [
     { transform: 'scale(1)', easing: 'cubic-bezier(0.34, 1.56, 0.64, 1)' },
-    { transform: 'scale(' + (ding.soort === 'klap' ? 1.4 : 1.12) + ')', offset: 0.3, easing: 'ease-out' },
+    { transform: 'scale(1.12)', offset: 0.3, easing: 'ease-out' },
     { transform: 'scale(1)' }
   ], { duration: 300 });
+}
+
+// Op de klap is het rondje even helemaal te zien, met de rand in de kleur van
+// het klapje. Elke klap apart, dus bij twee of vier klappen in een tel flitst
+// hij twee of vier keer. Daarom duurt een flits een halve klap lang, anders
+// lopen ze bij een hoog tempo in elkaar over.
+let rnFlitsKlok = 0;
+
+function flitsRnDoel(aantal) {
+  if (!rnDoelEl) return;
+  clearTimeout(rnFlitsKlok);
+  rnDoelEl.classList.remove('aantal-1', 'aantal-2', 'aantal-4');
+  rnDoelEl.classList.add('raak', 'aantal-' + aantal);
+  const duur = 60 / rnStand.tempo / aantal / 2 * 1000;
+  rnFlitsKlok = setTimeout(() => rnDoelEl.classList.remove('raak'), duur);
 }
 
 // Van rechts naar links. Op zijn moment staat het midden bij de skater;
@@ -482,20 +505,30 @@ function zetRnDingen(nu, m) {
     const raak = Math.abs(ding.tijd - nu) < 0.09;
     ding.el.classList.toggle('raak', raak);
     if (raak) zwelRnOp(ding);
-    if (nu - ding.tijd > (ding.soort === 'buk' ? 0 : RN_WEG_NA)) ruimRnOp(ding, y);
+    if (nu - ding.tijd > (ding.soort === 'spring' ? RN_WEG_NA : 0)) ruimRnOp(ding, y);
     over.push(ding);
   });
 
   rn.beeld = over;
+
+  // Het rondje boven haar hoofd is er alleen als er een klap vlak bij haar is:
+  // minder dan één skater van haar af. In afstand en niet in tijd, zodat het er
+  // bij een langzaam en een snel tempo op dezelfde plek bij komt.
+  const vlakbij = RN_DOEL_AFSTAND * 100 * RN_VAK * m.eenheid;
+  const klapKomt = over.some((ding) => ding.soort === 'klap' &&
+    (ding.tijd - nu) / RN_VOORUIT * afstand < vlakbij && nu - ding.tijd < RN_WEG_NA);
+  if (rnDoelEl) rnDoelEl.classList.toggle('aan', klapKomt);
 }
 
 // Wat ze gehaald heeft, gaat met een effectje weg, net als de noten in het
 // ritmespel. Het blok tuimelt weg, de balk zwaait na aan zijn touw, en de
-// klaphanden schieten omhoog en vervagen, met een paar sterretjes. Net nadat het
-// bij haar was, zodat de puls op de tel eerst te zien is. Alleen de balk begint
-// al op de tel met zwaaien, alsof ze hem net raakt: hij is anders het beeld al
-// uit voordat je hem ziet slingeren.
+// klaphanden zwellen op en vervagen, met een paar sterretjes. Het blok net
+// nadat het bij haar was, zodat de puls op de tel eerst te zien is. De balk en
+// de handen gaan al op de tel: de balk zwaait alsof ze hem net raakt, en de
+// handen zijn meteen weg, zodat het klapje en de klap samenvallen. Het rondje
+// flitst dan al.
 const RN_WEG_NA = 0.12;    // seconden na de tel
+const RN_DOEL_AFSTAND = 1;  // hoeveel skaters voor haar het rondje verschijnt
 
 function ruimRnOp(ding, y) {
   if (ding.weg) return;
@@ -524,11 +557,25 @@ function ruimRnOp(ding, y) {
     return;
   }
 
-  animeer(ding.vorm, [
-    { transform: 'translateY(0) scale(1)', opacity: 1, easing: 'ease-out' },
-    { transform: 'translateY(-90%) scale(1.3)', opacity: 0 }
-  ], { duration: 420, fill: 'forwards' });
-  sterretjesRn(ding.el);
+  // Het klapje zelf is op de tel weg; een gele kopie blijft in het rondje
+  // hangen, zwelt nog wat op en vervaagt daar, met de sterretjes.
+  sterretjesRn(laatKlapHangen(ding.el, rnDingenEl));
+  ding.vorm.style.visibility = 'hidden';
+}
+
+// De kopie staat waar het klapje op de tel stond, want de transform gaat mee.
+const RN_HANGEN = 220;     // milliseconden dat de gele klap blijft hangen
+
+function laatKlapHangen(el, bak) {
+  const kopie = el.cloneNode(true);
+  kopie.classList.add('raak');
+  bak.appendChild(kopie);
+  animeer(kopie.querySelector('.rn-vorm'), [
+    { transform: 'scale(1)', opacity: 1, easing: 'ease-out' },
+    { transform: 'scale(1.7)', opacity: 0 }
+  ], { duration: RN_HANGEN, fill: 'forwards' });
+  setTimeout(() => kopie.remove(), RN_HANGEN + 50);
+  return kopie;
 }
 
 // Een paar gele streepjes die uit de klap wegspringen, zoals de sterretjes om
@@ -538,7 +585,7 @@ const RN_STERREN = [-70, -35, 0, 35, 70];
 function sterretjesRn(el) {
   RN_STERREN.forEach((hoek) => {
     const ster = document.createElement('span');
-    ster.className = 'rn-ster';
+    ster.className = 'klap-ster';
     el.appendChild(ster);
     const beweging = animeer(ster, [
       { transform: 'rotate(' + hoek + 'deg) translateY(0) scaleY(0.4)', opacity: 1, easing: 'ease-out' },
@@ -584,6 +631,7 @@ function beeldjeBij(reeks, deel, grenzen) {
 // ze precies boven het blok hangt als het onder haar door gaat. Bukken duurt
 // net zo lang; een klap is kort.
 const RN_SPRONG = 58;      // hoe hoog ze springt, in honderdsten van haar vakje
+const RN_KLAP_HOUDING = 0.13; // seconden voor en na een klap dat ze klapt, op zijn langst
 
 function werkRnPopBij(nu) {
   const tel = 60 / rn.bpm;
@@ -593,7 +641,13 @@ function werkRnPopBij(nu) {
   let dichtst = Infinity;
   rn.beeld.forEach((ding) => {
     const dt = nu - ding.tijd;
-    const breed = ding.soort === 'klap' ? 0.13 : venster;
+    // Een klap is kort: hooguit een kwart van de tijd tot de volgende klap aan
+    // weerskanten, dus de helft van de tijd klappen en de helft los. Anders
+    // lopen twee of vier snelle klappen in elkaar over en blijft ze met haar
+    // handen tegen elkaar hangen.
+    const breed = ding.soort === 'klap'
+      ? Math.min(RN_KLAP_HOUDING, tel / (ding.aantal || 1) * 0.25)
+      : venster;
     if (Math.abs(dt) < breed && Math.abs(dt) < dichtst) {
       dichtst = Math.abs(dt);
       bezig = { ding: ding, dt: dt, breed: breed };
@@ -619,7 +673,7 @@ function werkRnPopBij(nu) {
 
   // Anders rijdt ze, en wisselt ze op de achtsten van houding. Zo gaat ze mee
   // op de beat, ook tijdens het aftellen.
-  rn.renFase += (nu - rn.vorigNu) * rn.bpm / 30;
+  rn.renFase += Math.max(0, nu - rn.vorigNu) * rn.bpm / 30;
   zetRnPop(RN_BEELDJES.rijden[Math.floor(rn.renFase) % 2], 0);
 }
 
@@ -627,16 +681,19 @@ function rnStap() {
   if (!rn || !rn.loopt) return;
   const nu = Tone.now();
   const m = rnBaanMaat();
-
   vulRnAan(nu);
-  werkRnAftellenBij(nu);
-  werkRnTelBij(nu);
-  zetRnDingen(nu, m);
-  werkRnPopBij(nu);
-  rn.vorigNu = nu;
+
+  // Het beeld loopt net zoveel achter als het geluid, zodat je ziet wat je
+  // hoort (zie instellingen.js). Plannen gaat gewoon op de audioklok.
+  const beeld = nu - geluidVertraging();
+  werkRnAftellenBij(beeld);
+  werkRnTelBij(beeld);
+  zetRnDingen(beeld, m);
+  werkRnPopBij(beeld);
+  rn.vorigNu = beeld;
   werkRnBalkBij();
 
-  if (rn.einde && nu > rn.einde) {
+  if (rn.einde && beeld > rn.einde) {
     stopRenner(true);
     meld('Klaar!', 'Goed gedaan, allemaal');
     return;
@@ -761,7 +818,7 @@ function bouwRnKnoppen() {
 
   rnSchuifEl.innerHTML = RN_INSTELLINGEN.map((p) => `
     <div class="klap-schuif">
-      <label for="rn-${p.id}">${p.label}<b data-toon="${p.id}"></b></label>
+      <label for="rn-${p.id}"><span class="klap-schuif-naam">${p.label}</span><b data-toon="${p.id}"></b></label>
       <input type="range" id="rn-${p.id}" data-rn="${p.id}"
              min="${p.min}" max="${p.max}" step="${p.step}">
     </div>
@@ -785,7 +842,8 @@ function bouwRnKnoppen() {
 function werkRnKnoppenBij() {
   RN_INSTELLINGEN.forEach((p) => {
     const toon = rnSchuifEl.querySelector('[data-toon="' + p.id + '"]');
-    if (toon) toon.textContent = rnStand[p.id] + (p.achter ? ' ' + p.achter : '');
+    // De eenheid apart, zodat een telefoon hem kan weglaten (zie site.css).
+    if (toon) toon.innerHTML = rnStand[p.id] + (p.achter ? '<span class="eenheid"> ' + p.achter + '</span>' : '');
   });
   rnEl.querySelectorAll('.klap-keus').forEach((knop) => {
     knop.setAttribute('aria-pressed', String(rnStand[knop.dataset.groep] === knop.dataset.keus));

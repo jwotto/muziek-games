@@ -56,6 +56,120 @@ body {
   border: 2px solid var(--ink);
 }
 
+/* ---------- Het geluid, onder het tandwiel ---------- */
+
+/* Het tandwiel rechtsboven op de beginpagina. Het menu klapt eronder open, over
+   de bladzijde heen. */
+.geluid-balk {
+  position: relative;
+  justify-content: flex-end;
+  margin-bottom: 0;
+}
+
+.geluid-knop {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  font-size: 24px;
+  color: var(--ink);
+  background: var(--wit);
+  border: 3px solid var(--ink);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: transform 0.3s var(--bounce);
+}
+
+.geluid-knop:hover,
+.geluid-knop[aria-expanded="true"] { transform: rotate(45deg); }
+.geluid-knop:focus-visible { outline: 4px solid var(--blauw); outline-offset: 3px; }
+
+.geluid-menu {
+  position: absolute;
+  top: calc(100% + var(--space-2));
+  right: 0;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  width: min(420px, calc(100vw - 2 * var(--gutter)));
+  box-sizing: border-box;
+  padding: var(--space-4);
+  font-size: var(--text-sm);
+  line-height: 1.45;
+  background: var(--wit);
+  border: 4px solid var(--ink);
+  border-radius: var(--radius);
+  box-shadow: 0 8px 0 rgba(26, 34, 51, 0.12);
+}
+
+.geluid-menu[hidden] { display: none; }
+.geluid-menu p { margin: 0; }
+
+.geluid-menu-kop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Het kruisje rechtsboven in het menu: rond, net als het tandwiel. */
+.geluid-dicht {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  font-size: 16px;
+  color: var(--ink);
+  background: var(--wit);
+  border: 2px solid var(--ink);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: transform 0.15s var(--bounce);
+}
+
+.geluid-dicht:hover { transform: rotate(90deg); }
+.geluid-dicht:focus-visible { outline: 3px solid var(--blauw); outline-offset: 2px; }
+
+.geluid-menu h2 {
+  margin: 0;
+  font-family: var(--font-kop);
+  font-size: var(--text-md);
+}
+
+.geluid-schuiven {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.geluid-test {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.geluid-test .knop { flex: none; align-self: center; }
+
+.geluid-stip {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  border: 3px solid var(--ink);
+  border-radius: 50%;
+  background: var(--wit);
+  /* Vooraf een eigen laag, want hij veert op elke tel. */
+  will-change: transform;
+}
+
+.geluid-stip.aan { background: var(--koraal); }
+
+.geluid-tip {
+  padding: var(--space-2) var(--space-3);
+  background: var(--zon);
+  border-radius: 12px;
+}
+
 /* ---------- Hero ---------- */
 
 .hero { margin-bottom: var(--space-7); }
@@ -131,10 +245,16 @@ body {
 /* ---------- Luisteren ---------- */
 
 /* Drie kaarten naast elkaar, en onder elkaar zodra ze niet meer passen. */
+/* De drie beats naast elkaar, en op een telefoon onder elkaar -- nooit twee
+   naast elkaar met de derde er alleen onder. */
 .beats {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: var(--space-4);
+}
+
+@media (max-width: 520px) {
+  .beats { grid-template-columns: 1fr; }
 }
 
 .beat {
@@ -1165,7 +1285,15 @@ input[type="range"]::-moz-range-thumb {
   font-size: var(--text-base);
 }
 
-.klap-schuif label b { font-variant-numeric: tabular-nums; }
+.klap-schuif label b { font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+/* Past het label niet, dan wordt de naam afgekapt en blijft het getal staan. */
+.klap-schuif-naam {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 /* De schuifjes van de kit krijgen hun knop als getekende vorm mee (--knop) en
    zijn te herkennen aan hun data-param. Alle andere schuiven -- het tempo van
    de klapoefening, het ritmebord en de sequencer -- krijgen een ronde blauwe. */
@@ -1216,7 +1344,6 @@ input[type="range"]:not([data-param])::-moz-range-thumb {
   font-size: var(--text-md);
 }
 
-.klap-keus-uitleg { font-size: var(--text-sm); line-height: 1.3; }
 
 /* De gekozen stand. Onderaan, want hij moet het van de uitgeschakelde stand
    hierboven winnen. */
@@ -1224,6 +1351,31 @@ input[type="range"]:not([data-param])::-moz-range-thumb {
 .klap-keus[aria-pressed="true"]:disabled {
   color: var(--wit);
   background: var(--blauw);
+}
+
+/* Schuifjes en keuzes op één regel, zodat het spel zelf zo hoog mogelijk op
+   het scherm staat. Is het scherm te smal, dan gaan de keuzes onder de
+   schuifjes. Klap mee en de ritme skater gebruiken dit allebei. */
+.klap-knoppen.op-een-regel {
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: flex-end;
+}
+
+/* De schuifjes krijgen voorrang: elk minstens 190 pixels, zodat "Begintempo
+   140 bpm" er op één regel in past. Hoeveel schuifjes er zijn staat in de html
+   (--schuiven). Passen ze niet meer naast de keuzes, dan gaan de keuzes eronder
+   en hebben ze allebei de hele breedte. Op één regel groeien de schuifjes
+   harder mee dan de keuzes, want die hebben niet meer nodig dan hun woord. */
+.op-een-regel .klap-schuifjes {
+  --schuiven: 2;
+  flex: 4 1 calc(var(--schuiven) * 190px);
+  grid-template-columns: repeat(var(--schuiven), minmax(0, 1fr));
+}
+
+.op-een-regel .klap-keuzes {
+  flex: 1 1 330px;
+  grid-template-columns: repeat(3, 1fr);
 }
 
 /* De baan waarover de klapjes van rechts naar links komen. */
@@ -1279,6 +1431,13 @@ input[type="range"]:not([data-param])::-moz-range-thumb {
   border-radius: 50%;
   will-change: transform;
 }
+
+/* Op de klap: een dichte rand in de kleur van het klapje -- blauw is een klap
+   per tel, groen twee, rood vier. */
+.klap-doel.raak { border-style: solid; }
+.klap-doel.raak.aantal-1 { border-color: var(--blauw); }
+.klap-doel.raak.aantal-2 { border-color: var(--mint); }
+.klap-doel.raak.aantal-4 { border-color: var(--koraal); }
 
 .klap-noten { position: absolute; inset: 0; }
 
@@ -1355,6 +1514,165 @@ input[type="range"]:not([data-param])::-moz-range-thumb {
 
 /* De startknop rechts, zodat de cijfers links op hun plek blijven staan. */
 .klap-balk .knop { margin-left: auto; }
+
+/* ---------- Klassikaal of alleen (zie alleen.js) ---------- */
+
+/* De schakelaar klein rechts onder het vak. Een echte checkbox eronder, zodat
+   toetsenbord en schermlezer gewoon werken; de baan met het bolletje is alleen
+   de tekening ervan. */
+.schakel-rij {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: var(--space-2);
+}
+
+.schakel {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-kop);
+  font-weight: 600;
+  font-size: var(--text-xs);
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.schakel input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+}
+
+.schakel-baan {
+  position: relative;
+  flex: none;
+  width: 34px;
+  height: 20px;
+  box-sizing: border-box;
+  background: var(--wit);
+  border: 2px solid var(--ink);
+  border-radius: var(--radius-pill);
+  transition: background 0.2s ease;
+}
+
+.schakel-baan::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 12px;
+  height: 12px;
+  background: var(--ink);
+  border-radius: 50%;
+  transition: transform 0.2s var(--bounce);
+}
+
+.schakel input:checked + .schakel-baan { background: var(--blauw); }
+.schakel input:checked + .schakel-baan::after { transform: translateX(14px); background: var(--wit); }
+.schakel input:focus-visible + .schakel-baan { outline: 3px solid var(--blauw); outline-offset: 2px; }
+.schakel input:disabled + .schakel-baan { opacity: 0.5; }
+
+/* De levels nemen de hele regel in, net als in de drumles. */
+.op-een-regel .alleen-niveaus { flex: 1 1 100%; }
+
+/* Wat bij de andere stand hoort is weg. Ook als het zelf een display heeft,
+   zoals de schuifjes en keuzes (grid). */
+.klapspel [hidden] { display: none !important; }
+
+/* Wat je niet op tijd raakte, schuift vaal door. */
+.klap-noot.gemist,
+.rn-ding.gemist { opacity: 0.35; filter: grayscale(1); }
+
+/* De uitslag na een beurt alleen, midden in de baan. Compact, want de baan van
+   klap mee is maar een hand hoog. Vangt geen klikken: Start staat eronder. */
+.alleen-uitslag {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: var(--space-1);
+  padding: var(--space-2);
+  text-align: center;
+  background: rgba(255, 255, 255, 0.92);
+  pointer-events: none;
+}
+
+.alleen-uitslag[hidden] { display: none; }
+.alleen-uitslag h3 { margin: 0; font-size: var(--text-md); }
+.alleen-uitslag .kaart-cijfers { gap: 0 var(--space-6); margin: 0; }
+.alleen-uitslag .cijfer b { font-size: clamp(1.8rem, 5vw, 3rem); }
+.alleen-uitslag .cijfer.beste b { font-size: clamp(1.4rem, 3.5vw, 2.2rem); }
+.alleen-uitslag .cijfer small { font-size: 0.45em; }
+.alleen-uitslag p { margin: 0; font-size: var(--text-sm); }
+
+/* Perfect, Goed, Net, Naast of Mis: even naast de ring, net als in de drumles. */
+.alleen-oordeel {
+  position: absolute;
+  top: var(--space-2);
+  left: calc(var(--doel-x) + var(--klap));
+  z-index: 3;
+  min-height: 0;
+  pointer-events: none;
+}
+
+/* De balk onder de baan blijft altijd op één regel: de tel, het tempo, de maat
+   en de startknop horen bij elkaar. */
+.klap-balk .klap-label { white-space: nowrap; }
+
+/* Op een telefoon is er geen ruimte voor alles op één regel: dan komen de
+   schuifjes naast elkaar en de keuzes daaronder, elk op hun eigen regel. Alles
+   wordt een maat kleiner, en achter de getallen van de schuifjes valt de
+   eenheid weg -- die staat in het label er toch al bijna. */
+@media (max-width: 720px) {
+  .klapspel { padding: var(--space-3); gap: var(--space-3); }
+
+  .klap-knoppen.op-een-regel {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-3);
+  }
+
+  .op-een-regel .klap-schuifjes {
+    flex: none;
+    gap: var(--space-3);
+  }
+
+  .op-een-regel .klap-keuzes { flex: none; }
+
+  .klapspel .klap-schuif label { font-size: var(--text-sm); white-space: nowrap; }
+  .klapspel .klap-schuif .eenheid { display: none; }
+  .klapspel .klap-keus { padding: 0.45em var(--space-2); }
+  .klapspel .klap-keus-naam { font-size: var(--text-base); }
+
+  .klapspel .klap-balk { gap: var(--space-2); }
+  .klapspel .klap-tellen { gap: 6px; height: 14px; }
+  .klapspel .klap-tel { width: 14px; height: 14px; border-width: 2px; }
+  .klapspel .klap-label { font-size: var(--text-sm); }
+  .klapspel .klap-balk .knop { font-size: var(--text-md); padding: 0.45em 1.1em; }
+
+}
+
+/* Een smalle telefoon: nog een maat kleiner, zodat de startknop binnen het vak
+   blijft en drie schuifjes elk hun eigen label houden. */
+@media (max-width: 420px) {
+  .klapspel .klap-schuifjes { gap: var(--space-2); }
+  .klapspel .klap-schuif label { font-size: var(--text-xs); }
+  .klapspel .klap-tellen { gap: 4px; height: 12px; }
+  .klapspel .klap-tel { width: 12px; height: 12px; }
+  .klapspel .klap-label { font-size: var(--text-xs); }
+  .klapspel .klap-balk .knop { font-size: var(--text-base); padding: 0.45em 0.9em; }
+}
+
+@media (max-width: 340px) {
+  .klapspel .klap-balk { gap: 6px; }
+  .klapspel .klap-tellen { gap: 3px; height: 10px; }
+  .klapspel .klap-tel { width: 10px; height: 10px; }
+  .klapspel .klap-balk .knop { padding: 0.4em 0.7em; }
+}
 
 /* ============================================================
    De ritmevierkanten
@@ -1433,14 +1751,30 @@ input[type="range"]:not([data-param])::-moz-range-thumb {
   .met-plaatje-beeld { width: 110px; }
 }
 
-/* Alles in een regel: de afspeelknop vooraan, het tempo op de halve breedte, en
-   daarnaast de twee menu's. Ze staan onderlangs uitgelijnd, zodat de knop en de
-   schuif op dezelfde lijn liggen ook al heeft de schuif een label boven zich. */
+/* Op een breed scherm alles in een regel: de afspeelknop vooraan, dan het
+   tempo, en daarnaast de twee menu's. Ze staan onderlangs uitgelijnd, zodat de
+   knop en de schuif op dezelfde lijn liggen ook al heeft de schuif een label
+   boven zich. De menu's moeten hun hele tekst kwijt kunnen ("Vierkant 1 · op de
+   tel", "boven naar beneden"), dus is het vak daar te smal voor, dan gaan ze
+   samen naar een tweede regel, en op een telefoon elk op een eigen regel. */
 .vierkant-instellingen {
   display: grid;
-  grid-template-columns: auto 2fr 1fr 1fr;
+  grid-template-columns: auto 1.4fr 1fr 1fr;
   gap: var(--space-4);
   align-items: end;
+}
+
+@media (max-width: 1150px) {
+  .vierkant-instellingen { grid-template-columns: auto 1fr 1fr; }
+  .vierkant-instellingen > :nth-child(2) { grid-column: 2 / 4; }
+  .vierkant-instellingen > :nth-child(3) { grid-column: 1 / 3; }
+}
+
+@media (max-width: 520px) {
+  .vierkant-instellingen { grid-template-columns: auto 1fr; gap: var(--space-3); }
+  .vierkant-instellingen > :nth-child(2) { grid-column: 2; }
+  .vierkant-instellingen > :nth-child(3),
+  .vierkant-instellingen > :nth-child(4) { grid-column: 1 / 3; }
 }
 
 .speelknop {
@@ -1491,7 +1825,6 @@ input[type="range"]:not([data-param])::-moz-range-thumb {
 .vierkant-menu:disabled { cursor: default; opacity: 0.6; }
 
 @media (max-width: 720px) {
-  .vierkant-instellingen { grid-template-columns: auto 1fr; }
   .speelknop { width: 48px; height: 48px; }
 }
 
@@ -1891,25 +2224,6 @@ input[type="range"]:not([data-param])::-moz-range-thumb {
    Ritme skater (extra les)
    ============================================================ */
 
-/* De knoppen van de juf: dezelfde als bij klap mee, maar alles op één regel,
-   zodat het spel zelf zo hoog mogelijk op het scherm staat. Is het scherm te
-   smal, dan gaan de keuzes onder de schuifjes. */
-.rn-knoppen {
-  flex-direction: row;
-  flex-wrap: wrap;
-  align-items: flex-end;
-}
-
-.rn-knoppen .klap-schuifjes {
-  flex: 2 1 400px;
-  grid-template-columns: repeat(2, minmax(150px, 1fr));
-}
-
-.rn-knoppen .klap-keuzes {
-  flex: 1 1 330px;
-  grid-template-columns: repeat(3, 1fr);
-}
-
 /* Het vak: van opzij, zoals het dinospelletje. Een wit vlak met onderin de
    grond, de skater links, en alles komt van rechts. Via padding en niet via
    aspect-ratio, want een ouder digibord kent die niet. */
@@ -1918,8 +2232,10 @@ input[type="range"]:not([data-param])::-moz-range-thumb {
   overflow: hidden;
   /* Vooraf een eigen laag, want dit hele vak ademt mee op elke tel. */
   will-change: transform;
+  /* Hoogte gedeeld door breedte. Het rondje voor de klapjes rekent ermee. */
+  --verhouding: 0.36;
   height: 0;
-  padding-top: 36%;
+  padding-top: calc(var(--verhouding) * 100%);
   background: var(--wit);
   border: 4px solid var(--ink);
   border-radius: var(--radius);
@@ -1947,6 +2263,43 @@ input[type="range"]:not([data-param])::-moz-range-thumb {
 }
 
 .rn-baan .klap-aftellen { z-index: 3; }
+
+/* Het rondje boven haar hoofd: daar staan de klaphanden als je moet klappen,
+   net als de ring bij klap mee. Een beetje doorzichtig en helemaal achteraan,
+   zodat het niet in de weg zit, en alleen te zien als er een klap vlak bij haar is
+   (renner.js zet dan .aan). De maten volgen renner.js: ze staat op 18% van de breedte, de grond
+   op 84%, haar vakje is 52% van de hoogte en de handen hangen 104 tot 132
+   honderdsten daarvan boven de grond. Het rondje is 32 honderdsten breed. */
+.rn-doel {
+  --doorsnee: calc(0.52 * 32%);
+  position: absolute;
+  left: calc(18% - var(--verhouding) * var(--doorsnee) / 2);
+  top: calc(84% - 0.52 * 118% - var(--doorsnee) / 2);
+  width: calc(var(--verhouding) * var(--doorsnee));
+  height: var(--doorsnee);
+  box-sizing: border-box;
+  border: 4px dashed var(--ink);
+  border-radius: 50%;
+  background: var(--wit);
+  z-index: 0;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.rn-doel.aan { opacity: 1; }
+
+/* Op de klap: helemaal te zien, met een dichte rand in de kleur van het
+   klapje -- blauw is een klap per tel, groen twee, rood vier. Meteen aan,
+   zonder overgang, en daarna zakt hij met de gewone overgang terug. */
+.rn-doel.raak {
+  opacity: 1;
+  border-style: solid;
+  transition: none;
+}
+
+.rn-doel.raak.aantal-1 { border-color: var(--blauw); }
+.rn-doel.raak.aantal-2 { border-color: var(--mint); }
+.rn-doel.raak.aantal-4 { border-color: var(--koraal); }
 
 /* Alles wat aankomt. De maat zet javascript erop, het schuiven gaat met een
    transform vanaf de linkerbovenhoek. */
@@ -2034,7 +2387,7 @@ input[type="range"]:not([data-param])::-moz-range-thumb {
 
 /* De sterretjes die uit een klap wegspringen. Ze draaien om het midden van de
    handen, en schieten dan naar buiten. */
-.rn-ster {
+.klap-ster {
   position: absolute;
   left: 50%;
   top: 50%;
@@ -2049,5 +2402,5 @@ input[type="range"]:not([data-param])::-moz-range-thumb {
 
 /* Op een telefoon rechtop is het vak anders een streepje. */
 @media (max-width: 720px) {
-  .rn-baan { padding-top: 62%; }
+  .rn-baan { --verhouding: 0.62; }
 }

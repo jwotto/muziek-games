@@ -447,7 +447,8 @@ function planSeq() {
 // goed in plaats van achter de klank aan te lopen.
 function seqBeeld() {
   if (!seq) return;
-  const nu = Tone.now();
+  // Net zoveel later als het geluid achterloopt (zie instellingen.js).
+  const nu = Tone.now() - geluidVertraging();
 
   let nieuw = null;
   seq.komend.forEach((k) => {

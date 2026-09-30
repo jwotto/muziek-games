@@ -90,6 +90,40 @@
 
 <div class="wrap">
 
+  <!-- Het geluid: volume, en hoeveel het achterloopt. Zie instellingen.js. -->
+  <header class="topbar geluid-balk">
+    <button class="geluid-knop" type="button" data-geluid-knop
+            aria-expanded="false" aria-controls="geluid-menu" aria-label="Instellingen voor het geluid">
+      <i class="ph-bold ph-gear" aria-hidden="true"></i>
+    </button>
+    <div class="geluid-menu" id="geluid-menu" data-geluid-menu hidden>
+      <div class="geluid-menu-kop">
+        <h2>Geluid</h2>
+        <button class="geluid-dicht" type="button" data-geluid-dicht aria-label="Sluit">
+          <i class="ph-bold ph-x" aria-hidden="true"></i>
+        </button>
+      </div>
+      <div class="geluid-schuiven" data-geluid-schuiven></div>
+      <p>
+        <b>Loopt het geluid achter op het beeld?</b> Dat gebeurt met een
+        bluetooth-koptelefoon of -speaker, en soms met het geluid van het digibord.
+        Zet de vertraging dan hoger: de spellen laten het beeld net zoveel wachten,
+        zodat beeld en geluid weer samen lopen. Een bluetooth-koptelefoon
+        loopt meestal zo'n <b>200 ms</b> achter (tussen 150 en 250).
+      </p>
+      <div class="geluid-test">
+        <button class="knop klein" type="button" data-geluid-test aria-pressed="false">Test</button>
+        <span class="geluid-stip" data-geluid-stip aria-hidden="true"></span>
+        <span>Je hoort een metronoom en ziet de stip meekloppen. Schuif tot ze precies tegelijk gaan.</span>
+      </div>
+      <p class="geluid-tip">
+        Het allerbeste is een koptelefoon of speaker <b>met een draad</b>: die loopt
+        niet achter. Bij vinger drummen op de pads kan de vertraging niet worden
+        opgevangen, want je tik gaat pas weg als je tikt.
+      </p>
+    </div>
+  </header>
+
   <div class="hero">
     <h1 class="merkbeeld">
       <img src="img/muziekfles.webp" width="1600" height="533"
@@ -112,7 +146,7 @@
       <span class="badge spelen">Spelen</span>
     </a>
 
-    <a class="les klaar" href="les2-drums.html" style="--kleur: var(--zon)">
+    <a class="les klaar" href="les2-drums.html" style="--kleur: var(--koraal)">
       <span class="icoon"><i class="ph-bold ph-squares-four" aria-hidden="true"></i></span>
       <span class="reeks">Ritme · les 2</span>
       <h2>Drumstel-ritme maken</h2>
@@ -128,8 +162,8 @@
       <span class="badge spelen">Spelen</span>
     </a>
 
-    <a class="les klaar" href="bodypercussion2.html" style="--kleur: var(--bubblegum)">
-      <span class="icoon"><i class="ph-bold ph-hands-clapping" aria-hidden="true"></i></span>
+    <a class="les klaar" href="bodypercussion2.html" style="--kleur: var(--mint)">
+      <span class="icoon"><i class="ph-bold ph-pencil-simple" aria-hidden="true"></i></span>
       <span class="reeks">Body percussion · les 2</span>
       <h2>Ontwerp je eigen ritme</h2>
       <p class="tekst">Maak je eigen ritmevierkant: sleep boem en klap in de vakjes, kies het tempo en hoor hoe jouw ritme klinkt. Daarna speelt de klas het mee.</p>
@@ -137,7 +171,7 @@
     </a>
 
     <a class="les klaar op-blauw" href="ritmeskater.html" style="--kleur: var(--blauw)">
-      <span class="icoon"><i class="ph-bold ph-hands-clapping" aria-hidden="true"></i></span>
+      <span class="icoon"><i class="ph-bold ph-person-simple-snowboard" aria-hidden="true"></i></span>
       <span class="reeks">Extra</span>
       <h2>Ritme skater</h2>
       <p class="tekst">Een skater rijdt op een stoere hiphopbeat. Spring, buk en klap mee, precies op de tel. De hele klas doet mee.</p>
@@ -191,8 +225,9 @@
 
 </div>
 
+<script defer src="js/instellingen.js"></script>
+
 <!-- Cloudflare Web Analytics: telt bezoeken zonder cookies. -->
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "5dab1e3a930548d8b2e3a0ba0880f787"}'></script>
-
 </body>
 </html>

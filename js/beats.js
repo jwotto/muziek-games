@@ -201,7 +201,8 @@ function planBeat() {
 let beatFlitsers = [];
 
 function flitsStraks(id, tijd) {
-  const wacht = Math.max(0, (tijd - Tone.now()) * 1000);
+  // Plus wat het geluid achterloopt, zodat de flits valt als je hem hoort.
+  const wacht = Math.max(0, (tijd - Tone.now() + geluidVertraging()) * 1000);
   beatFlitsers.push(setTimeout(() => flits(id), wacht));
 }
 
