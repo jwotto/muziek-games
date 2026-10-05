@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 8 320 320">
+  <defs>
+    <path id="druppel" d="M0,-24 C9,-10 17,0 17,10 A17,17 0 0 1 -17,10 C-17,0 -9,-10 0,-24 Z"/>
+    <g id="wolk">
+      <circle cx="108" cy="122" r="52"/>
+      <circle cx="172" cy="98" r="64"/>
+      <circle cx="226" cy="140" r="52"/>
+      <circle cx="70" cy="160" r="38"/>
+      <rect x="62" y="130" width="206" height="68" rx="34"/>
+    </g>
+  </defs>
+  <!-- wind -->
+  <g fill="none" stroke="#1A2233" stroke-width="9" stroke-linecap="round">
+    <path d="M230,236 h48 a14,14 0 1 0 -14,-14"/>
+    <path d="M244,264 h32 a12,12 0 1 1 -12,12"/>
+  </g>
+  <!-- druppels -->
+  <g fill="#0061E0" stroke="#1A2233" stroke-width="7" stroke-linejoin="round">
+    <use href="#druppel" x="72" y="238"/>
+    <use href="#druppel" x="106" y="288"/>
+    <use href="#druppel" x="216" y="290"/>
+    <use href="#druppel" x="40" y="294"/>
+  </g>
+  <!-- bliksem -->
+  <polygon points="168,170 128,246 158,246 136,306 210,218 176,218 200,170" fill="#FFF069" stroke="#1A2233" stroke-width="9" stroke-linejoin="round"/>
+  <!-- wolk: eerst de rand, dan het wit erover -->
+  <use href="#wolk" fill="#1A2233" stroke="#1A2233" stroke-width="18" stroke-linejoin="round"/>
+  <use href="#wolk" fill="#FFFFFF"/>
+</svg>

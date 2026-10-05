@@ -5,7 +5,9 @@ en javascript: geen bouwstap, wat in deze map staat is de site.
 
 - `index.html` — de voorpagina met alle lessen
 - `les1-drums.html`, `les2-drums.html`, `bodypercussion.html`, `bodypercussion2.html`,
-  `ritmeskater.html` — de lessen
+  `bodypercussion3.html`, `ritmeskater.html` — de lessen
+- `js/storm.js` — storm maken: opnemen met de microfoon, loops, filter en pitch; de
+  opnames blijven bewaard in de browser (IndexedDB)
 - `js/drumkit.js` — de drumgeluiden en alles wat de lessen delen: `master`,
   `bijNeer`, `animeer`, `stilNu`. Staat op elke lespagina.
 - `js/polka.js` — de polka onder de ritmespellen, `js/hiphop.js` — de hiphopbeat
@@ -136,6 +138,30 @@ undefined` te typen en daarna iets te laten bewegen: dan loopt alles via de
 reserve van `animeer()`. Maar het
 echte bord blijft de enige echte toets, dus probeer een nieuwe les daar voordat
 je hem in de klas gebruikt.
+
+## Opnemen met de microfoon (Storm maken)
+
+Wat we bij `js/storm.js` hebben geleerd, op een laptop met een Realtek
+Microphone Array:
+
+- **De microfoon blijft open zolang de schakelaar aan staat**, en loopt
+  continu door een AudioWorklet. Opnemen bewaart vanaf het moment dat je drukt.
+  Per opname iets opstarten liet het begin wegvallen: de MediaRecorder van
+  Chrome had bijna een seconde nodig voor hij echt opnam.
+- **Na het aanzetten twee seconden opwarmen.** De driver van zo'n microfoon
+  heeft eigen ruisonderdrukking die zich aanpast als de microfoon opengaat:
+  eerst ruis, dan even bijna niets, dan pas gewoon geluid. Daarna klinkt het wat
+  hol. Dat zit ná wat de browser kan uitzetten (`noiseSuppression: false`
+  helpt niet); alleen in Windows (mmsys.cpl, Audioverbeteringen uit) of de
+  Realtek Audio Console gaat het uit. Firefox had er geen last van.
+- **De opname blijft rauw**: niet harder gezet, niets afgeknipt. Harder zetten
+  doe je achteraf met het volume van het geluid (tot 300%). Harder zetten
+  vóór het opnemen maakte alleen het geruis harder en voegde niets toe.
+- **De overvloei van een loop zit aan het eind**, niet aan het begin. Aan het
+  begin hoorde je bij elke start eerst het staartje (vaak stilte met geruis).
+- **Opsporen**: open de les met `?debug` achter het adres. Na elke opname komt
+  er een bestand `storm-debug-<geluid>.json` in Downloads met de opname en de
+  gegevens van de microfoon.
 
 ## Dingen die er staan en moeten blijven staan
 

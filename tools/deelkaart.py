@@ -77,5 +77,7 @@ kaart('deelkaart-bodypercussion.png', MINT, 'Body percussion · les 1',
       ['Maak muziek', 'met je lijf'], 'bodypercussion.png')
 kaart('deelkaart-bodypercussion2.png', BUBBLEGUM, 'Body percussion · les 2',
       ['Ontwerp je', 'eigen ritme'], 'clap.png')
+kaart('deelkaart-bodypercussion3.png', BLAUW, 'Body percussion · les 3',
+      ['Storm', 'maken'], 'storm.png', WIT)
 kaart('deelkaart-ritmeskater.png', BLAUW, 'Extra',
       ['Ritme', 'skater'], 'ritmeskater.png', WIT)

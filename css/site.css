@@ -2343,3 +2343,520 @@ input[type="range"]:not([data-param])::-moz-range-thumb {
 @media (max-width: 720px) {
   .rn-baan { --verhouding: 0.62; }
 }
+
+/* ============================================================
+   Body percussion 3: storm maken
+   ============================================================ */
+
+/* Bovenaan de microfoon en alles tegelijk aan of uit. Op een smal scherm gaan
+   de twee knoppen onder de microfoon. */
+.storm-balk {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+/* De microfoon: de keuze, de schakelaar, de meter en het mic-volume op een
+   rij. Is het smal, dan lopen ze door op een volgende regel. */
+.storm-mic {
+  display: flex;
+  flex: 1 1 auto;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+  min-width: 0;
+}
+
+.storm-mic[hidden] { display: none; }
+
+/* De schakelaar iets groter dan elders: hier tik je hem op een bord aan. */
+.storm-mic-aan { font-size: var(--text-sm); gap: var(--space-2); }
+.storm-mic-aan .schakel-baan { width: 44px; height: 26px; border-width: 3px; }
+.storm-mic-aan .schakel-baan::after { top: 3px; left: 3px; width: 14px; height: 14px; }
+.storm-mic-aan input:checked + .schakel-baan::after { transform: translateX(18px); }
+
+/* De meter: een pilletje dat vol loopt met wat de microfoon hoort. */
+.storm-meter {
+  flex: 0 0 100px;
+  height: 18px;
+  overflow: hidden;
+  background: var(--wit);
+  border: 3px solid var(--ink);
+  border-radius: var(--radius-pill);
+}
+
+.storm-meter span {
+  display: block;
+  width: 0%;
+  height: 100%;
+  background: var(--mint);
+}
+
+.storm-mic:not(.aan) .storm-meter { border-style: dotted; }
+
+/* Het clip-lampje: rood als het geluid tegen de top komt. Het blijft even
+   branden, zodat je het ook ziet als het maar heel kort was. */
+.storm-clip {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  margin-left: calc(var(--space-1) - var(--space-3));
+  background: var(--wit);
+  border: 3px solid var(--ink);
+  border-radius: 50%;
+}
+
+.storm-meter.clip + .storm-clip { background: var(--koraal); }
+.storm-mic:not(.aan) .storm-clip { border-style: dotted; }
+
+
+/* Het woord Microfoon staat er niet bij: het icoontje zegt het al. Het vakje
+   is smal en kapt een lange naam af; klik je erop, dan laat de lijst die
+   namen gewoon helemaal zien. */
+.storm-microfoon-naam { display: none; }
+
+.storm-microfoon {
+  display: flex;
+  flex: 0 1 auto;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+  max-width: 100%;
+  font-family: var(--font-kop);
+  font-weight: 600;
+}
+
+.storm-microfoon[hidden] { display: none; }
+.storm-microfoon .ph-bold { font-size: var(--text-xl); }
+
+/* Een gewone keuzelijst, in de vorm van een pilletje. 16 pixels, anders zoomt
+   een iPhone in zodra je erop tikt. */
+.storm-microfoon select {
+  flex: 0 1 auto;
+  min-width: 0;
+  max-width: 150px;
+  text-overflow: ellipsis;
+  font-family: var(--font-kop);
+  font-weight: 600;
+  font-size: var(--text-base);
+  color: var(--ink);
+  background: var(--wit);
+  border: 3px solid var(--ink);
+  border-radius: var(--radius-pill);
+  padding: 0.4em 0.8em;
+  cursor: pointer;
+}
+
+.storm-microfoon select:focus-visible { outline: 4px solid var(--blauw); outline-offset: 3px; }
+
+.storm-alles { display: flex; align-items: center; gap: var(--space-2); }
+.storm-alles .knop { display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2); white-space: nowrap; }
+
+/* Op een telefoon in twee regels: boven de microfoon en de schakelaar,
+   daaronder de meter met het lampje en de drie knoppen. Reset is dan alleen
+   het icoontje, en het woordje Aan naast de schakelaar valt weg, zodat de
+   keuzelijst ruimte heeft. Het raster legt alles op zijn plek; de twee
+   groepjes doen daarvoor even niet mee als blok (display: contents). */
+@media (max-width: 700px) {
+  .storm-balk {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 18px 44px 44px 44px;
+    align-items: center;
+    gap: var(--space-2);
+  }
+  .storm-mic,
+  .storm-alles { display: contents; }
+  .storm-microfoon { grid-column: 1 / 5; grid-row: 1; }
+  .storm-microfoon select { flex: 1 1 auto; max-width: none; padding-inline: 0.5em 0.3em; }
+  .storm-mic-aan { grid-column: 5; grid-row: 1; justify-self: end; }
+  .storm-mic-aan > span:last-child { display: none; }
+  .storm-meter { grid-column: 1; grid-row: 2; }
+  .storm-clip { grid-column: 2; grid-row: 2; margin-left: 0; }
+  [data-storm-alles="aan"] { grid-column: 3; grid-row: 2; }
+  [data-storm-alles="uit"] { grid-column: 4; grid-row: 2; }
+  .storm-alles [data-storm-reset] {
+    grid-column: 5;
+    grid-row: 2;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border-radius: 50%;
+  }
+  .storm-alles [data-storm-reset] .storm-lang { display: none; }
+}
+
+.storm-melding {
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  background: var(--zon);
+  border: 3px solid var(--ink);
+  border-radius: var(--radius-md);
+  line-height: 1.5;
+}
+
+.storm-melding[hidden] { display: none; }
+
+/* De golf van het gekozen geluid. De kop krijgt de kleur van dat geluid, zodat
+   je ziet bij welk kanaal hij hoort. */
+.storm-golf {
+  border: 4px solid var(--ink);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--wit);
+}
+
+/* Nog niets opgenomen: gestippeld, want er is nog niets. */
+.storm-golf.leeg { border-style: dotted; }
+
+.storm-golf-kop {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-1) var(--space-4);
+  padding: var(--space-2) var(--space-4);
+  background: var(--kleur, var(--wit));
+  border-bottom: 4px solid var(--ink);
+  font-family: var(--font-kop);
+  font-weight: 600;
+}
+
+.storm-golf.op-blauw .storm-golf-kop { color: var(--wit); }
+
+.storm-golf-naam { font-size: var(--text-lg); font-weight: 700; }
+.storm-golf-tijd { font-size: var(--text-base); font-variant-numeric: tabular-nums; }
+
+/* Slepen over de golf is van de strepen, niet van de bladzijde. Aan de zijkant
+   wat ruimte, zodat een streep helemaal aan het begin of eind nog heel te zien
+   is en je hem kunt pakken. */
+.storm-golf-vlak {
+  position: relative;
+  height: clamp(66px, 8vw, 100px);
+  margin: 0 var(--space-5);
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  cursor: ew-resize;
+}
+
+.storm-golf.leeg .storm-golf-vlak { cursor: default; }
+.storm-golf-vlak.midden { cursor: grab; }
+.storm-golf-vlak.schuift { cursor: grabbing; }
+
+.storm-golf-vlak canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.storm-leeg {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  padding: var(--space-4);
+  text-align: center;
+  font-family: var(--font-kop);
+  font-weight: 600;
+  font-size: var(--text-md);
+}
+
+.storm-leeg[hidden] { display: none; }
+
+/* Op een smal scherm is de golf laag; dan de tekst kleiner, zodat hij erin
+   past. */
+@media (max-width: 600px) {
+  .storm-leeg { padding: var(--space-1) var(--space-2); font-size: var(--text-sm); line-height: 1.25; }
+}
+
+/* Een streep is breder om te pakken dan hij eruitziet: de knop is 44 breed,
+   het zichtbare deel een lijn met een handvat in het midden. */
+.storm-greep {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 44px;
+  margin-left: -22px;
+  padding: 0;
+  background: none;
+  border: none;
+  cursor: ew-resize;
+  touch-action: none;
+}
+
+.storm-greep[hidden] { display: none; }
+
+.storm-greep::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 6px;
+  margin-left: -3px;
+  background: var(--ink);
+}
+
+.storm-greep span {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 26px;
+  height: 46px;
+  margin: -23px 0 0 -13px;
+  background: var(--wit);
+  border: 4px solid var(--ink);
+  border-radius: var(--radius-pill);
+}
+
+.storm-greep:focus-visible { outline: none; }
+.storm-greep:focus-visible span { outline: 4px solid var(--blauw); outline-offset: 2px; }
+
+/* Hoe je elk geluid met je lijf maakt. */
+.storm-tips {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: var(--space-1) var(--space-5);
+  margin: 0 0 var(--space-5);
+  padding: 0;
+  list-style: none;
+  line-height: 1.5;
+}
+
+/* Waar de loop nu is. */
+.storm-kop-lijn {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  margin-left: -2px;
+  background: var(--koraal);
+  pointer-events: none;
+}
+
+.storm-kop-lijn[hidden] { display: none; }
+
+/* Staan de geluiden niet allemaal naast elkaar, dan blijft de golf bovenaan
+   het scherm plakken terwijl je naar beneden scrolt: zo zie je hem altijd
+   boven het geluid waar je mee bezig bent. */
+@media (max-width: 999px) {
+  .storm-golf {
+    position: sticky;
+    top: var(--space-2);
+    z-index: 5;
+  }
+}
+
+/* De vier geluiden: naast elkaar op een groot scherm, twee bij twee op een
+   tablet, onder elkaar op een telefoon. Nooit drie en één. */
+.storm-kanalen {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-4);
+}
+
+@media (min-width: 560px) {
+  .storm-kanalen { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (min-width: 1000px) {
+  .storm-kanalen { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+
+.storm-kanaal {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  background: var(--wit);
+  border: 4px solid var(--ink);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+/* Nog niet opgenomen: gestippeld. */
+.storm-kanaal.leeg { border-style: dotted; }
+
+/* Het geluid dat bovenaan in beeld is. */
+.storm-kanaal.gekozen { outline: 4px solid var(--ink); outline-offset: 3px; }
+
+.storm-kies {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  font-family: var(--font-kop);
+  font-weight: 700;
+  font-size: var(--text-md);
+  color: var(--ink);
+  background: var(--kleur);
+  border: none;
+  border-bottom: 4px solid var(--ink);
+  cursor: pointer;
+}
+
+.storm-kanaal.op-blauw .storm-kies { color: var(--wit); }
+.storm-kies .ph-bold { font-size: 1.3em; }
+.storm-kies span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.storm-kies:focus-visible { outline: 4px solid var(--blauw); outline-offset: -8px; }
+
+.storm-binnen {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3);
+}
+
+/* De kleine golf van dit geluid. Hij wordt groter als je het volume
+   hoger zet, zodat je bij het dirigeren ziet wat er hard staat. */
+.storm-mini {
+  display: block;
+  width: 100%;
+  height: 44px;
+  border: 3px solid var(--ink);
+  border-radius: var(--radius-sm);
+}
+
+.storm-kanaal.leeg .storm-mini { border-style: dotted; }
+
+/* Vier kleine ronde knoppen op een rij: opnemen, spelen, de richting van de
+   loop en het draaiknopje van de overgang. Alleen een icoontje, zodat alles
+   op één scherm past; wat ze doen staat in de title. 44 pixels, want kleiner
+   raak je op een bord niet meer. */
+.storm-knoppen {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-2);
+}
+
+.storm-ikoon {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  font-family: var(--font-kop);
+  font-weight: 700;
+  font-size: var(--text-lg);
+  line-height: 1;
+  color: var(--ink);
+  background: var(--wit);
+  border: 3px solid var(--ink);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: transform 0.15s var(--bounce);
+}
+
+.storm-ikoon:hover:not(:disabled) { transform: scale(1.08); }
+.storm-ikoon:active:not(:disabled) { transform: scale(0.94); }
+.storm-ikoon:focus-visible { outline: 4px solid var(--blauw); outline-offset: 3px; }
+
+/* Uitgeschakeld: gestippeld, de taal van de site voor wat nog niet kan. */
+.storm-ikoon:disabled { border-style: dotted; cursor: default; color: var(--ink); }
+
+/* Het icoontje groot en precies in het midden: als blok, zonder de kleine
+   verschuiving omlaag die iconen in een regel tekst hebben. */
+.storm-ikoon .ph-bold {
+  display: block;
+  width: 24px;
+  height: 24px;
+  vertical-align: 0;
+}
+
+/* Opnemen is wit met een rode stip; tijdens het opnemen wordt de knop rood
+   met een stopteken. Spelen is groen; speelt hij, dan rood met een stopteken. */
+.storm-op { color: var(--koraal); }
+.storm-kanaal.neemt-op .storm-op { color: var(--ink); background: var(--koraal); }
+.storm-speel { background: var(--mint); }
+.storm-speel[aria-pressed="true"] { background: var(--koraal); }
+.storm-ikoon:disabled { background: var(--wit); }
+.storm-op:disabled { color: var(--ink); }
+
+/* Het draaiknopje: een wijzer die van linksonder (geen overgang) naar
+   rechtsonder (een hele seconde) draait. Slepen is van het knopje, niet van
+   de bladzijde. */
+.storm-draai {
+  position: relative;
+  touch-action: none;
+  cursor: ns-resize;
+}
+
+.storm-draai-wijzer {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 4px;
+  height: 15px;
+  margin: -15px 0 0 -2px;
+  background: var(--ink);
+  border-radius: 2px;
+  transform-origin: 50% 100%;
+  transform: rotate(var(--draai, -135deg));
+}
+
+.storm-draai::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 8px;
+  height: 8px;
+  margin: -4px 0 0 -4px;
+  background: var(--ink);
+  border-radius: 50%;
+}
+
+/* Eén effect per geluid, met naast de keuze het knopje voor hoeveel. */
+.storm-effect {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+}
+
+.storm-effect-kies {
+  display: flex;
+  flex: 0 1 auto;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+  font-family: var(--font-kop);
+  font-weight: 600;
+  font-size: var(--text-sm);
+}
+
+.storm-effect-kies select {
+  min-width: 0;
+  font-family: var(--font-kop);
+  font-weight: 600;
+  font-size: var(--text-base);
+  color: var(--ink);
+  background: var(--wit);
+  border: 3px solid var(--ink);
+  border-radius: var(--radius-pill);
+  padding: 0.3em 0.5em;
+  cursor: pointer;
+}
+
+.storm-effect-kies select:focus-visible { outline: 4px solid var(--blauw); outline-offset: 3px; }
+
+.storm-draai:disabled { cursor: default; }
+.storm-draai:disabled .storm-draai-wijzer,
+.storm-draai:disabled::after { opacity: 0.3; }
+
+.storm-schuif label { font-size: var(--text-sm); margin-bottom: 0; }
+
+.storm-na { margin-top: var(--space-6); }
