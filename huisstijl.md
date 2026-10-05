@@ -74,7 +74,9 @@ Knoppen zijn bouncy. Overshoot op hover, indrukken op click.
 .knop:active { transform: scale(0.94); }
 ```
 
-Respecteer `prefers-reduced-motion` en zet animaties dan uit.
+De beweging op de maat hoort bij de les, dus die blijft altijd aan, ook als de
+computer om minder beweging vraagt (`prefers-reduced-motion`). Kijk daar niet
+naar.
 
 ## Tokens
 

@@ -130,7 +130,3 @@ h1, h2, h3, .ui {
   padding: 1.5rem;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .knop { transition: none; }
-  .knop:hover, .knop:active { transform: none; }
-}

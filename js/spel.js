@@ -496,7 +496,7 @@ function werkAftellenBij(nu) {
 function toonAftellen(getal) {
   if (!aftelEl) return;
   aftelEl.textContent = getal ? String(getal) : '';
-  if (!getal || minderBeweging.matches) return;
+  if (!getal) return;
   animeer(aftelEl,
     [{ transform: 'scale(0.6)' }, { transform: 'scale(1)' }],
     { duration: 240, easing: 'cubic-bezier(0.34, 1.56, 0.64, 1)' }
@@ -589,7 +589,6 @@ function vier(naam) {
 
   confetti(44, veldEl);
   const kaart = vrijEl.firstElementChild;
-  if (minderBeweging.matches) return;
   // De bounce hoort alleen op het opkomen. Zet je hem over de hele animatie, dan
   // schiet de overshoot voorbij de laatste keyframes en fadet het kaartje al weg
   // terwijl het nog groot in beeld hoort te staan.

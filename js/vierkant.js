@@ -436,7 +436,7 @@ function vierkantOpMoment(tijd, doe) {
 // beeldje al door zijn eindstand heen en zie je er niets van. Alleen transform,
 // want dat draait op de grafische kaart.
 function veerVierkant(el, groei, duur) {
-  if (!el || minderBeweging.matches) return;
+  if (!el) return;
   animeer(el, [
     { transform: 'scale(1)', easing: 'cubic-bezier(0.34, 1.56, 0.64, 1)' },
     { transform: 'scale(' + groei + ')', offset: 0.35, easing: 'ease-out' },
@@ -482,7 +482,7 @@ function werkVierkantAftellenBij(nu) {
 function toonVierkantAftellen(getal) {
   if (!vkAftelEl) return;
   vkAftelEl.textContent = getal ? String(getal) : '';
-  if (!getal || minderBeweging.matches) return;
+  if (!getal) return;
   animeer(vkAftelEl,
     [{ transform: 'scale(0.6)' }, { transform: 'scale(1)' }],
     { duration: 240, easing: 'cubic-bezier(0.34, 1.56, 0.64, 1)' }

@@ -420,7 +420,7 @@ function ebWerkAftellenBij(nu) {
 function ebToonAftellen(getal) {
   if (!ebAftelEl) return;
   ebAftelEl.textContent = getal ? String(getal) : '';
-  if (!getal || minderBeweging.matches) return;
+  if (!getal) return;
   animeer(ebAftelEl,
     [{ transform: 'scale(0.6)' }, { transform: 'scale(1)' }],
     { duration: 240, easing: 'cubic-bezier(0.34, 1.56, 0.64, 1)' }

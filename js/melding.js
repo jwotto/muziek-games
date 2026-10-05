@@ -7,7 +7,7 @@
 
    Los bestand omdat twee lessen hem gebruiken: in de eerste ritmeles gaan er
    de geluiden en de game mee open, in de tweede de geluiden. Laden na
-   drumkit.js, want minderBeweging en animeer() komen daarvandaan. */
+   drumkit.js, want animeer() komt daarvandaan. */
 
 const meldingEl = document.querySelector('[data-melding]');
 let meldTimer = 0;
@@ -23,7 +23,6 @@ function meld(kop, regel) {
 
   confetti(54, meldingEl);
   const kaart = meldingEl.firstElementChild;
-  if (minderBeweging.matches) return;
   // De bounce hoort alleen op het opkomen. Zet je hem over de hele animatie, dan
   // schiet de overshoot voorbij de laatste keyframes en fadet het kaartje al weg
   // terwijl het nog groot in beeld hoort te staan.
@@ -41,7 +40,7 @@ function meld(kop, regel) {
 const SNIPPERKLEUREN = ['--koraal', '--zon', '--blauw', '--mint', '--bubblegum'];
 
 function confetti(aantal, laag) {
-  if (!laag || minderBeweging.matches) return;
+  if (!laag) return;
   const val = laag.clientHeight + 60;
 
   for (let i = 0; i < aantal; i++) {

@@ -416,7 +416,7 @@ function bouwKlapTellen() {
 // tussen een puls en een hik. De veer zit alleen op het eerste stuk: over het
 // geheel schiet hij bij het eerste beeldje al door zijn eindstand heen.
 function pulseerKlap(el, groei) {
-  if (!el || minderBeweging.matches) return;
+  if (!el) return;
   animeer(el, [
     { transform: 'scale(1)', easing: 'cubic-bezier(0.34, 1.56, 0.64, 1)' },
     { transform: 'scale(' + groei + ')', offset: 0.35, easing: 'ease-out' },
@@ -505,7 +505,6 @@ const KLAP_STERREN = [-70, -35, 0, 35, 70];
 function ruimKlapOp(noot) {
   if (noot.weg) return;
   noot.weg = true;
-  if (minderBeweging.matches) return;
 
   const vorm = noot.el.querySelector('svg');
   if (!vorm) return;
@@ -595,7 +594,7 @@ function klapZelf() {
 
 // Ernaast: de ring schudt even nee.
 function schudKlapDoel() {
-  if (!klapDoelEl || minderBeweging.matches) return;
+  if (!klapDoelEl) return;
   animeer(klapDoelEl, [
     { transform: 'translateX(0)' },
     { transform: 'translateX(-5px)', offset: 0.25 },
@@ -697,7 +696,7 @@ function werkKlapAftellenBij(nu) {
 function toonKlapAftellen(getal) {
   if (!klapAftelEl) return;
   klapAftelEl.textContent = getal ? String(getal) : '';
-  if (!getal || minderBeweging.matches) return;
+  if (!getal) return;
   animeer(klapAftelEl,
     [{ transform: 'scale(0.6)' }, { transform: 'scale(1)' }],
     { duration: 240, easing: 'cubic-bezier(0.34, 1.56, 0.64, 1)' }

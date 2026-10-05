@@ -16,7 +16,7 @@
    Dit bestand doet alleen wat de twee spellen delen: de schakelaar, de knoppen
    van de levels, de teller en de uitslag. Wat goed of mis is, en welke toets
    wat doet, weet het spel zelf. Laden na drumkit.js en melding.js, want
-   animeer(), minderBeweging en confetti() komen daarvandaan. */
+   animeer() en confetti() komen daarvandaan. */
 
 const ALLEEN_BPM = 90;
 const ALLEEN_MATEN = 16;
@@ -231,7 +231,6 @@ function maakAlleen(paneel, opties) {
     clearTimeout(vrijTimer);
     vrijTimer = setTimeout(() => { vrijEl.textContent = ''; }, 2600);
     if (typeof confetti === 'function') confetti(44, vrijEl.parentElement);
-    if (minderBeweging.matches) return;
     animeer(vrijEl.firstElementChild, [
       { transform: 'scale(0.3) rotate(-14deg)', opacity: 0, easing: 'cubic-bezier(0.34, 1.56, 0.64, 1)' },
       { transform: 'scale(1) rotate(-3deg)', opacity: 1, offset: 0.18, easing: 'linear' },

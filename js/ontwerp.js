@@ -373,7 +373,7 @@ function owTik(doel) {
 }
 
 function owVeer(el, groei) {
-  if (!el || minderBeweging.matches) return;
+  if (!el) return;
   animeer(el, [
     { transform: 'scale(1)', easing: 'cubic-bezier(0.34, 1.56, 0.64, 1)' },
     { transform: 'scale(' + groei + ')', offset: 0.35, easing: 'ease-out' },
@@ -583,7 +583,7 @@ function owKnik(sterk) {
 // volgende heen.
 function owGroei(vak, k, tel) {
   const img = owVakken[vak].querySelectorAll('img')[k];
-  if (!img || minderBeweging.matches) return;
+  if (!img) return;
   animeer(img, [
     { transform: 'scale(1)', easing: 'cubic-bezier(0.34, 1.56, 0.64, 1)' },
     { transform: 'scale(1.35)', offset: 0.35, easing: 'ease-out' },
@@ -644,7 +644,7 @@ function owWerkAftellenBij(nu) {
 function owToonAftellen(getal) {
   if (!owAftelEl) return;
   owAftelEl.textContent = getal ? String(getal) : '';
-  if (!getal || minderBeweging.matches) return;
+  if (!getal) return;
   animeer(owAftelEl,
     [{ transform: 'scale(0.6)' }, { transform: 'scale(1)' }],
     { duration: 240, easing: 'cubic-bezier(0.34, 1.56, 0.64, 1)' }

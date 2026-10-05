@@ -129,8 +129,10 @@ Twee dingen die we onderweg hebben geleerd en die hier blijven staan:
   element in `data-puls`: klein en vrijstaand mag 32%, een grote foto tegen de
   rand hooguit 12%.
 
-Bij `prefers-reduced-motion` gaat alle beweging uit, maar blijft de terugkoppeling
-staan — een sprong in plaats van een veer, nooit niets.
+De site kijkt bewust niet naar `prefers-reduced-motion`. Op schoolcomputers en
+digiborden staat "Animatie-effecten" vaak uit zonder dat de juf dat weet, en dan
+zag de klas niets meer meebewegen. Het meeveren op de maat hoort bij de les, dus
+het blijft altijd aan.
 
 ---
 

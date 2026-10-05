@@ -301,11 +301,6 @@ body {
 
 .kitblok[hidden] { display: none; }
 
-@media (prefers-reduced-motion: reduce) {
-  .beat { transition: none; }
-  .beat:hover { transform: none; }
-}
-
 /* De foto van het hele drumstel. Erop klikken maakt hem groot, zodat je op het
    digibord de klas kunt laten raden hoe de onderdelen heten. */
 .drumstel-groot { margin: var(--space-5) 0 0; }
@@ -366,11 +361,6 @@ body {
   cursor: zoom-out;
 }
 
-
-@media (prefers-reduced-motion: reduce) {
-  .vergroot img { transition: none; }
-  .vergroot:hover img { transform: none; }
-}
 
 /* De foto van het drumstel hoort bij de uitleg: hij laat zien wat de drie
    onderdelen zijn voordat je ze hoort. */
@@ -437,11 +427,6 @@ body {
 /* Licht mee op zodra dat geluid klinkt, ook als je de foto of het pad aantikt. */
 .deel-titel.aan { transform: scale(1.08); }
 
-@media (prefers-reduced-motion: reduce) {
-  .deel-titel { transition: none; }
-  .deel-titel:hover { transform: none; }
-}
-
 .deel {
   /* Geen dubbeltik-zoom en geen wachttijd van 300 ms op een aanraakscherm;
      scrollen vanaf een foto blijft gewoon kunnen. */
@@ -492,16 +477,6 @@ body {
    als je er midden in nog eens op tikt. */
 .deel:hover { transform: scale(1.03); }
 .deel:focus-visible { outline: 4px solid var(--blauw); outline-offset: 4px; }
-
-/* Zonder beweging blijft het opveren staan als sprong, want anders krijg je bij
-   het aantikken helemaal geen antwoord terug. */
-@media (prefers-reduced-motion: reduce) {
-  .deel { transition: none; }
-  .deel:hover { transform: none; }
-  /* Zonder beweging slaat de puls over, dus daar springt het plaatje even groot:
-     anders krijg je bij het aantikken helemaal geen antwoord terug. */
-  .deel.aan img { transform: scale(1.08); }
-}
 
 .drumstel figcaption {
   margin-top: var(--space-3);
@@ -871,11 +846,6 @@ input[type="range"]::-moz-range-thumb {
   .deel { gap: var(--space-2); }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .niveau { transition: none; }
-  .niveau:hover:not(:disabled) { transform: none; }
-}
-
 /* Het speelveld: een smal rechtop scherm in het midden, met de cijfers links en
    rechts ernaast in plaats van erboven. */
 .spel-veld {
@@ -1217,10 +1187,6 @@ input[type="range"]::-moz-range-thumb {
 .spel-oordeel[data-soort="mis"],
 .spel-oordeel[data-soort="naast"] { color: var(--koraal); }
 
-@media (prefers-reduced-motion: reduce) {
-  .noot.raak svg { animation: none; }
-}
-
 /* ---------- Over ---------- */
 
 /* Het verhaal onder de lessen op de voorpagina. Smal gehouden: het is leestekst,
@@ -1247,13 +1213,6 @@ input[type="range"]::-moz-range-thumb {
 .voet a {
   color: var(--blauw);
   font-weight: 600;
-}
-
-/* ---------- Beweging uit ---------- */
-
-@media (prefers-reduced-motion: reduce) {
-  .les.klaar, .pad, .terug { transition: none; }
-  .les.klaar:hover, .les.klaar:active, .pad:hover, .pad.aan, .terug:hover { transform: none; }
 }
 
 /* ---------- Body percussion: klap mee ---------- */
@@ -1828,22 +1787,12 @@ input[type="range"]:not([data-param])::-moz-range-thumb {
   .speelknop { width: 48px; height: 48px; }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .speelknop { transition: none; }
-  .speelknop:hover { transform: none; }
-}
-
 @media (max-width: 720px) {
   .klap-baan { --klap: 46px; --doel-x: 64px; }
   .klap-tellen { gap: var(--space-2); height: 15px; }
   .klap-tel { width: 15px; height: 15px; border-width: 2px; }
   .vierkant-raster { gap: var(--space-1); }
   .vierkant-vak { border-width: 3px; padding: 4%; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .klap-keus { transition: none; }
-  .klap-keus:hover:not(:disabled) { transform: none; }
 }
 
 /* ============================================================
@@ -1982,11 +1931,6 @@ input[type="range"]:not([data-param])::-moz-range-thumb {
   .seq-raster { gap: var(--space-1); }
   .seq-rij .deel-titel { padding-inline: 0.5em; font-size: var(--text-sm); border-width: 2px; }
   .stap { border-width: 2px; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .stap { transition: none; }
-  .stap:hover { transform: none; }
 }
 
 /* De kit zonder de grote pads. In de tweede ritmeles is het bord al de plek
@@ -2213,11 +2157,6 @@ input[type="range"]:not([data-param])::-moz-range-thumb {
   /* Op een telefoon passen vijf knoppen van 98 breed niet naast elkaar, en
      worden ze groter dan de vakjes zelf. Iets smaller, dan blijft het een rij. */
   .ow-tegels { gap: var(--space-1); }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .ow-tegel { transition: none; }
-  .ow-tegel:hover, .ow-tegel.gekozen { transform: none; }
 }
 
 /* ============================================================

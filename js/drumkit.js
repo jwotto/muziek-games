@@ -541,7 +541,6 @@ document.addEventListener('visibilitychange', () => {
 // ============================================================
 
 const flitsers = {};
-const minderBeweging = window.matchMedia('(prefers-reduced-motion: reduce)');
 
 // Alle veren, pulsen en snippers lopen via animeer() in plaats van rechtstreeks
 // via el.animate(). Oudere browsers, zoals die op sommige digiborden, kennen die
@@ -690,8 +689,6 @@ function flits(id) {
   lijst.forEach((pad) => pad.classList.add('aan'));
   clearTimeout(flitsers[id]);
   flitsers[id] = setTimeout(() => lijst.forEach((pad) => pad.classList.remove('aan')), 120);
-
-  if (minderBeweging.matches) return;
 
   // Via de animatie-API en niet via een class, want dan begint de puls opnieuw
   // ook als je hem midden in een vorige aanslag weer raakt.

@@ -216,10 +216,8 @@ function testTik(tijd, eerste) {
 
 // De stip klopt mee zoals de stipjes onder de spellen: hij veert even op, op
 // de eerste tel van de maat wat meer.
-const bewegingUit = window.matchMedia('(prefers-reduced-motion: reduce)');
-
 function pulseerStip(stip, eerste) {
-  if (bewegingUit.matches || !stip.animate) return;
+  if (!stip.animate) return;
   stip.animate([
     { transform: 'scale(1)', easing: 'cubic-bezier(0.34, 1.56, 0.64, 1)' },
     { transform: 'scale(' + (eerste ? 1.6 : 1.3) + ')', offset: 0.35, easing: 'ease-out' },

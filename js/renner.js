@@ -460,7 +460,6 @@ function zwelRnOp(ding) {
     flitsRnDoel(ding.aantal);
     return;
   }
-  if (minderBeweging.matches) return;
   animeer(ding.vorm, [
     { transform: 'scale(1)', easing: 'cubic-bezier(0.34, 1.56, 0.64, 1)' },
     { transform: 'scale(1.12)', offset: 0.3, easing: 'ease-out' },
@@ -533,7 +532,6 @@ const RN_DOEL_AFSTAND = 1;  // hoeveel skaters voor haar het rondje verschijnt
 function ruimRnOp(ding, y) {
   if (ding.weg) return;
   ding.weg = true;
-  if (minderBeweging.matches) return;
 
   if (ding.soort === 'spring') {
     animeer(ding.vorm, [
@@ -722,7 +720,7 @@ function bouwRnTellen() {
 }
 
 function pulseerRn(el, groei) {
-  if (!el || minderBeweging.matches) return;
+  if (!el) return;
   animeer(el, [
     { transform: 'scale(1)', easing: 'cubic-bezier(0.34, 1.56, 0.64, 1)' },
     { transform: 'scale(' + groei + ')', offset: 0.35, easing: 'ease-out' },
@@ -746,7 +744,7 @@ function toonRnTel(inMaat) {
 }
 
 function veerRn(sterk) {
-  if (!rnPopBeeldEl || minderBeweging.matches) return;
+  if (!rnPopBeeldEl) return;
   const zak = sterk ? 0.9 : 0.94;
   animeer(rnPopBeeldEl, [
     { transform: 'scale(1, 1)', easing: 'ease-out' },
@@ -793,7 +791,7 @@ function werkRnAftellenBij(nu) {
 function toonRnAftellen(getal) {
   if (!rnAftelEl) return;
   rnAftelEl.textContent = getal ? String(getal) : '';
-  if (!getal || minderBeweging.matches) return;
+  if (!getal) return;
   animeer(rnAftelEl,
     [{ transform: 'scale(0.6)' }, { transform: 'scale(1)' }],
     { duration: 240, easing: 'cubic-bezier(0.34, 1.56, 0.64, 1)' }

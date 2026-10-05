@@ -54,6 +54,15 @@ De lessen worden gegeven op een Prowise-bord, en dat is geen grote telefoon. Er
 zit een infraroodraam omheen met een eigen driver, vaak een beheerde Windows of
 een oudere Android-browser erachter. Wat we daar hebben geleerd:
 
+**De animaties moeten altijd werken, op elk bord en elke computer.** Het
+meeknikken van het bord, de plaatjes die op de maat groter worden, de pads die
+meeslaan, het aftellen en de confetti: dat hoort bij de les, de klas leest de
+maat eraf. Het mag nooit uitgaan door een instelling van de computer
+("Animatie-effecten" of "minder beweging"), en ook niet op een oude browser.
+Het kost bijna niets: het zijn een paar korte veren per tel, alleen
+`transform` (dat doet de grafische kaart), en geen zware effecten. Het geluid
+plannen kost meer dan dit.
+
 **Aanraken kwam niet aan.** Knoppen die op `click` luisteren deden het, maar de
 pads, de drumfoto's en de sequencervakjes niet: die luisterden alleen naar
 `pointerdown`, en dat kwam op het bord niet (goed) binnen. Music Lab en Ableton
@@ -84,11 +93,13 @@ animatie overgeslagen en bleef alleen het harde verspringen van de classes over.
   `requestAnimationFrame`. Hij kan transform en opacity, offsets, easing per
   keyframe, `delay`, `fill` en `onfinish`. **Roep nooit zelf `el.animate()`
   aan**; gebruik `animeer`, ook in een nieuwe les.
-- Een tweede mogelijke oorzaak blijft de instelling "minder beweging": staat in
-  Windows "Animatie-effecten" uit (beheerde schoolcomputers hebben dat vaak), of
-  op Android "Animaties verwijderen" aan, dan geeft de browser
-  `prefers-reduced-motion` door en kiest de site bewust een sprong in plaats van
-  een veer (zie `stijl.md`). Dat is dan geen fout.
+- **De site kijkt niet naar "minder beweging".** Staat in Windows
+  "Animatie-effecten" uit (beheerde schoolcomputers hebben dat vaak), of op
+  Android "Animaties verwijderen" aan, dan geeft de browser
+  `prefers-reduced-motion` door. Eerst sloeg de site dan alle pulsen over, en
+  dat was de echte reden dat het bord niet meebewoog. Dat is eruit: de beweging
+  hoort bij de les. **Zet er in een nieuwe les geen `prefers-reduced-motion`
+  of `matchMedia` voor beweging in.**
 
 **Na stoppen bleef er zacht een toon of piepje hangen.** De bas, het akkoord en
 de tik zijn oscillators die altijd aan staan; een envelope zet per noot het
@@ -118,7 +129,8 @@ tegelijk.
   heb je hetzelfde probleem terug.
 
 Nakijken zonder bord: in Chrome DevTools de apparaatbalk aan voor aanraken, en
-onder Rendering "Emulate CSS media feature prefers-reduced-motion". Hoe een oude
+onder Rendering "Emulate CSS media feature prefers-reduced-motion" op reduce
+(alles moet dan gewoon blijven bewegen). Hoe een oude
 browser het doet zie je door in de console `Element.prototype.animate =
 undefined` te typen en daarna iets te laten bewegen: dan loopt alles via de
 reserve van `animeer()`. Maar het
