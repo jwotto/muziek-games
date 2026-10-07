@@ -11,8 +11,27 @@
    seconden geluid past niet in localStorage); de stand van de schuifjes staat
    in localStorage. Neem je opnieuw op, dan is het oude geluid weg.
 
+   Een andere les mag deze sampler hergebruiken met eigen geluiden. Die zet
+   vóór dit bestand een STORM_LES neer (zie samplebeat.js):
+
+     kanalen      de geluiden, net als STORM_KANALEN hieronder
+     soort        'stukjes': elk geluid klinkt één keer als iets het aanslaat,
+                  in plaats van als loop door te lopen. Dan speelt een
+                  sequencer ze af met speelStormStuk().
+     bibliotheek  het adres van een lijst.json met kant-en-klare geluiden. Dan
+                  krijgt elk geluid een keuzelijst en een knop om zelf een
+                  bestand te uploaden.
+     sleutel, db  waar de stand en de opnames bewaard worden, zodat de lessen
+                  elkaars opnames niet overschrijven.
+
    Laden na Tone.js en drumkit.js: master, bijNeer en kleurWaarde komen daar
    vandaan. */
+
+const STORM_ANDERS = typeof STORM_LES !== 'undefined' ? STORM_LES : {};
+
+// Loops die doorlopen (de storm), of losse stukjes voor een sequencer.
+const STORM_HERHAALT = STORM_ANDERS.soort !== 'stukjes';
+const STORM_BIBLIOTHEEK = STORM_ANDERS.bibliotheek || '';
 
 // ============================================================
 //  1. De geluiden
@@ -20,7 +39,7 @@
 
 // kleur: een merkkleur uit wotto.css. Op blauw komt witte tekst, op de rest ink.
 // Hoe je elk geluid met je lijf maakt, staat in de uitleg boven het paneel.
-const STORM_KANALEN = [
+const STORM_KANALEN = STORM_ANDERS.kanalen || [
   { id: 'druppels', naam: 'Druppels',    icoon: 'drop',       kleur: 'blauw' },
   { id: 'wind',     naam: 'Wind',        icoon: 'wind',       kleur: 'mint' },
   { id: 'regen',    naam: 'Harde regen', icoon: 'cloud-rain', kleur: 'bubblegum' },
@@ -43,8 +62,10 @@ const STORM_RICHTINGEN = [
   { id: 'heenenweer', naam: 'Heen en weer', icoon: 'arrows-left-right' }
 ];
 
-// Hoe lang het eind van de loop overvloeit in het begin, in seconden.
-const STORM_OVERGANG = { min: 0, max: 1, step: 0.01, waarde: 0.08 };
+// Hoe lang het eind van de loop overvloeit in het begin, in seconden. Bij
+// losse stukjes is het een fade: zo lang komt het geluid op en zakt het weg.
+// Daar begint hij op nul, want een blaf of een klap moet meteen hard zijn.
+const STORM_OVERGANG = { min: 0, max: 1, step: 0.01, waarde: STORM_HERHAALT ? 0.08 : 0 };
 
 // Eén effect per geluid. Zweef is een phaser: het geluid golft, alsof het door
 // een draaiende buis komt. Mooi op wind.
@@ -61,8 +82,8 @@ const STORM_MIX = { min: 0, max: 1, waarde: 0.5 };
 
 const STORM_MAX = 10;        // langer dan dit neemt hij niet op, in seconden
 const STORM_KORTSTE = 0.1;   // de kortste loop die je met de strepen kunt maken
-const STORM_SLEUTEL = 'wotto-muziekfles-storm';
-const STORM_DB = 'muziekfles-storm';
+const STORM_SLEUTEL = STORM_ANDERS.sleutel || 'wotto-muziekfles-storm';
+const STORM_DB = STORM_ANDERS.db || 'muziekfles-storm';
 
 // Zo ver om het midden heen klikt het filter op "uit". Precies op nul komen
 // met een vinger op een digibord lukt anders bijna nooit.
@@ -82,7 +103,10 @@ const storm = {
 
 STORM_KANALEN.forEach((def) => {
   const k = {
+    // naam en bron: waar het geluid vandaan komt. Een eigen opname heeft geen
+    // naam; een geluid uit de bibliotheek heeft als bron zijn bestand.
     def: def, buffer: null, begin: 0, eind: 0, aan: false, kop: null, pieken: {},
+    naam: '', bron: '', laatsteStart: 0,
     richting: 'gewoon', overgang: STORM_OVERGANG.waarde,
     effect: 'geen', mix: STORM_MIX.waarde, effectNode: null
   };
@@ -167,9 +191,10 @@ function openStormDb() {
   return stormDb;
 }
 
-function bewaarStormOpname(id, data, sr) {
+function bewaarStormOpname(id, data, sr, naam, bron) {
   openStormDb().then((db) => {
-    db.transaction('opnames', 'readwrite').objectStore('opnames').put({ data: data, sr: sr }, id);
+    db.transaction('opnames', 'readwrite').objectStore('opnames').put(
+      { data: data, sr: sr, naam: naam || '', bron: bron || '' }, id);
   }).catch(() => {
     // Geen opslag: de opname blijft staan zolang de bladzijde open is.
   });
@@ -209,8 +234,11 @@ STORM_KANALEN.forEach((def) => {
   k.hoog = new Tone.Filter({ type: 'highpass', frequency: 20, rolloff: -24, Q: 0.7 }).connect(k.gain);
   k.laag = new Tone.Filter({ type: 'lowpass', frequency: 20000, rolloff: -24, Q: 0.7 }).connect(k.hoog);
   // Een korte fade bij starten en stoppen, anders tikt het als een loop
-  // midden in een geluid begint of ophoudt.
-  k.speler = new Tone.Player({ loop: true, fadeIn: 0.01, fadeOut: 0.04 }).connect(k.laag);
+  // midden in een geluid begint of ophoudt. Een los stukje begint zonder fade:
+  // dat is vaak een klap of een tik, en die moet meteen hard zijn.
+  k.speler = new Tone.Player({
+    loop: STORM_HERHAALT, fadeIn: STORM_HERHAALT ? 0.01 : 0, fadeOut: 0.04
+  }).connect(k.laag);
 });
 
 // Het effect zit tussen het filter en het volume. Wisselen is het oude
@@ -307,7 +335,7 @@ function maakStormLus(k) {
   }
 
   const lengte = stuk.length;
-  const over = k.richting === 'heenenweer' ? 0
+  const over = (!STORM_HERHAALT || k.richting === 'heenenweer') ? 0
     : Math.min(Math.round(k.overgang * sr), Math.floor(lengte / 2));
 
   const lus = Tone.getContext().createBuffer(1, Math.max(2, lengte), sr);
@@ -317,9 +345,23 @@ function maakStormLus(k) {
     const t = (i / over) * Math.PI / 2;
     doel[lengte - over + i] = stuk[lengte - over + i] * Math.cos(t) + stuk[i] * Math.sin(t);
   }
+  // Een los stukje herhaalt niet, dus er valt niets over te vloeien. Daar is
+  // de overgang een fade aan beide kanten.
+  if (!STORM_HERHAALT) stormRandjes(doel, sr, k.overgang);
   k.lusDuur = lus.duration;
   k.lusBegin = over / sr;
   return lus;
+}
+
+// Een fade in en uit van fade seconden. Altijd minstens twee milliseconden in
+// en tien uit: te kort om een klap zachter te maken, lang genoeg om de tik weg
+// te halen die je hoort als de strepen midden in een geluid knippen.
+function stormRandjes(data, sr, fade) {
+  const half = Math.floor(data.length / 2);
+  const inN = Math.min(Math.round(Math.max(0.002, fade) * sr), half);
+  const uitN = Math.min(Math.round(Math.max(0.01, fade) * sr), half);
+  for (let i = 0; i < inN; i++) data[i] *= i / inN;
+  for (let i = 0; i < uitN; i++) data[data.length - 1 - i] *= i / uitN;
 }
 
 function zetStormLus(k) {
@@ -352,6 +394,14 @@ function stormLusLive(k) {
 
 function zetStormAan(k, aan) {
   if (aan && !k.buffer) return;
+  // Losse stukjes staan nooit "aan": spelen is het stukje één keer horen.
+  if (!STORM_HERHAALT) {
+    if (aan) {
+      Tone.start();
+      speelStormStuk(k);
+    }
+    return;
+  }
   if (k.aan === aan) return;
   k.aan = aan;
   if (aan) {
@@ -364,6 +414,28 @@ function zetStormAan(k, aan) {
   }
   werkStormKanaalBij(k);
   werkStormKopBij();
+}
+
+// Een los stukje één keer afspelen: nu, of op een tijd van de audioklok (de
+// sequencer plant een paar honderdste vooruit). Tone weigert een start die
+// vóór de vorige ligt; tikt iemand op het naamknopje terwijl de sequencer er
+// net een heeft klaargezet, dan komt deze er vlak achter. Hij kapt het vorige
+// stukje af, net als op een echte sampler.
+function speelStormStuk(k, wanneer) {
+  if (!k.buffer || storm.opname) return;
+  let t = wanneer === undefined ? Tone.now() + 0.012 : wanneer;
+  if (t <= k.laatsteStart) t = k.laatsteStart + 0.001;
+  k.laatsteStart = t;
+  k.speler.start(t);
+  k.kop = { tijd: t, pos: 0 };
+  stormLus();
+}
+
+// Speelt dit geluid nu, zodat de streep over de golf moet lopen?
+function stormKopBezig(k) {
+  if (!k.kop || !k.lusDuur) return false;
+  if (STORM_HERHAALT) return k.aan;
+  return Tone.now() - k.kop.tijd < k.lusDuur / stormSnelheid(k);
 }
 
 // Waar in de opname de loop nu is, voor de streep over de golf.
@@ -383,6 +455,7 @@ function stormKopPositie(k) {
   if (!k.kop || !k.lusDuur) return 0;
   const verder = k.kop.pos + Math.max(0, Tone.now() - k.kop.tijd) * stormSnelheid(k);
   if (verder < k.lusDuur) return verder;
+  if (!STORM_HERHAALT) return k.lusDuur;
   const rond = k.lusDuur - (k.lusBegin || 0);
   if (rond <= 0) return 0;
   return (k.lusBegin || 0) + ((verder - (k.lusBegin || 0)) % rond);
@@ -693,10 +766,41 @@ function stormMicKlaar() {
 //  Een opname
 // ------------------------------------------------------------
 
+// Een les die er zelf geluid bij maakt (de sequencer van samplebeat.js) hangt
+// hier aan, en zet dat stil voordat de microfoon het meeneemt.
+let bijStormOpname = null;
+
+// En hier, om mee te kijken als een geluid verandert: een nieuwe opname, een
+// ander geluid uit de lijst, of alles gewist.
+let bijStormKanaal = null;
+
+// Opnemen terwijl de microfoon uit staat: zeggen wat je moet doen, en de
+// schakelaar even laten opspringen zodat je ziet waar hij zit.
+function vraagStormMicAan() {
+  meldStorm(storm.micStroom
+    ? 'De microfoon gaat aan, nog heel even. Druk dan nog een keer op Opnemen.'
+    : 'Zet eerst de microfoon aan, bovenaan bij de schakelaar. Daarna kun je opnemen.');
+  const schakel = stormMicAanEl && stormMicAanEl.closest('.schakel');
+  if (schakel) {
+    animeer(schakel, [
+      { transform: 'scale(1)', easing: 'ease-out' },
+      { transform: 'scale(1.3)', offset: 0.2, easing: 'ease-in' },
+      { transform: 'scale(1)', offset: 0.45, easing: 'ease-out' },
+      { transform: 'scale(1.3)', offset: 0.65, easing: 'ease-in' },
+      { transform: 'scale(1)' }
+    ], { duration: 900 });
+  }
+}
+
 function startStormOpname(k) {
-  if (storm.opname || !stormMicKlaar()) return;
+  if (storm.opname) return;
+  if (!stormMicKlaar()) {
+    vraagStormMicAan();
+    return;
+  }
   meldStorm('');
   kiesStorm(k.def.id);
+  if (bijStormOpname) bijStormOpname();
 
   const sr = storm.mic.klok.sampleRate;
   const op = {
@@ -767,20 +871,147 @@ function rondStormOpnameAf(op) {
   op.stukken.forEach((stuk) => { data.set(stuk, plek); plek += stuk.length; });
   if (STORM_DEBUG) bewaarStormDebug(op, data);
 
-  const wasAan = k.aan;
-  if (wasAan) zetStormAan(k, false);
-  zetStormOpname(k, data, sr);
-  // Een nieuwe opname begint als de hele opname: de strepen helemaal links en
-  // op het eind. Inkorten doe je daarna zelf.
-  k.begin = 0;
-  k.eind = k.buffer.duration;
-  bewaarStormOpname(k.def.id, data, sr);
-  bewaarStormStand();
-  zetStormLus(k);
-
+  zetStormGeluid(k, data, sr, '', '');
   ruimStormOpnameOp(op);
   // Meteen laten horen wat je hebt opgenomen.
   zetStormAan(k, true);
+}
+
+// Een nieuw geluid in een kanaal: opgenomen, uit de lijst of geüpload. Het
+// oude is dan weg.
+function zetStormGeluid(k, data, sr, naam, bron) {
+  if (k.aan) zetStormAan(k, false);
+  zetStormOpname(k, data, sr);
+  // Een nieuw geluid begint helemaal: de strepen helemaal links en op het
+  // eind. Inkorten doe je daarna zelf.
+  k.begin = 0;
+  k.eind = k.buffer.duration;
+  k.naam = naam;
+  k.bron = bron;
+  // Bij losse samples begint een nieuw geluid ook met alle knoppen gewoon:
+  // een pitch of echo die bij de hond paste, hoort niet vanzelf bij de kat.
+  // Bij de storm blijven ze staan, zodat je opnieuw kunt opnemen met dezelfde
+  // klank.
+  if (!STORM_HERHAALT && k.el) zetStormKnoppenTerug(k);
+  bewaarStormOpname(k.def.id, data, sr, naam, bron);
+  bewaarStormStand();
+  zetStormLus(k);
+}
+
+// ------------------------------------------------------------
+//  Een geluid uit de lijst, of een eigen bestand
+// ------------------------------------------------------------
+
+// Werkt de microfoon niet, dan kun je toch verder: met een geluid uit de map
+// (STORM_BIBLIOTHEEK, gemaakt door tools/samples.py) of een eigen bestand.
+// Langer dan tien seconden wordt afgeknipt, net als een opname.
+storm.bibliotheek = [];
+
+function laadStormBibliotheek() {
+  if (!STORM_BIBLIOTHEEK || !window.fetch) return;
+  fetch(STORM_BIBLIOTHEEK).then((r) => (r.ok ? r.json() : [])).then((lijst) => {
+    storm.bibliotheek = (Array.isArray(lijst) ? lijst : []).filter((g) =>
+      g && typeof g.bestand === 'string' && typeof g.naam === 'string');
+    vulStormBibliotheek();
+  }).catch(() => {});
+}
+
+function stormBibliotheekAdres(bestand) {
+  return STORM_BIBLIOTHEEK.replace(/[^/]*$/, '') + encodeURIComponent(bestand);
+}
+
+// Van een bestand naar geluid. Oude browsers kennen alleen de versie met
+// terugroepers, nieuwe geven een belofte terug; zo werken ze allebei.
+function ontcijferStormBestand(ruw) {
+  const klok = Tone.getContext().rawContext;
+  return new Promise((klaar, mis) => {
+    const belofte = klok.decodeAudioData(ruw, klaar, mis);
+    if (belofte && belofte.then) belofte.then(klaar, mis);
+  });
+}
+
+// Alle sporen bij elkaar tot één, want de sampler werkt met één spoor, en
+// hooguit tien seconden.
+function stormMono(buffer) {
+  const lengte = Math.min(buffer.length, Math.round(STORM_MAX * buffer.sampleRate));
+  const data = new Float32Array(lengte);
+  const sporen = buffer.numberOfChannels;
+  for (let s = 0; s < sporen; s++) {
+    const spoor = buffer.getChannelData(s);
+    for (let i = 0; i < lengte; i++) data[i] += spoor[i] / sporen;
+  }
+  return data;
+}
+
+// stil: alleen erin zetten, zonder het te laten horen of bovenaan te zetten.
+// Zo komen de geluiden waarmee een les begint erin (zie zetStormBeginGeluiden).
+function laadStormBestand(k, ruw, naam, bron, stil) {
+  return ontcijferStormBestand(ruw).then((buffer) => {
+    if (storm.opname) return;
+    zetStormGeluid(k, stormMono(buffer), buffer.sampleRate, naam, bron);
+    if (stil) {
+      werkStormBij();
+      return;
+    }
+    kiesStorm(k.def.id);
+    werkStormBij();
+    zetStormAan(k, true);
+    if (buffer.duration > STORM_MAX + 0.05) {
+      meldStorm('Dat geluid was langer dan tien seconden. Alleen het begin is erin gezet.');
+    }
+  }, () => {
+    meldStorm('Dit geluid kan de computer niet openen. Probeer een wav- of mp3-bestand.');
+  });
+}
+
+// Een kanaal mag met een geluid uit de map beginnen: begin in STORM_LES,
+// bijvoorbeeld { bestand: 'hond.mp3', naam: 'Hond' }. Dat staat erin zolang er
+// niets anders is opgenomen of gekozen, en komt terug na Reset.
+function zetStormBeginGeluiden() {
+  if (!STORM_BIBLIOTHEEK || !window.fetch) return;
+  STORM_KANALEN.forEach((def) => {
+    const k = stormKanaal(def.id);
+    if (!def.begin || k.buffer) return;
+    fetch(stormBibliotheekAdres(def.begin.bestand))
+      .then((r) => { if (!r.ok) throw new Error(r.status); return r.arrayBuffer(); })
+      .then((ruw) => { if (!k.buffer) return laadStormBestand(k, ruw, def.begin.naam, def.begin.bestand, true); })
+      .catch(() => {});
+  });
+}
+
+function kiesStormUitLijst(k, bestand) {
+  const gevonden = storm.bibliotheek.find((g) => g.bestand === bestand);
+  if (!gevonden || storm.opname) return;
+  meldStorm('');
+  fetch(stormBibliotheekAdres(bestand))
+    .then((r) => { if (!r.ok) throw new Error(r.status); return r.arrayBuffer(); })
+    .then((ruw) => laadStormBestand(k, ruw, gevonden.naam, bestand))
+    .catch(() => {
+      meldStorm('Dit geluid kon niet geladen worden. Staat de internetverbinding aan?');
+      werkStormBij();
+    });
+}
+
+// Met FileReader en niet met file.arrayBuffer(): die kent een oudere browser
+// niet.
+function uploadStormBestand(k, bestand) {
+  if (!bestand || storm.opname) return;
+  meldStorm('');
+  const lezer = new FileReader();
+  lezer.onload = () => laadStormBestand(k, lezer.result, bestand.name.replace(/\.[^.]+$/, ''), '');
+  lezer.onerror = () => meldStorm('Dit bestand kon niet gelezen worden.');
+  lezer.readAsArrayBuffer(bestand);
+}
+
+// Eén keuzelijst bovenaan in de balk ([data-storm-lijst] in de bladzijde),
+// voor het geluid dat gekozen is.
+function vulStormBibliotheek() {
+  if (!stormLijstEl) return;
+  stormLijstEl.innerHTML =
+    storm.bibliotheek.map((g) =>
+      '<option value="' + stormTekst(g.bestand) + '">' + stormTekst(g.naam) + '</option>'
+    ).join('');
+  werkStormBij();
 }
 
 // ------------------------------------------------------------
@@ -836,6 +1067,8 @@ const stormKopEl = stormEl && stormEl.querySelector('[data-storm-kop]');
 const stormLeegEl = stormEl && stormEl.querySelector('[data-storm-leeg]');
 const stormNaamEl = stormEl && stormEl.querySelector('[data-storm-golf-naam]');
 const stormTijdEl = stormEl && stormEl.querySelector('[data-storm-golf-tijd]');
+const stormLijstEl = stormEl && stormEl.querySelector('[data-storm-lijst]');
+const stormKopKnoppenEl = stormEl && stormEl.querySelector('[data-storm-kop-knoppen]');
 const stormGrepen = {};
 
 function stormTekst(s) {
@@ -852,7 +1085,49 @@ function meldStorm(tekst) {
   stormMeldEl.hidden = !tekst;
 }
 
+// Eén effect per geluid, met naast de keuze het knopje voor hoeveel.
+function stormEffectKeuze(id) {
+  return `
+        <div class="storm-effect">
+          <label class="storm-effect-kies">
+            <span>Effect</span>
+            <select data-storm-effect="${id}">
+              ${STORM_EFFECTEN.map((f) => '<option value="' + f.id + '">' + f.naam + '</option>').join('')}
+            </select>
+          </label>
+          ${stormDraaiKnop(id, 'mix')}
+        </div>`;
+}
+
+// Opnemen, spelen, de richting, de overgang en (met een bibliotheek) uploaden.
+function stormKnoppen(id) {
+  return `
+          <button class="storm-ikoon storm-op" type="button" data-storm-op="${id}">
+            <i class="ph-bold ph-record" aria-hidden="true"></i>
+          </button>
+          <button class="storm-ikoon storm-speel" type="button" data-storm-speel="${id}" aria-pressed="false">
+            <i class="ph-bold ph-play" aria-hidden="true"></i>
+          </button>
+          <button class="storm-ikoon storm-richting" type="button" data-storm-richting="${id}">
+            <i class="ph-bold ph-arrow-right" aria-hidden="true"></i>
+          </button>
+          ${stormDraaiKnop(id, 'overgang')}
+          ${STORM_BIBLIOTHEEK ? `
+          <button class="storm-ikoon" type="button" data-storm-upload="${id}" title="Upload een eigen geluid" aria-label="Upload een eigen geluid">
+            <i class="ph-bold ph-upload-simple" aria-hidden="true"></i>
+          </button>
+          <input type="file" accept="audio/*" hidden data-storm-bestand="${id}">` : ''}`;
+}
+
+// Zoekt een knop van een geluid: in zijn eigen vak, of in de kop van de golf
+// als de bladzijde daar plek voor heeft ([data-storm-kop-knoppen]). Dan staan
+// de knoppen van het gekozen geluid rechtsboven in de golf.
+function stormDeel(k, kiezer) {
+  return k.el.querySelector(kiezer) || (k.kopKnoppen ? k.kopKnoppen.querySelector(kiezer) : null);
+}
+
 function bouwStormKanalen() {
+  const inKop = !!stormKopKnoppenEl;
   stormKanalenEl.innerHTML = STORM_KANALEN.map((def) => `
     <article class="storm-kanaal${def.kleur === 'blauw' ? ' op-blauw' : ''}" style="--kleur: var(--${def.kleur})" data-kanaal="${def.id}">
       <button class="storm-kies" type="button" data-storm-kies="${def.id}" aria-pressed="false">
@@ -861,40 +1136,29 @@ function bouwStormKanalen() {
       </button>
       <div class="storm-binnen">
         <canvas class="storm-mini" data-storm-mini aria-hidden="true"></canvas>
-        <div class="storm-knoppen">
-          <button class="storm-ikoon storm-op" type="button" data-storm-op="${def.id}">
-            <i class="ph-bold ph-record" aria-hidden="true"></i>
-          </button>
-          <button class="storm-ikoon storm-speel" type="button" data-storm-speel="${def.id}" aria-pressed="false">
-            <i class="ph-bold ph-play" aria-hidden="true"></i>
-          </button>
-          <button class="storm-ikoon storm-richting" type="button" data-storm-richting="${def.id}">
-            <i class="ph-bold ph-arrow-right" aria-hidden="true"></i>
-          </button>
-          ${stormDraaiKnop(def.id, 'overgang')}
-        </div>
+        ${inKop ? '' : '<div class="storm-knoppen">' + stormKnoppen(def.id) + '</div>'}
         ${STORM_SCHUIVEN.map((p) => `
         <div class="klap-schuif storm-schuif">
           <label for="storm-${def.id}-${p.id}"><span class="klap-schuif-naam">${p.label}</span><b data-storm-toon="${p.id}"></b></label>
           <input type="range" id="storm-${def.id}-${p.id}" data-storm-schuif="${p.id}"
                  min="${p.min}" max="${p.max}" step="${p.step}">
         </div>`).join('')}
-        <div class="storm-effect">
-          <label class="storm-effect-kies">
-            <span>Effect</span>
-            <select data-storm-effect="${def.id}">
-              ${STORM_EFFECTEN.map((f) => '<option value="' + f.id + '">' + f.naam + '</option>').join('')}
-            </select>
-          </label>
-          ${stormDraaiKnop(def.id, 'mix')}
-        </div>
+        ${stormEffectKeuze(def.id)}
       </div>
     </article>
   `).join('');
 
+  if (inKop) {
+    stormKopKnoppenEl.innerHTML = STORM_KANALEN.map((def) =>
+      '<div class="storm-knoppen" data-kop-kanaal="' + def.id + '">' + stormKnoppen(def.id) + '</div>'
+    ).join('');
+  }
+
   STORM_KANALEN.forEach((def) => {
     const k = stormKanaal(def.id);
     k.el = stormKanalenEl.querySelector('[data-kanaal="' + def.id + '"]');
+    // Niet k.kop: dat is de streep die tijdens het spelen over de golf loopt.
+    k.kopKnoppen = inKop ? stormKopKnoppenEl.querySelector('[data-kop-kanaal="' + def.id + '"]') : null;
     k.mini = k.el.querySelector('[data-storm-mini]');
     k.el.querySelector('[data-storm-effect]').value = k.effect;
     STORM_SCHUIVEN.forEach((p) => {
@@ -924,43 +1188,77 @@ function werkStormKanaalBij(k) {
   k.el.classList.toggle('leeg', !k.buffer);
   k.el.classList.toggle('gekozen', storm.gekozen === k.def.id);
   k.el.classList.toggle('neemt-op', neemtOp);
+  if (k.kopKnoppen) {
+    k.kopKnoppen.hidden = storm.gekozen !== k.def.id;
+    k.kopKnoppen.classList.toggle('neemt-op', neemtOp);
+  }
   k.el.querySelector('[data-storm-kies]').setAttribute('aria-pressed', String(storm.gekozen === k.def.id));
 
   // Alleen icoontjes, dus wat een knop doet staat in title (voor de muis) en
   // aria-label (voor een schermlezer).
-  // Opnemen kan pas als de microfoon aanstaat (de schakelaar bovenaan).
-  const opKnop = k.el.querySelector('[data-storm-op]');
+  // Opnemen kan pas als de microfoon aanstaat (de schakelaar bovenaan); de
+  // knop is dan gestippeld.
+  const opKnop = stormDeel(k, '[data-storm-op]');
   const micUit = !stormMicKlaar();
-  opKnop.disabled = op ? !neemtOp : micUit;
+  // Ook met de microfoon uit te klikken: dan zegt hij dat die eerst aan moet.
+  opKnop.disabled = !!op && !neemtOp;
+  opKnop.classList.toggle('mic-uit', micUit && !op);
   stormNoem(opKnop, neemtOp ? 'Stop met opnemen' : (micUit ? 'Zet eerst de microfoon aan' : 'Opnemen'));
   opKnop.querySelector('i').className = 'ph-bold ' + (neemtOp ? 'ph-stop' : 'ph-record');
 
-  const speel = k.el.querySelector('[data-storm-speel]');
+  const speel = stormDeel(k, '[data-storm-speel]');
   speel.disabled = !k.buffer || !!op;
   speel.setAttribute('aria-pressed', String(k.aan));
   speel.querySelector('i').className = 'ph-bold ' + (k.aan ? 'ph-stop' : 'ph-play');
   stormNoem(speel, k.aan ? 'Stop' : 'Speel');
 
   const richting = STORM_RICHTINGEN.find((r) => r.id === k.richting);
-  const richtingKnop = k.el.querySelector('[data-storm-richting]');
+  const richtingKnop = stormDeel(k, '[data-storm-richting]');
   richtingKnop.disabled = !k.buffer || !!op;
   richtingKnop.querySelector('i').className = 'ph-bold ph-' + richting.icoon;
-  stormNoem(richtingKnop, 'Loop: ' + richting.naam.toLowerCase());
+  stormNoem(richtingKnop, (STORM_HERHAALT ? 'Loop: ' : 'Afspelen: ') + richting.naam.toLowerCase());
 
-  const heenEnWeer = k.richting === 'heenenweer';
+  const heenEnWeer = STORM_HERHAALT && k.richting === 'heenenweer';
   werkStormDraaiBij(k, 'overgang', !k.buffer || !!op || heenEnWeer, heenEnWeer ? 'niet nodig bij heen en weer' : '');
   werkStormDraaiBij(k, 'mix', k.effect === 'geen', k.effect === 'geen' ? 'kies eerst een effect' : '');
+
+  const upload = stormDeel(k, '[data-storm-upload]');
+  if (upload) upload.disabled = !!op;
 
   STORM_SCHUIVEN.forEach((p) => {
     k.el.querySelector('[data-storm-toon="' + p.id + '"]').textContent = stormSchuifWaarde(p, k[p.id]);
   });
 
   tekenStormOp(k.mini, k);
+  if (bijStormKanaal) bijStormKanaal(k);
 }
 
 function werkStormBij() {
   STORM_KANALEN.forEach((def) => werkStormKanaalBij(stormKanaal(def.id)));
   stormEl.querySelectorAll('[data-storm-alles]').forEach((knop) => { knop.disabled = !!storm.opname; });
+  if (stormLijstEl) {
+    const gekozen = stormKanaal(storm.gekozen);
+    const bron = gekozen.bron;
+    stormLijstEl.disabled = !!storm.opname || !storm.bibliotheek.length;
+    // Een eigen opname of upload staat niet in de lijst: dan komt die er
+    // bovenaan bij. Verder geen lege regel, want een sample heeft altijd een
+    // geluid.
+    const eigen = !!gekozen.buffer && !bron;
+    const nodig = eigen || !storm.bibliotheek.length;
+    let leeg = stormLijstEl.querySelector('option[value=""]');
+    if (nodig && !leeg) {
+      leeg = document.createElement('option');
+      leeg.value = '';
+      stormLijstEl.insertBefore(leeg, stormLijstEl.firstChild);
+    } else if (!nodig && leeg) {
+      leeg.remove();
+      leeg = null;
+    }
+    const tekst = eigen ? (gekozen.naam || 'Eigen opname') : 'Nog geen geluiden';
+    if (leeg && leeg.textContent !== tekst) leeg.textContent = tekst;
+    if (stormLijstEl.value !== bron) stormLijstEl.value = bron;
+    if (stormLijstEl.value !== bron) stormLijstEl.value = '';
+  }
   werkStormGolfBij();
 }
 
@@ -1061,7 +1359,7 @@ function tekenStormOp(canvas, k, metOvergang) {
   // komt het geluid op, aan het eind zakt het weg, en die twee lopen over
   // elkaar heen. Hoe langer de overgang, hoe flauwer de helling. Achteruit
   // ziet het er net zo uit; heen en weer heeft geen overgang.
-  if (!metOvergang || k.richting === 'heenenweer') return;
+  if (!metOvergang || (STORM_HERHAALT && k.richting === 'heenenweer')) return;
   const over = Math.min(k.overgang, (k.eind - k.begin) / 2);
   if (over <= 0) return;
   const breedte = (over / duur) * b;
@@ -1084,9 +1382,13 @@ function werkStormGolfBij() {
   const op = storm.opname;
   const neemtOp = !!op && op.k === k;
 
-  if (stormNaamEl.dataset.kanaal !== k.def.id) {
-    stormNaamEl.dataset.kanaal = k.def.id;
-    stormNaamEl.innerHTML = '<i class="ph-bold ph-' + k.def.icoon + '" aria-hidden="true"></i> ' + stormTekst(k.def.naam);
+  // Met de naam van het geluid erachter, als het uit de lijst of een bestand
+  // komt: Sample 1 · Koe.
+  // Staat er een keuzelijst in de kop, dan staat de naam van het geluid daarin.
+  const kopNaam = k.def.naam + (k.naam && k.buffer && !stormLijstEl ? ' · ' + k.naam : '');
+  if (stormNaamEl.dataset.naam !== kopNaam) {
+    stormNaamEl.dataset.naam = kopNaam;
+    stormNaamEl.innerHTML = '<i class="ph-bold ph-' + k.def.icoon + '" aria-hidden="true"></i> ' + stormTekst(kopNaam);
     stormGolfEl.style.setProperty('--kleur', 'var(--' + k.def.kleur + ')');
     stormGolfEl.classList.toggle('op-blauw', k.def.kleur === 'blauw');
   }
@@ -1101,9 +1403,11 @@ function werkStormGolfBij() {
     const soort = STORM_DRAAIEN[stormDraait.soort];
     tijd = soort.naam + ' ' + soort.toon(k[stormDraait.soort]);
   } else if (k.buffer) {
-    tijd = 'Herhaalt ' + stormSeconden(k.begin).replace(' s', '') + ' tot ' + stormSeconden(k.eind);
+    tijd = (STORM_HERHAALT ? 'Herhaalt ' : 'Speelt ') + stormSeconden(k.begin).replace(' s', '') + ' tot ' + stormSeconden(k.eind);
   } else if (!storm.micStroom) {
-    leeg = 'Zet eerst de microfoon aan, bovenaan. Druk dan bij ' + k.def.naam + ' op Opnemen.';
+    leeg = STORM_BIBLIOTHEEK
+      ? 'Zet de microfoon aan en druk hieronder op Opnemen. Of kies een geluid uit de lijst.'
+      : 'Zet eerst de microfoon aan, bovenaan. Druk dan bij ' + k.def.naam + ' op Opnemen.';
   } else if (!stormMicKlaar()) {
     leeg = 'De microfoon gaat aan…';
   } else {
@@ -1137,7 +1441,7 @@ function stormOvergang(t) {
 // De streep die laat zien waar de loop nu is.
 function werkStormKopBij() {
   const k = stormKanaal(storm.gekozen);
-  const zichtbaar = k.aan && !!k.buffer && !storm.opname;
+  const zichtbaar = stormKopBezig(k) && !!k.buffer && !storm.opname;
   stormKopEl.hidden = !zichtbaar;
   if (!zichtbaar) return;
   const t = Math.max(k.begin, Math.min(k.eind, stormKopTijd(k)));
@@ -1158,7 +1462,7 @@ function stormLus() {
       if (op.k.def.id === storm.gekozen) werkStormGolfBij();
     }
     werkStormKopBij();
-    if (op || stormKanaal(storm.gekozen).aan) {
+    if (op || stormKopBezig(stormKanaal(storm.gekozen))) {
       requestAnimationFrame(stap);
     } else {
       stormLusLoopt = false;
@@ -1221,7 +1525,7 @@ let stormDraait = null;
 const STORM_DRAAI_PIXELS = 160; // zo ver slepen is van helemaal links naar rechts
 
 const STORM_DRAAIEN = {
-  overgang: { naam: 'Overgang', min: STORM_OVERGANG.min, max: STORM_OVERGANG.max, toon: (w) => stormOvergang(w) },
+  overgang: { naam: STORM_HERHAALT ? 'Overgang' : 'Fade', min: STORM_OVERGANG.min, max: STORM_OVERGANG.max, toon: (w) => stormOvergang(w) },
   mix:      { naam: 'Effect',   min: STORM_MIX.min,      max: STORM_MIX.max,      toon: (w) => Math.round(w * 100) + '%' }
 };
 
@@ -1234,7 +1538,7 @@ function stormDraaiKnop(id, soort) {
 
 function werkStormDraaiBij(k, soort, uit, waarom) {
   const d = STORM_DRAAIEN[soort];
-  const knop = k.el.querySelector('[data-storm-draai][data-soort="' + soort + '"]');
+  const knop = stormDeel(k, '[data-storm-draai][data-soort="' + soort + '"]');
   knop.disabled = uit;
   knop.style.setProperty('--draai', (-135 + 270 * (k[soort] - d.min) / (d.max - d.min)) + 'deg');
   knop.setAttribute('aria-valuenow', k[soort].toFixed(2));
@@ -1269,6 +1573,22 @@ function stormX(e) {
 // Alles wissen voor de volgende klas: de opnames en alle knoppen terug naar
 // het begin. Alleen de microfoon blijft staan, want die hoort bij het bord en
 // niet bij de les.
+// Alle knoppen van een geluid terug naar het begin: volume, filter, pitch,
+// de richting, de overgang en het effect.
+function zetStormKnoppenTerug(k) {
+  STORM_SCHUIVEN.forEach((p) => {
+    k[p.id] = p.waarde;
+    k.el.querySelector('[data-storm-schuif="' + p.id + '"]').value = p.waarde;
+  });
+  k.richting = 'gewoon';
+  k.overgang = STORM_OVERGANG.waarde;
+  k.effect = 'geen';
+  k.mix = STORM_MIX.waarde;
+  k.el.querySelector('[data-storm-effect]').value = 'geen';
+  pasStormGeluidToe(k);
+  zetStormEffect(k);
+}
+
 function resetStorm() {
   if (storm.opname) ruimStormOpnameOp(storm.opname);
   STORM_KANALEN.forEach((def) => {
@@ -1280,23 +1600,17 @@ function resetStorm() {
     k.pieken = {};
     k.begin = 0;
     k.eind = 0;
-    STORM_SCHUIVEN.forEach((p) => {
-      k[p.id] = p.waarde;
-      k.el.querySelector('[data-storm-schuif="' + p.id + '"]').value = p.waarde;
-    });
-    k.richting = 'gewoon';
-    k.overgang = STORM_OVERGANG.waarde;
-    k.effect = 'geen';
-    k.mix = STORM_MIX.waarde;
-    k.el.querySelector('[data-storm-effect]').value = 'geen';
-    pasStormGeluidToe(k);
-    zetStormEffect(k);
+    k.naam = '';
+    k.bron = '';
+    k.kop = null;
+    zetStormKnoppenTerug(k);
   });
   storm.gekozen = STORM_KANALEN[0].id;
   wisStormOpnames();
   bewaarStormStand();
   meldStorm('');
   werkStormBij();
+  zetStormBeginGeluiden();
 }
 
 // ============================================================
@@ -1306,6 +1620,7 @@ function resetStorm() {
 if (stormEl) {
   laadStormStand();
   bouwStormKanalen();
+  laadStormBibliotheek();
   stormGrepen.begin = stormEl.querySelector('[data-storm-greep="begin"]');
   stormGrepen.eind = stormEl.querySelector('[data-storm-greep="eind"]');
   STORM_KANALEN.forEach((def) => {
@@ -1320,6 +1635,8 @@ if (stormEl) {
       if (!opname || !opname.data || !opname.data.length || !opname.sr) return;
       const k = stormKanaal(def.id);
       zetStormOpname(k, opname.data, opname.sr);
+      k.naam = typeof opname.naam === 'string' ? opname.naam : '';
+      k.bron = typeof opname.bron === 'string' ? opname.bron : '';
       // Past de bewaarde loop niet (meer) in de opname, dan de hele opname.
       const duur = k.buffer.duration;
       if (!(k.eind > k.begin + STORM_KORTSTE / 2 && k.eind <= duur + 0.001)) {
@@ -1329,6 +1646,7 @@ if (stormEl) {
       zetStormLus(k);
     });
     werkStormBij();
+    zetStormBeginGeluiden();
   });
 
   if (!kanStormOpnemen()) {
@@ -1393,6 +1711,13 @@ if (stormEl) {
       return;
     }
 
+    const upload = e.target.closest('[data-storm-upload]');
+    if (upload) {
+      kiesStorm(upload.dataset.stormUpload);
+      stormEl.querySelector('[data-storm-bestand="' + upload.dataset.stormUpload + '"]').click();
+      return;
+    }
+
     const richting = e.target.closest('[data-storm-richting]');
     if (richting) {
       const k = stormKanaal(richting.dataset.stormRichting);
@@ -1440,7 +1765,7 @@ if (stormEl) {
 
   // De draaiknopjes. Je hoort het al tijdens het draaien (zie zetStormDraai);
   // bij loslaten wordt het bewaard.
-  bijNeer(stormKanalenEl, (el) => (el && el.closest ? el.closest('[data-storm-draai]') : null), (knop, e) => {
+  bijNeer(stormEl, (el) => (el && el.closest ? el.closest('[data-storm-draai]') : null), (knop, e) => {
     if (knop.disabled) return;
     const k = stormKanaal(knop.dataset.stormDraai);
     const soort = knop.dataset.soort;
@@ -1473,7 +1798,7 @@ if (stormEl) {
     werkStormGolfBij();
   });
 
-  stormKanalenEl.addEventListener('keydown', (e) => {
+  stormEl.addEventListener('keydown', (e) => {
     const knop = e.target.closest && e.target.closest('[data-storm-draai]');
     if (!knop || knop.disabled) return;
     const k = stormKanaal(knop.dataset.stormDraai);
@@ -1490,6 +1815,22 @@ if (stormEl) {
     zetStormDraai(k, soort, t);
     legStormDraaiVast(k, soort);
   });
+
+  // Een eigen bestand.
+  stormEl.addEventListener('change', (e) => {
+    const bestand = e.target.dataset.stormBestand;
+    if (bestand) {
+      uploadStormBestand(stormKanaal(bestand), e.target.files && e.target.files[0]);
+      // Leeg, zodat hetzelfde bestand nog een keer kiezen ook weer werkt.
+      e.target.value = '';
+    }
+  });
+
+  if (stormLijstEl) {
+    stormLijstEl.addEventListener('change', () => {
+      if (stormLijstEl.value) kiesStormUitLijst(stormKanaal(storm.gekozen), stormLijstEl.value);
+    });
+  }
 
   // Een ander effect kiezen.
   stormKanalenEl.addEventListener('change', (e) => {

@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>Samples beat — online muziek maken | muziekfles.nl</title>
+<meta name="description" content="Ritmeles 3: neem twee eigen geluiden op, of kies er een, en maak er met de kick, de snare en de hihat een beat mee in de sequencer. Gratis online muziekles, meteen in je browser.">
+<meta name="author" content="Studio Wotto">
+<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
+
+<link rel="canonical" href="https://muziekfles.nl/les3-samples.html">
+<link rel="author" href="https://studiowotto.com">
+
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://muziekfles.nl/les3-samples.html">
+<meta property="og:site_name" content="muziekfles.nl">
+<meta property="og:locale" content="nl_NL">
+<meta property="og:title" content="Samples beat — online muziek maken">
+<meta property="og:description" content="Neem twee eigen geluiden op en maak er met het drumstel een beat mee in de sequencer.">
+<meta property="og:image" content="https://muziekfles.nl/img/deelkaart-les3-samples.png">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Samples beat: een sampler met gekleurde pads op een roze kaart van muziekfles.nl">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Samples beat — online muziek maken">
+<meta name="twitter:description" content="Neem twee eigen geluiden op en maak er met het drumstel een beat mee in de sequencer.">
+<meta name="twitter:image" content="https://muziekfles.nl/img/deelkaart-les3-samples.png">
+
+<link rel="icon" href="favicon.ico" sizes="32x32">
+<link rel="icon" href="img/favicon-192.png" type="image/png" sizes="192x192">
+<link rel="apple-touch-icon" href="img/favicon-192.png">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "LearningResource",
+      "@id": "https://muziekfles.nl/les3-samples.html#les",
+      "url": "https://muziekfles.nl/les3-samples.html",
+      "name": "Samples beat",
+      "description": "Ritmeles 3: neem twee eigen geluiden op, of kies er een, en maak er met de kick, de snare en de hihat een beat mee in de sequencer. Gratis online muziekles, meteen in je browser.",
+      "inLanguage": "nl-NL",
+      "isAccessibleForFree": true,
+      "learningResourceType": "interactieve les",
+      "educationalLevel": "primair onderwijs",
+      "typicalAgeRange": "8-12",
+      "teaches": "sampling, geluid opnemen, sequencer, beat maken, kick, snare, hihat",
+      "image": "https://muziekfles.nl/img/deelkaart-les3-samples.png",
+      "audience": { "@type": "EducationalAudience", "educationalRole": "teacher" },
+      "educationalUse": "klassikale les op het digibord",
+      "interactivityType": "active",
+      "isPartOf": { "@type": "WebSite", "@id": "https://muziekfles.nl/#site", "url": "https://muziekfles.nl/", "name": "muziekfles.nl" },
+      "publisher": { "@type": "Organization", "@id": "https://muziekfles.nl/#studio", "name": "Studio Wotto", "url": "https://studiowotto.com" }
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "name": "Alle lessen", "item": "https://muziekfles.nl/" },
+        { "@type": "ListItem", "position": 2, "name": "Samples beat" }
+      ]
+    }
+  ]
+}
+</script>
+
+<link rel="preload" href="fonts/fredoka.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/nunito.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="css/wotto.css">
+<link rel="stylesheet" href="css/site.css">
+<link rel="stylesheet" href="css/iconen.css">
+</head>
+<body>
+
+<div class="wrap">
+
+  <header class="topbar">
+    <a class="terug" href="index.html">
+      <i class="ph-bold ph-arrow-left" aria-hidden="true"></i> Alle lessen
+    </a>
+  </header>
+
+  <div class="hero">
+    <h1><span class="reeks">Ritme · les 3</span> <em>Samples</em> beat</h1>
+
+    <div class="met-plaatje">
+      <img class="met-plaatje-beeld" src="img/sampler.webp" alt="Een sampler: een wit kastje met acht gekleurde pads, draaiknoppen, een schuif en een schermpje met een lachend gezicht."
+           width="640" height="640">
+      <div class="met-plaatje-tekst">
+        <h2>Wat is een sample?</h2>
+        <p class="lead">
+          Een <b>sample</b> is een stukje geluid dat je opneemt en daarna als
+          instrument gebruikt. Een hond die blaft, een klap op tafel, of jouw
+          stem die "boem" zegt.
+        </p>
+        <p class="lead">
+          Je kunt geluiden opnemen en daar een ritme mee maken!
+        </p>
+      </div>
+    </div>
+
+    <div class="stippels" aria-hidden="true"></div>
+  </div>
+
+  <h2 class="kop">Maak je beat met samples</h2>
+
+  <p class="blok-uitleg">
+    Zet de microfoon aan en druk op <b>Opnemen</b>. Werkt de microfoon niet?
+    Kies dan een geluid uit de lijst, of upload er zelf een.
+  </p>
+
+  <!-- Afspelen, tempo en Reset alles helemaal bovenaan, boven de sampler. -->
+  <div class="seq-knoppen sb-knoppen" data-sb-knoppen></div>
+
+  <section class="paneel storm samples" id="samples" data-storm>
+
+    <!-- De microfoon. Zie storm.js. -->
+    <div class="storm-balk">
+      <div class="storm-mic" data-storm-mic>
+        <label class="storm-microfoon">
+          <i class="ph-bold ph-microphone" aria-hidden="true"></i>
+          <span class="storm-microfoon-naam">Microfoon</span>
+          <select data-storm-microfoon aria-label="Microfoon">
+            <option value="">Standaard</option>
+          </select>
+        </label>
+        <label class="schakel storm-mic-aan">
+          <input type="checkbox" role="switch" data-storm-mic-aan aria-label="Microfoon aan">
+          <span class="schakel-baan" aria-hidden="true"></span>
+          <span>Aan</span>
+        </label>
+        <div class="storm-meter" data-storm-meter aria-hidden="true"><span></span></div>
+        <span class="storm-clip" title="Rood: te hard, de top gaat eraf" aria-hidden="true"></span>
+      </div>
+    </div>
+
+    <p class="storm-melding" data-storm-melding role="status" hidden></p>
+
+    <!-- De golf van het gekozen sample, met de twee strepen. -->
+    <div class="storm-golf" data-storm-golf>
+      <!-- In de kop: de naam, een geluid uit snd/samples, en rechts de knoppen
+           van het gekozen sample (storm.js zet ze erin). -->
+      <div class="storm-golf-kop">
+        <span class="storm-golf-naam" data-storm-golf-naam></span>
+        <label class="storm-effect-kies storm-lijst">
+          <select data-storm-lijst aria-label="Kies een geluid">
+            <option value="">Nog geen geluiden</option>
+          </select>
+        </label>
+        <span class="storm-golf-tijd" data-storm-golf-tijd></span>
+        <div class="storm-kop-knoppen" data-storm-kop-knoppen></div>
+      </div>
+      <div class="storm-golf-vlak" data-storm-vlak>
+        <canvas data-storm-canvas aria-hidden="true"></canvas>
+        <div class="storm-kop-lijn" data-storm-kop hidden></div>
+        <button class="storm-greep" type="button" role="slider" data-storm-greep="begin"
+                aria-label="Begin van het geluid"><span aria-hidden="true"></span></button>
+        <button class="storm-greep" type="button" role="slider" data-storm-greep="eind"
+                aria-label="Eind van het geluid"><span aria-hidden="true"></span></button>
+        <p class="storm-leeg" data-storm-leeg></p>
+      </div>
+    </div>
+
+    <!-- De twee samples naast elkaar. storm.js bouwt ze uit STORM_LES in
+         samplebeat.js. -->
+    <div class="storm-kanalen" data-storm-kanalen></div>
+
+    <!-- Tik je in het bord op de kick, de snare of de hihat, dan staan hier
+         zijn schuifjes, in plaats van de golf en de knoppen van een sample.
+         samplebeat.js vult dit. -->
+    <div class="storm-golf sb-drum" data-sb-drum hidden></div>
+
+  </section>
+
+  <section class="seq">
+    <div class="seq-bord" data-sb-bord></div>
+  </section>
+
+  <footer class="voet">
+    muziekfles.nl · gemaakt door <a href="https://studiowotto.com">Studio Wotto</a>
+  </footer>
+
+</div>
+
+<script defer src="js/vendor/Tone.js"></script>
+<script defer src="js/instellingen.js"></script>
+<script defer src="js/drumkit.js"></script>
+<script defer src="js/beats.js"></script>
+<script defer src="js/samplebeat.js"></script>
+<script defer src="js/storm.js"></script>
+
+<!-- Cloudflare Web Analytics: telt bezoeken zonder cookies. -->
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "5dab1e3a930548d8b2e3a0ba0880f787"}'></script>
+
+</body>
+</html>

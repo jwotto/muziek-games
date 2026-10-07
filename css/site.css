@@ -1254,9 +1254,10 @@ input[type="range"]::-moz-range-thumb {
   white-space: nowrap;
 }
 /* De schuifjes van de kit krijgen hun knop als getekende vorm mee (--knop) en
-   zijn te herkennen aan hun data-param. Alle andere schuiven -- het tempo van
+   zijn te herkennen aan hun data-param (in ritmeles 3 aan data-sb-drum). Alle
+   andere schuiven -- het tempo van
    de klapoefening, het ritmebord en de sequencer -- krijgen een ronde blauwe. */
-input[type="range"]:not([data-param])::-webkit-slider-thumb {
+input[type="range"]:not([data-param]):not([data-sb-drum])::-webkit-slider-thumb {
   width: 30px;
   height: 30px;
   margin-top: -7px;
@@ -1265,7 +1266,7 @@ input[type="range"]:not([data-param])::-webkit-slider-thumb {
   border-radius: 50%;
 }
 
-input[type="range"]:not([data-param])::-moz-range-thumb {
+input[type="range"]:not([data-param]):not([data-sb-drum])::-moz-range-thumb {
   width: 30px;
   height: 30px;
   background: var(--blauw);
@@ -2860,3 +2861,171 @@ input[type="range"]:not([data-param])::-moz-range-thumb {
 .storm-schuif label { font-size: var(--text-sm); margin-bottom: 0; }
 
 .storm-na { margin-top: var(--space-6); }
+
+/* ============================================================
+   Ritme 3: samples maken
+   ============================================================ */
+
+/* Dezelfde sampler als bij Storm maken, maar je ziet er één sample tegelijk.
+   Welk sample dat is kies je door op zijn naam in het bord te tikken. In de
+   kop van de golf staan de naam, de keuzelijst met geluiden en rechts de
+   knoppen; eronder de drie schuiven met het effect ernaast. Geen eigen kop
+   en geen kleine golf per sample: de golf bovenaan is de enige. */
+.samples .storm-kanalen { display: block; }
+.samples .storm-kanaal { border: none; border-radius: 0; overflow: visible; }
+.samples .storm-kanaal:not(.gekozen),
+.samples .storm-kies,
+.samples .storm-mini { display: none; }
+.samples .storm-kanaal.gekozen { outline: none; }
+.samples .storm-binnen { padding: 0; }
+
+.samples .storm-golf-kop { align-items: center; }
+.samples .storm-golf-tijd { margin-left: auto; font-size: var(--text-sm); }
+.storm-kop-knoppen .storm-knoppen { gap: var(--space-2); }
+.storm-kop-knoppen .storm-knoppen[hidden] { display: none; }
+.storm-knoppen.neemt-op .storm-op { color: var(--ink); background: var(--koraal); }
+
+/* De keuzelijst in de kop, naast de naam. */
+.storm-lijst select { flex: 1 1 auto; max-width: 14em; }
+
+/* Op een telefoon: de naam en de lijst op een regel, de knoppen eronder. Op
+   een smalle telefoon passen vijf knoppen van 44 pixels niet: dan krimpen ze
+   alle vijf even veel, zodat ze altijd op één regel blijven. */
+@media (max-width: 600px) {
+  .samples .storm-golf-tijd { display: none; }
+  .storm-kop-knoppen { flex: 1 1 100%; }
+  .storm-kop-knoppen .storm-knoppen {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 44px));
+    gap: var(--space-1);
+    justify-content: start;
+  }
+  .storm-kop-knoppen .storm-ikoon { width: 100%; height: auto; aspect-ratio: 1; }
+}
+
+/* De drie schuiven en het effect op een rij. Op een telefoon onder elkaar. */
+@media (min-width: 760px) {
+  .samples .storm-binnen {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
+    column-gap: var(--space-5);
+    align-items: end;
+  }
+}
+
+/* De knoppen staan in de kop van de golf, dus hij hoeft niet mee te plakken
+   zoals bij de storm. */
+.samples .storm-golf { position: static; margin-bottom: var(--space-4); }
+
+/* Het sample dat bovenaan staat, ook te zien in het bord. */
+.deel-titel.gekozen { outline: 4px solid var(--ink); outline-offset: 3px; }
+
+.storm-effect-kies select:disabled { border-style: dotted; cursor: default; }
+
+/* Een sample zonder geluid: gestippeld, net als een leeg kanaal erboven. */
+.deel-titel.leeg { border-style: dotted; }
+
+/* Wat ruimte tussen de sampler en de kop van het bord eronder. */
+.samples + .kop { margin-top: var(--space-6); }
+
+/* Een drumgeluid bovenaan: zijn schuifjes uit les 2 in een vak met de kleur
+   van het geluid, op de plek van de golf en de knoppen van een sample. */
+.samples.drum-gekozen [data-storm-golf],
+.samples.drum-gekozen .storm-kanalen { display: none; }
+.sb-drum[hidden] { display: none; }
+.samples .sb-drum { margin-bottom: 0; }
+
+.sb-drum:not([hidden]) { display: flex; flex-direction: column; }
+
+/* Hetzelfde als een geluid in les 1: links het pad met de vorm, rechts de
+   schuifjes, en Reset in de hoek rechtsboven. Het pad rekt mee in plaats van
+   zijn eigen 4 op 3, zodat het vak niet hoger wordt dan dat van een sample;
+   de schuifjes staan onderaan, gelijk met de onderkant van het pad. */
+.sb-drum-paneel {
+  position: relative;
+  display: grid;
+  flex: 1;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+  align-items: stretch;
+  gap: var(--space-5);
+  padding: var(--space-4);
+}
+.sb-drum-paneel[hidden] { display: none; }
+
+.sb-drum-paneel .pad { aspect-ratio: auto; }
+.sb-drum-paneel .pad .vorm { width: min(40%, 90px); }
+.sb-drum-reset { position: absolute; top: var(--space-4); right: var(--space-4); }
+
+.sb-drum-rechts { display: flex; flex-direction: column; justify-content: flex-end; }
+.sb-drum-paneel .schuifjes { gap: var(--space-2); }
+
+@media (min-width: 1000px) {
+  .sb-drum-paneel .schuifjes {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    column-gap: var(--space-5);
+  }
+}
+
+/* Op een telefoon onder elkaar: het pad als smalle strook naast Reset, en
+   onderaan de schuifjes. */
+@media (max-width: 599px) {
+  .sb-drum-paneel { grid-template-columns: 1fr; grid-template-rows: auto 1fr; gap: var(--space-3); }
+  .sb-drum-paneel .pad { width: calc(100% - 6.5em); flex-direction: row; padding: var(--space-2); }
+  .sb-drum-paneel .pad .vorm { width: 36px; }
+}
+
+/* Opnemen terwijl de microfoon nog uit staat: gestippeld, maar wel te
+   klikken. Dan zegt de les dat de microfoon eerst aan moet. */
+.storm-op.mic-uit { border-style: dotted; color: var(--ink); }
+.sb-knoppen { margin-bottom: var(--space-4); }
+
+/* Reset alles na de eerste tik: geel, met Zeker? erop. Op een telefoon, waar
+   alleen het pijltje staat, ook. Beide woorden staan op dezelfde plek in de
+   knop, en alleen het ene is te zien: zo is hij altijd zo breed als het
+   langste en verspringt hij niet. */
+.sb-knoppen .seq-leeg.zeker { background: var(--zon); }
+.sb-wissel { display: inline-grid; }
+.sb-wissel > span { grid-area: 1 / 1; text-align: center; }
+.sb-wissel > span:last-child,
+.seq-leeg.zeker .sb-wissel > span:first-child { visibility: hidden; }
+.seq-leeg.zeker .sb-wissel > span:last-child { visibility: visible; }
+@media (max-width: 720px) {
+  .sb-wissel { display: none; }
+}
+
+/* De schuifjes van een sample: een ruitje als knop, in de kleur van het
+   sample (samplebeat.js zet --knop). */
+.samples .storm-kanaal input[type="range"][data-storm-schuif]::-webkit-slider-thumb {
+  width: 32px;
+  height: 32px;
+  margin-top: -8px;
+  border: none;
+  border-radius: 0;
+  background: var(--knop) center / contain no-repeat;
+}
+
+.samples .storm-kanaal input[type="range"][data-storm-schuif]::-moz-range-thumb {
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 0;
+  background: var(--knop) center / contain no-repeat;
+}
+
+/* De microfoonbalk van ritmeles 3 heeft alleen de microfoon, dus op een
+   telefoon past alles op één regel: de keuze, de schakelaar en de meter met
+   het lampje. De keuzelijst en de meter worden daarvoor smaller. */
+@media (max-width: 700px) {
+  .samples .storm-balk { display: flex; flex-wrap: nowrap; }
+  .samples .storm-mic { display: flex; flex-wrap: nowrap; gap: var(--space-2); min-width: 0; }
+  .samples .storm-microfoon { flex: 1 1 auto; min-width: 0; gap: var(--space-1); }
+  .samples .storm-microfoon select { flex: 1 1 auto; width: 100%; max-width: none; padding-inline: 0.5em 0.3em; }
+  .samples .storm-mic-aan { flex: none; }
+  .samples .storm-meter { flex: 0 1 56px; min-width: 28px; }
+  .samples .storm-clip { flex: none; margin-left: 0; }
+}
+
+/* Staat het effect op een eigen regel onder de schuiven (op een telefoon),
+   dan links, net als de schuiven erboven. */
+.samples .storm-effect { justify-content: flex-start; }

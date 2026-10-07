@@ -4,10 +4,15 @@ Gratis online muzieklessen met muziekgames voor de basisschool. Gewone html, css
 en javascript: geen bouwstap, wat in deze map staat is de site.
 
 - `index.html` — de voorpagina met alle lessen
-- `les1-drums.html`, `les2-drums.html`, `bodypercussion.html`, `bodypercussion2.html`,
-  `bodypercussion3.html`, `ritmeskater.html` — de lessen
+- `les1-drums.html`, `les2-drums.html`, `les3-samples.html`, `bodypercussion.html`,
+  `bodypercussion2.html`, `bodypercussion3.html`, `ritmeskater.html` — de lessen
 - `js/storm.js` — storm maken: opnemen met de microfoon, loops, filter en pitch; de
   opnames blijven bewaard in de browser (IndexedDB)
+- `js/samplebeat.js` — Samples beat (ritmeles 3): de sequencer met twee samples
+  boven het drumstel. Het opnemen en bewerken doet `js/storm.js`, met de
+  instellingen in `STORM_LES` bovenaan samplebeat.js
+- `snd/samples/` — de geluiden in de keuzelijst van Samples beat. Zet er een
+  geluid bij en draai `python tools/samples.py`; dat schrijft `lijst.json`
 - `js/drumkit.js` — de drumgeluiden en alles wat de lessen delen: `master`,
   `bijNeer`, `animeer`, `stilNu`. Staat op elke lespagina.
 - `js/polka.js` — de polka onder de ritmespellen, `js/hiphop.js` — de hiphopbeat

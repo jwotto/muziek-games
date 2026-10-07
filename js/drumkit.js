@@ -845,8 +845,10 @@ function bijNeer(wortel, zoek, neer, beweeg, los) {
     .forEach((soort) => opDoc(soort, los));
 }
 
-// Pads: indrukken speelt meteen, zonder te wachten op het loslaten.
-bijNeer(document, (el) => (el && el.closest ? el.closest('.pad, .deel, .deel-titel') : null), (pad, e) => {
+// Pads: indrukken speelt meteen, zonder te wachten op het loslaten. Een
+// naamknopje zonder data-id is geen drumgeluid (de samples in ritmeles 3); dat
+// regelt zijn eigen les.
+bijNeer(document, (el) => (el && el.closest ? el.closest('.pad, .deel, .deel-titel[data-id]') : null), (pad, e) => {
   // preventDefault houdt het slepen en selecteren tegen, maar neemt ook de focus
   // weg. Die zetten we er zelf op, zodat je na een klik gewoon de spatiebalk kunt
   // gebruiken. Zonder scrollen, anders springt de pagina op een klein scherm.
@@ -875,7 +877,7 @@ document.addEventListener('click', (e) => {
 // het geluid een tweede keer starten en zichzelf afkappen.
 document.addEventListener('keydown', (e) => {
   if (e.key !== 'Enter' && e.key !== ' ') return;
-  const pad = e.target.closest && e.target.closest('.pad, .deel, .deel-titel');
+  const pad = e.target.closest && e.target.closest('.pad, .deel, .deel-titel[data-id]');
   if (!pad) return;
   e.preventDefault();
   raak(pad.dataset.id);
