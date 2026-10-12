@@ -83,3 +83,5 @@ kaart('deelkaart-bodypercussion3.png', BLAUW, 'Body percussion · les 3',
       ['Storm', 'maken'], 'storm.png', WIT)
 kaart('deelkaart-ritmeskater.png', BLAUW, 'Extra',
       ['Ritme', 'skater'], 'ritmeskater.png', WIT)
+kaart('deelkaart-carnaval.png', ZON, 'Extra · luisteren',
+      ['Carnaval', 'der Dieren'], 'carnaval.png')

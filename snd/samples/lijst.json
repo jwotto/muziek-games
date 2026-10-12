@@ -1,5 +1,13 @@
 [
   {
+    "bestand": "boertje.mp3",
+    "naam": "Boertje"
+  },
+  {
+    "bestand": "harp.mp3",
+    "naam": "Harp"
+  },
+  {
     "bestand": "hond.mp3",
     "naam": "Hond"
   },
@@ -8,8 +16,16 @@
     "naam": "Kat"
   },
   {
+    "bestand": "koebel.mp3",
+    "naam": "Koebel"
+  },
+  {
     "bestand": "koor.mp3",
     "naam": "Koor"
+  },
+  {
+    "bestand": "scheetje.mp3",
+    "naam": "Scheetje"
   },
   {
     "bestand": "scratch.mp3",
@@ -18,5 +34,13 @@
   {
     "bestand": "toeter.mp3",
     "naam": "Toeter"
+  },
+  {
+    "bestand": "yo.mp3",
+    "naam": "Yo"
+  },
+  {
+    "bestand": "yo-2.mp3",
+    "naam": "Yo 2"
   }
 ]

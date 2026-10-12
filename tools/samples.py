@@ -27,6 +27,9 @@ for bestand in sorted(os.listdir(MAP), key=str.lower):
     naam = stam.replace('-', ' ').replace('_', ' ').strip()
     lijst.append({'bestand': bestand, 'naam': naam[:1].upper() + naam[1:]})
 
+# Op de naam zoals hij in de lijst staat, dus Yo voor Yo 2.
+lijst.sort(key=lambda g: g['naam'].lower())
+
 with open(os.path.join(MAP, 'lijst.json'), 'w', encoding='utf-8') as f:
     json.dump(lijst, f, ensure_ascii=False, indent=2)
     f.write('\n')
